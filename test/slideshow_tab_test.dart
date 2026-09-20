@@ -290,5 +290,74 @@ void main() {
     final borderTop = (navbarTop.decoration as BoxDecoration).border;
     expect(borderTop?.bottom.color, equals(Colors.transparent));
   });
+
+  testWidgets('SlideshowTab allows selecting 3m, 5m, 10m, and 45m auto-shuffle intervals', (tester) async {
+    final fakeStorage = FakeStorageService();
+    final fakeWallpaperService = FakeWallpaperService();
+    final controller = WallpaperController(
+      storageService: fakeStorage,
+      wallpaperService: fakeWallpaperService,
+    );
+
+    await controller.initialize();
+
+    tester.view.physicalSize = const Size(1080, 2400);
+    tester.view.devicePixelRatio = 1.0;
+    addTearDown(() {
+      tester.view.resetPhysicalSize();
+      tester.view.resetDevicePixelRatio();
+    });
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: SlideshowTab(controller: controller),
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    // Verify chips 3m, 5m, 10m, 45m exist
+    expect(find.text('3m'), findsOneWidget);
+    expect(find.text('5m'), findsOneWidget);
+    expect(find.text('10m'), findsOneWidget);
+    expect(find.text('45m'), findsOneWidget);
+
+    // Tap 3m chip
+    await tester.tap(find.text('3m'));
+    await tester.pumpAndSettle();
+    expect(controller.config.intervalMinutes, 3);
+
+    // Tap 5m chip
+    await tester.tap(find.text('5m'));
+    await tester.pumpAndSettle();
+    expect(controller.config.intervalMinutes, 5);
+
+    // Tap 10m chip
+    await tester.tap(find.text('10m'));
+    await tester.pumpAndSettle();
+    expect(controller.config.intervalMinutes, 10);
+
+    // Tap 45m chip after scrolling it into view
+    await tester.ensureVisible(find.text('45m'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('45m'));
+    await tester.pumpAndSettle();
+    expect(controller.config.intervalMinutes, 45);
+
+    // Open More options modal
+    await tester.tap(find.text('More options'));
+    await tester.pumpAndSettle();
+
+    expect(find.text('Every 3 minutes'), findsOneWidget);
+    expect(find.text('Every 5 minutes'), findsOneWidget);
+    expect(find.text('Every 10 minutes'), findsOneWidget);
+    expect(find.text('Every 45 minutes'), findsOneWidget);
+
+    // Select 'Every 3 minutes' from modal
+    await tester.tap(find.text('Every 3 minutes'));
+    await tester.pumpAndSettle();
+    expect(controller.config.intervalMinutes, 3);
+  });
 }
 

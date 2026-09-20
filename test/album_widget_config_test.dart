@@ -22,7 +22,12 @@ void main() {
     test('intervalLabel formats correctly', () {
       expect(const AlbumWidgetConfig(widgetId: 1, albumId: 'a', intervalMinutes: 0).intervalLabel, 'Manual');
       expect(const AlbumWidgetConfig(widgetId: 1, albumId: 'a', intervalMinutes: 1).intervalLabel, '1 minute');
+      expect(const AlbumWidgetConfig(widgetId: 1, albumId: 'a', intervalMinutes: 3).intervalLabel, '3 minutes');
+      expect(const AlbumWidgetConfig(widgetId: 1, albumId: 'a', intervalMinutes: 5).intervalLabel, '5 minutes');
+      expect(const AlbumWidgetConfig(widgetId: 1, albumId: 'a', intervalMinutes: 10).intervalLabel, '10 minutes');
+      expect(const AlbumWidgetConfig(widgetId: 1, albumId: 'a', intervalMinutes: 15).intervalLabel, '15 minutes');
       expect(const AlbumWidgetConfig(widgetId: 1, albumId: 'a', intervalMinutes: 30).intervalLabel, '30 minutes');
+      expect(const AlbumWidgetConfig(widgetId: 1, albumId: 'a', intervalMinutes: 45).intervalLabel, '45 minutes');
       expect(const AlbumWidgetConfig(widgetId: 1, albumId: 'a', intervalMinutes: 60).intervalLabel, '1 hour');
       expect(const AlbumWidgetConfig(widgetId: 1, albumId: 'a', intervalMinutes: 180).intervalLabel, '3 hours');
       expect(const AlbumWidgetConfig(widgetId: 1, albumId: 'a', intervalMinutes: 1440).intervalLabel, 'Daily (24h)');

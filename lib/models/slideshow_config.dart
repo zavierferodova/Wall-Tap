@@ -49,6 +49,15 @@ class SlideshowConfig {
     }
   }
 
+  String get intervalLabel {
+    if (intervalMinutes <= 0) return 'Off (Manual)';
+    if (intervalMinutes == 1) return '1 minute';
+    if (intervalMinutes < 60) return '$intervalMinutes minutes';
+    if (intervalMinutes == 60) return '1 hour';
+    if (intervalMinutes == 1440) return 'Daily (24h)';
+    return '${intervalMinutes ~/ 60} hours';
+  }
+
   SlideshowConfig copyWith({
     String? targetScreen,
     String? scaleType,

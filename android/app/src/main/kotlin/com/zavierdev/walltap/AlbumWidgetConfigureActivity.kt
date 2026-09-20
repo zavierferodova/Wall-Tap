@@ -37,9 +37,12 @@ class AlbumWidgetConfigureActivity : Activity() {
     private val intervalOptions = listOf(
         Pair(0, "Manual / Static (No Rotation)"),
         Pair(1, "Every 1 minute"),
+        Pair(3, "Every 3 minutes"),
         Pair(5, "Every 5 minutes"),
+        Pair(10, "Every 10 minutes"),
         Pair(15, "Every 15 minutes"),
         Pair(30, "Every 30 minutes"),
+        Pair(45, "Every 45 minutes"),
         Pair(60, "Every 1 hour"),
         Pair(180, "Every 3 hours"),
         Pair(360, "Every 6 hours"),
@@ -196,7 +199,8 @@ class AlbumWidgetConfigureActivity : Activity() {
             if (intervalIndex >= 0) {
                 spinnerInterval.setSelection(intervalIndex)
             } else {
-                spinnerInterval.setSelection(3) // 15 minutes default
+                val defaultIndex = intervalOptions.indexOfFirst { it.first == 15 }.coerceAtLeast(0)
+                spinnerInterval.setSelection(defaultIndex)
             }
 
             if (savedIsRandom) {
@@ -208,7 +212,8 @@ class AlbumWidgetConfigureActivity : Activity() {
             btnSave.text = "Apply & Add Widget"
             btnShuffleNow.visibility = View.GONE
             radioRandom.isChecked = true
-            spinnerInterval.setSelection(3) // 15 minutes default
+            val defaultIndex = intervalOptions.indexOfFirst { it.first == 15 }.coerceAtLeast(0)
+            spinnerInterval.setSelection(defaultIndex)
         }
     }
 

@@ -84,9 +84,12 @@ class _AlbumWidgetsTabState extends State<AlbumWidgetsTab> with WidgetsBindingOb
     final options = [
       (0, 'Manual (Tap only)'),
       (1, 'Every 1 minute (Fast test)'),
+      (3, 'Every 3 minutes'),
       (5, 'Every 5 minutes'),
+      (10, 'Every 10 minutes'),
       (15, 'Every 15 minutes'),
       (30, 'Every 30 minutes'),
+      (45, 'Every 45 minutes'),
       (60, 'Every 1 hour'),
       (180, 'Every 3 hours'),
       (360, 'Every 6 hours'),
@@ -265,9 +268,12 @@ class _AlbumWidgetsTabState extends State<AlbumWidgetsTab> with WidgetsBindingOb
 
   @override
   Widget build(BuildContext context) {
-    final albumWidgets = widget.controller.albumWidgets;
+    return ListenableBuilder(
+      listenable: widget.controller,
+      builder: (context, _) {
+        final albumWidgets = widget.controller.albumWidgets;
 
-    return Scaffold(
+        return Scaffold(
       backgroundColor: const Color(0xFF0D0E12),
       body: RefreshIndicator(
         color: const Color(0xFFFF3B30),
@@ -488,7 +494,9 @@ class _AlbumWidgetsTabState extends State<AlbumWidgetsTab> with WidgetsBindingOb
       ),
     ),
   );
-}
+      },
+    );
+  }
 
   Widget _buildOnboardingCard(BuildContext context) {
     return Container(

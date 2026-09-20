@@ -205,5 +205,59 @@ void main() {
     // Verify still stable
     expect(find.text('Album Widgets'), findsOneWidget);
   });
+
+  testWidgets('AlbumWidgetsTab interval picker supports 3m, 5m, 10m, and 45m options', (tester) async {
+    final fakeStorage = FakeStorageService();
+    final fakeWallpaperService = FakeWallpaperService();
+    fakeWallpaperService.widgets = [
+      const AlbumWidgetConfig(
+        widgetId: 99,
+        albumId: 'all_photos',
+        albumName: 'All Photos',
+        intervalMinutes: 15,
+        isRandom: true,
+      ),
+    ];
+
+    final controller = WallpaperController(
+      storageService: fakeStorage,
+      wallpaperService: fakeWallpaperService,
+    );
+    await controller.initialize();
+
+    tester.view.physicalSize = const Size(1080, 2400);
+    tester.view.devicePixelRatio = 1.0;
+    addTearDown(() {
+      tester.view.resetPhysicalSize();
+      tester.view.resetDevicePixelRatio();
+    });
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: AlbumWidgetsTab(controller: controller),
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    // Tap on the interval selector button (currently displaying '15 minutes')
+    await tester.tap(find.text('15 minutes'));
+    await tester.pumpAndSettle();
+
+    // Verify modal bottom sheet displays 3, 5, 10, 45 minutes
+    expect(find.text('Every 3 minutes'), findsOneWidget);
+    expect(find.text('Every 5 minutes'), findsOneWidget);
+    expect(find.text('Every 10 minutes'), findsOneWidget);
+    expect(find.text('Every 45 minutes'), findsOneWidget);
+
+    // Tap 'Every 3 minutes'
+    await tester.tap(find.text('Every 3 minutes'));
+    await tester.pumpAndSettle();
+
+    expect(controller.albumWidgets.first.intervalMinutes, 3);
+    expect(controller.albumWidgets.first.intervalLabel, '3 minutes');
+    expect(find.text('3 minutes'), findsOneWidget);
+  });
 }
 
