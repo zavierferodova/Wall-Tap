@@ -130,12 +130,6 @@ class WidgetGuideDialog extends StatelessWidget {
                             ),
                             SizedBox(height: 8),
                             _WidgetControlRow(
-                              icon: Icons.pause_circle_outline_rounded,
-                              title: 'Pause / Play',
-                              description: 'Pause or resume auto-shuffle schedule',
-                            ),
-                            SizedBox(height: 8),
-                            _WidgetControlRow(
                               icon: Icons.skip_next_rounded,
                               title: 'Next',
                               description: 'Instantly apply the previewed wallpaper',

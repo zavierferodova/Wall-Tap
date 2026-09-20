@@ -17,7 +17,6 @@ class WidgetProvider : AppWidgetProvider() {
 
     companion object {
         const val ACTION_NEXT = "com.walltap.app.ACTION_NEXT"
-        const val ACTION_TOGGLE = "com.walltap.app.ACTION_TOGGLE"
 
         fun updateAllWidgets(context: Context) {
             val appWidgetManager = AppWidgetManager.getInstance(context)
@@ -105,25 +104,6 @@ class WidgetProvider : AppWidgetProvider() {
                 val nextPendingIntent = PendingIntent.getBroadcast(context, 1, nextIntent, flags)
                 views.setOnClickPendingIntent(R.id.btn_widget_next, nextPendingIntent)
 
-                // PendingIntent for Toggle / Play / Pause
-                val toggleIntent = Intent(context, WidgetProvider::class.java).apply {
-                    action = ACTION_TOGGLE
-                }
-                val togglePendingIntent = PendingIntent.getBroadcast(context, 2, toggleIntent, flags)
-                views.setOnClickPendingIntent(R.id.btn_widget_play, togglePendingIntent)
-
-                // Dynamic Play / Pause Icon
-                val isEnabled = prefs.getBoolean("flutter.walltap_slideshow_enabled", true)
-                val intervalMinutes = prefs.getLong("flutter.walltap_interval_minutes", 0L).toInt()
-                val isRunning = isEnabled && intervalMinutes > 0
-                if (isRunning) {
-                    views.setImageViewResource(R.id.btn_widget_play, R.drawable.ic_widget_pause)
-                    views.setContentDescription(R.id.btn_widget_play, "Pause Auto-Shuffle")
-                } else {
-                    views.setImageViewResource(R.id.btn_widget_play, R.drawable.ic_widget_play)
-                    views.setContentDescription(R.id.btn_widget_play, "Resume Auto-Shuffle")
-                }
-
                 appWidgetManager.updateAppWidget(appWidgetId, views)
             } catch (e: Exception) {
                 e.printStackTrace()
@@ -183,32 +163,6 @@ class WidgetProvider : AppWidgetProvider() {
             }.start()
         }
 
-        fun handleToggle(context: Context) {
-            val prefs = context.getSharedPreferences("FlutterSharedPreferences", Context.MODE_PRIVATE)
-            val isEnabled = prefs.getBoolean("flutter.walltap_slideshow_enabled", true)
-            val intervalMinutes = prefs.getLong("flutter.walltap_interval_minutes", 0L).toInt()
-
-            val isCurrentlyRunning = isEnabled && intervalMinutes > 0
-
-            if (isCurrentlyRunning) {
-                // Pause auto-shuffle
-                prefs.edit().putBoolean("flutter.walltap_slideshow_enabled", false).apply()
-                Scheduler.cancel(context)
-                Toast.makeText(context, "Auto-shuffle paused", Toast.LENGTH_SHORT).show()
-            } else {
-                // Resume auto-shuffle
-                val targetInterval = if (intervalMinutes > 0) intervalMinutes else 15
-                prefs.edit()
-                    .putBoolean("flutter.walltap_slideshow_enabled", true)
-                    .putLong("flutter.walltap_interval_minutes", targetInterval.toLong())
-                    .apply()
-                Scheduler.schedule(context, targetInterval)
-                Toast.makeText(context, "Auto-shuffle running ($targetInterval min)", Toast.LENGTH_SHORT).show()
-            }
-
-            updateAllWidgets(context)
-        }
-
         private fun parsePaths(jsonString: String?): List<String> {
             if (jsonString.isNullOrEmpty()) return emptyList()
             return try {
@@ -240,9 +194,6 @@ class WidgetProvider : AppWidgetProvider() {
         when (intent.action) {
             ACTION_NEXT -> {
                 handleNextWallpaper(context)
-            }
-            ACTION_TOGGLE -> {
-                handleToggle(context)
             }
         }
     }

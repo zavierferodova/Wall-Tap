@@ -101,18 +101,17 @@ Wall Tap provides two distinct home screen widgets defined in `res/xml/` and `re
 - **Features**:
   - Displays a 300x480 thumbnail preview of the **upcoming** wallpaper.
   - Displays a red `NEXT` badge over the preview.
-  - **Shuffle Button (`R.id.btn_widget_next`)**: Fires `ACTION_NEXT` broadcast to trigger immediate wallpaper rotation.
-  - **Play/Pause Button (`R.id.btn_widget_play`)**: Fires `ACTION_TOGGLE` to start or pause auto-rotation alarms.
   - **Settings Button (`R.id.btn_widget_settings`)**: Launches `MainActivity` directly to the app.
+  - **Next / Shuffle Button (`R.id.btn_widget_next`)**: Fires `ACTION_NEXT` broadcast to apply the previewed upcoming wallpaper to the device, then pre-calculates the next upcoming wallpaper based on ordered or random shuffle settings.
 
 ### 3.2 Album Display Widget (`AlbumWidgetProvider.kt`)
 - **Layout**: `res/layout/album_widget.xml`
 - **Metadata**: `res/xml/album_widget_info.xml`
 - **Features**:
-  - Displays high-resolution photos from a specific chosen album or "All Photos".
+  - Displays high-resolution active photos currently selected from a specific chosen album or "All Photos" (displays the active photo from randomize or ordered section).
   - **Interactive Controls Overlay (`R.id.widget_album_controls_container`)**: Tapping the widget image toggles the visibility of on-screen controls (`ACTION_TOGGLE_CONTROLS`).
-  - **Next Button (`R.id.btn_album_widget_next`)**: Advances to the next photo in the configured album.
-  - **Configure Button (`R.id.btn_album_widget_settings`)**: Opens `AlbumWidgetConfigureActivity`.
+  - **Settings Button (`R.id.btn_album_widget_settings`)**: Opens `AlbumWidgetConfigureActivity`.
+  - **Next / Shuffle Button (`R.id.btn_album_widget_next`)**: Fires `ACTION_NEXT_ALBUM_IMAGE` broadcast to advance or shuffle to the next photo in the configured album based on the widget's random or ordered setting.
   - **Empty State**: If an album has no photos, displays an empty container with a prompt to tap and reconfigure.
 
 ### 3.3 Widget Configuration Activity (`AlbumWidgetConfigureActivity.kt`)

@@ -169,7 +169,6 @@ void main() {
     expect(find.text('Select "Widgets" and find "Wall Tap"'), findsOneWidget);
     expect(find.text('Drag it onto your home screen to preview and rotate wallpapers'), findsOneWidget);
     expect(find.text('Up Next'), findsOneWidget);
-    expect(find.text('Pause / Play'), findsOneWidget);
     expect(find.text('Next'), findsOneWidget);
     expect(find.text('Settings'), findsOneWidget);
     expect(find.text('Got It'), findsOneWidget);

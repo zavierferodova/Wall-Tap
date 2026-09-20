@@ -29,8 +29,8 @@
 - **Studio Tab**: One-tap wallpaper shuffle with tactile haptics, live artwork preview, rotation interval slider (1 min to 24 hr / daily), target screen configuration (Home / Lock / Both), and scaling mode adjustments (Full / Crop / Fit).
 - **Gallery & Custom Albums**: Fast two-column wallpaper grid with resolution tags, batch multi-selection mode (batch include, exclude, and delete), and custom album organization.
 - **Home Screen Widgets**:
-  - **Wall Tap Shuffle**: Launcher widget with upcoming wallpaper thumbnail preview, instant shuffle button, and pause/resume auto-rotation toggle.
-  - **Album Display Widget**: Interactive home screen photo frame displaying albums of your choice with tap-to-reveal controls for manual photo skipping.
+  - **Wall Tap Shuffle**: Launcher widget with upcoming wallpaper thumbnail preview, smart Next/Shuffle button respecting random/ordered settings, and direct access to settings.
+  - **Album Display Widget**: Interactive home screen photo frame displaying active album photos with tap-to-reveal controls for advancing/shuffling photos according to album order settings.
 - **Interactive Full-Screen Preview**: Pan and pinch zoom up to 5x, double-tap 2.5x smart zoom, full resolution inspection, and one-tap "Set as Current Wallpaper".
 - **Background Execution Reliability**: AlarmManager exact alarms (`RTC_WAKEUP`), reboot recovery (`BOOT_COMPLETED`), battery optimization exemption request, and persistent status notification.
 
