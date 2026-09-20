@@ -125,71 +125,76 @@ class _AlbumDetailScreenState extends State<AlbumDetailScreen> {
         borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
       ),
       builder: (ctx) => SafeArea(
-        child: Padding(
-          padding: const EdgeInsets.symmetric(vertical: 20, horizontal: 16),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              const Padding(
-                padding: EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                child: Text(
-                  'Add Wallpapers to Album',
-                  style: TextStyle(
-                    color: Colors.white,
-                    fontSize: 18,
-                    fontWeight: FontWeight.bold,
+        child: Center(
+          child: ConstrainedBox(
+            constraints: const BoxConstraints(maxWidth: 540),
+            child: Padding(
+              padding: const EdgeInsets.symmetric(vertical: 20, horizontal: 16),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const Padding(
+                    padding: EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                    child: Text(
+                      'Add Wallpapers to Album',
+                      style: TextStyle(
+                        color: Colors.white,
+                        fontSize: 18,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
                   ),
-                ),
-              ),
-              const SizedBox(height: 12),
-              ListTile(
-                leading: Container(
-                  padding: const EdgeInsets.all(10),
-                  decoration: BoxDecoration(
-                    color: const Color(0xFFFF3B30).withAlpha(40),
-                    borderRadius: BorderRadius.circular(12),
+                  const SizedBox(height: 12),
+                  ListTile(
+                    leading: Container(
+                      padding: const EdgeInsets.all(10),
+                      decoration: BoxDecoration(
+                        color: const Color(0xFFFF3B30).withAlpha(40),
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      child: const Icon(Icons.photo_library_outlined, color: Color(0xFFFF3B30)),
+                    ),
+                    title: const Text('Add from Gallery', style: TextStyle(color: Colors.white, fontWeight: FontWeight.w600)),
+                    subtitle: const Text('Select from existing wallpapers', style: TextStyle(color: Colors.white54, fontSize: 12)),
+                    onTap: () {
+                      Navigator.pop(ctx);
+                      _showSelectFromGalleryDialog(context);
+                    },
                   ),
-                  child: const Icon(Icons.photo_library_outlined, color: Color(0xFFFF3B30)),
-                ),
-                title: const Text('Add from Gallery', style: TextStyle(color: Colors.white, fontWeight: FontWeight.w600)),
-                subtitle: const Text('Select from existing wallpapers', style: TextStyle(color: Colors.white54, fontSize: 12)),
-                onTap: () {
-                  Navigator.pop(ctx);
-                  _showSelectFromGalleryDialog(context);
-                },
-              ),
-              const SizedBox(height: 4),
-              ListTile(
-                leading: Container(
-                  padding: const EdgeInsets.all(10),
-                  decoration: BoxDecoration(
-                    color: const Color(0xFF34C759).withAlpha(40),
-                    borderRadius: BorderRadius.circular(12),
+                  const SizedBox(height: 4),
+                  ListTile(
+                    leading: Container(
+                      padding: const EdgeInsets.all(10),
+                      decoration: BoxDecoration(
+                        color: const Color(0xFF34C759).withAlpha(40),
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      child: const Icon(Icons.add_photo_alternate_outlined, color: Color(0xFF34C759)),
+                    ),
+                    title: const Text('Import New Photos', style: TextStyle(color: Colors.white, fontWeight: FontWeight.w600)),
+                    subtitle: const Text('Pick photos from your device storage', style: TextStyle(color: Colors.white54, fontSize: 12)),
+                    onTap: () async {
+                      Navigator.pop(ctx);
+                      final picker = ImagePicker();
+                      final images = await picker.pickMultiImage();
+                      if (images.isNotEmpty && mounted) {
+                        final paths = images.map((e) => e.path).toList();
+                        final count = await widget.controller.importImages(paths, targetAlbumId: widget.albumId);
+                        if (context.mounted) {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(
+                              content: Text('Added $count wallpaper${count == 1 ? '' : 's'} to album'),
+                              backgroundColor: const Color(0xFF34C759),
+                            ),
+                          );
+                        }
+                      }
+                    },
                   ),
-                  child: const Icon(Icons.add_photo_alternate_outlined, color: Color(0xFF34C759)),
-                ),
-                title: const Text('Import New Photos', style: TextStyle(color: Colors.white, fontWeight: FontWeight.w600)),
-                subtitle: const Text('Pick photos from your device storage', style: TextStyle(color: Colors.white54, fontSize: 12)),
-                onTap: () async {
-                  Navigator.pop(ctx);
-                  final picker = ImagePicker();
-                  final images = await picker.pickMultiImage();
-                  if (images.isNotEmpty && mounted) {
-                    final paths = images.map((e) => e.path).toList();
-                    final count = await widget.controller.importImages(paths, targetAlbumId: widget.albumId);
-                    if (context.mounted) {
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(
-                          content: Text('Added $count wallpaper${count == 1 ? '' : 's'} to album'),
-                          backgroundColor: const Color(0xFF34C759),
-                        ),
-                      );
-                    }
-                  }
-                },
+                ],
               ),
-            ],
+            ),
           ),
         ),
       ),
@@ -222,169 +227,179 @@ class _AlbumDetailScreenState extends State<AlbumDetailScreen> {
       ),
       builder: (ctx) => StatefulBuilder(
         builder: (ctx, setModalState) {
-          return Container(
-            height: MediaQuery.of(context).size.height * 0.75,
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          return Center(
+            child: ConstrainedBox(
+              constraints: const BoxConstraints(maxWidth: 640),
+              child: Container(
+                height: MediaQuery.of(context).size.height * 0.75,
+                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        const Text(
-                          'Add Existing Wallpapers',
-                          style: TextStyle(
-                            color: Colors.white,
-                            fontSize: 18,
-                            fontWeight: FontWeight.bold,
-                          ),
+                        Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            const Text(
+                              'Add Existing Wallpapers',
+                              style: TextStyle(
+                                color: Colors.white,
+                                fontSize: 18,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                            Text(
+                              '${selectedCandidateIds.length} selected',
+                              style: const TextStyle(color: Colors.white54, fontSize: 12),
+                            ),
+                          ],
                         ),
-                        Text(
-                          '${selectedCandidateIds.length} selected',
-                          style: const TextStyle(color: Colors.white54, fontSize: 12),
+                        PressableScale(
+                          onTap: () {
+                            setModalState(() {
+                              if (selectedCandidateIds.length == candidateItems.length) {
+                                selectedCandidateIds.clear();
+                              } else {
+                                selectedCandidateIds.clear();
+                                selectedCandidateIds.addAll(candidateItems.map((e) => e.id));
+                              }
+                            });
+                          },
+                          child: Padding(
+                            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                            child: Text(
+                              selectedCandidateIds.length == candidateItems.length ? 'Deselect All' : 'Select All',
+                              style: const TextStyle(
+                                color: Color(0xFFFF3B30),
+                                fontWeight: FontWeight.bold,
+                                fontSize: 13,
+                              ),
+                            ),
+                          ),
                         ),
                       ],
                     ),
-                    PressableScale(
-                      onTap: () {
-                        setModalState(() {
-                          if (selectedCandidateIds.length == candidateItems.length) {
-                            selectedCandidateIds.clear();
-                          } else {
-                            selectedCandidateIds.clear();
-                            selectedCandidateIds.addAll(candidateItems.map((e) => e.id));
-                          }
-                        });
-                      },
-                      child: Padding(
-                        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                        child: Text(
-                          selectedCandidateIds.length == candidateItems.length ? 'Deselect All' : 'Select All',
-                          style: const TextStyle(
-                            color: Color(0xFFFF3B30),
-                            fontWeight: FontWeight.bold,
-                            fontSize: 13,
+                    const SizedBox(height: 12),
+                    Expanded(
+                      child: LayoutBuilder(
+                        builder: (context, constraints) {
+                          final cols = (constraints.maxWidth / 110).floor().clamp(3, 6);
+                          return GridView.builder(
+                            itemCount: candidateItems.length,
+                            gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                              crossAxisCount: cols,
+                              crossAxisSpacing: 8,
+                              mainAxisSpacing: 8,
+                              childAspectRatio: 0.65,
+                            ),
+                            itemBuilder: (context, index) {
+                              final item = candidateItems[index];
+                              final isSelected = selectedCandidateIds.contains(item.id);
+                              final file = File(item.path);
+
+                              return GestureDetector(
+                                onTap: () {
+                                  setModalState(() {
+                                    if (isSelected) {
+                                      selectedCandidateIds.remove(item.id);
+                                    } else {
+                                      selectedCandidateIds.add(item.id);
+                                    }
+                                  });
+                                },
+                                child: Stack(
+                                  fit: StackFit.expand,
+                                  children: [
+                                    ClipRRect(
+                                      borderRadius: BorderRadius.circular(12),
+                                      child: file.existsSync()
+                                          ? Image.file(file, fit: BoxFit.cover)
+                                          : Container(color: Colors.grey.shade900),
+                                    ),
+                                    AnimatedContainer(
+                                      duration: const Duration(milliseconds: 150),
+                                      decoration: BoxDecoration(
+                                        borderRadius: BorderRadius.circular(12),
+                                        border: Border.all(
+                                          color: isSelected ? const Color(0xFFFF3B30) : Colors.transparent,
+                                          width: 2.5,
+                                        ),
+                                        color: isSelected ? const Color(0xFFFF3B30).withAlpha(50) : Colors.transparent,
+                                      ),
+                                    ),
+                                    Positioned(
+                                      top: 6,
+                                      right: 6,
+                                      child: Container(
+                                        width: 22,
+                                        height: 22,
+                                        decoration: BoxDecoration(
+                                          shape: BoxShape.circle,
+                                          color: isSelected ? const Color(0xFFFF3B30) : Colors.black45,
+                                          border: Border.all(color: Colors.white70, width: 1.5),
+                                        ),
+                                        child: isSelected
+                                            ? const Icon(Icons.check, size: 14, color: Colors.white)
+                                            : null,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              );
+                            },
+                          );
+                        },
+                      ),
+                    ),
+                    const SizedBox(height: 12),
+                    SizedBox(
+                      width: double.infinity,
+                      child: PressableScale(
+                        onTap: selectedCandidateIds.isEmpty
+                            ? null
+                            : () async {
+                                final messenger = ScaffoldMessenger.of(context);
+                                Navigator.pop(ctx);
+                                await widget.controller.addItemsToAlbum(
+                                  widget.albumId,
+                                  selectedCandidateIds,
+                                );
+                                if (!mounted) return;
+                                messenger.showSnackBar(
+                                  SnackBar(
+                                    content: Text('Added ${selectedCandidateIds.length} wallpapers to album'),
+                                    backgroundColor: const Color(0xFF34C759),
+                                  ),
+                                );
+                              },
+                        child: Container(
+                          padding: const EdgeInsets.symmetric(vertical: 14),
+                          decoration: BoxDecoration(
+                            gradient: selectedCandidateIds.isEmpty
+                                ? null
+                                : const LinearGradient(
+                                    colors: [Color(0xFFFF3B30), Color(0xFFFF5E3A)],
+                                  ),
+                            color: selectedCandidateIds.isEmpty ? const Color(0xFF222634) : null,
+                            borderRadius: BorderRadius.circular(16),
+                          ),
+                          alignment: Alignment.center,
+                          child: Text(
+                            'Add (${selectedCandidateIds.length}) to Album',
+                            style: TextStyle(
+                              color: selectedCandidateIds.isEmpty ? Colors.white38 : Colors.white,
+                              fontWeight: FontWeight.bold,
+                              fontSize: 15,
+                            ),
                           ),
                         ),
                       ),
                     ),
                   ],
                 ),
-                const SizedBox(height: 12),
-                Expanded(
-                  child: GridView.builder(
-                    itemCount: candidateItems.length,
-                    gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                      crossAxisCount: 3,
-                      crossAxisSpacing: 8,
-                      mainAxisSpacing: 8,
-                      childAspectRatio: 0.65,
-                    ),
-                    itemBuilder: (context, index) {
-                      final item = candidateItems[index];
-                      final isSelected = selectedCandidateIds.contains(item.id);
-                      final file = File(item.path);
-
-                      return GestureDetector(
-                        onTap: () {
-                          setModalState(() {
-                            if (isSelected) {
-                              selectedCandidateIds.remove(item.id);
-                            } else {
-                              selectedCandidateIds.add(item.id);
-                            }
-                          });
-                        },
-                        child: Stack(
-                          fit: StackFit.expand,
-                          children: [
-                            ClipRRect(
-                              borderRadius: BorderRadius.circular(12),
-                              child: file.existsSync()
-                                  ? Image.file(file, fit: BoxFit.cover)
-                                  : Container(color: Colors.grey.shade900),
-                            ),
-                            AnimatedContainer(
-                              duration: const Duration(milliseconds: 150),
-                              decoration: BoxDecoration(
-                                borderRadius: BorderRadius.circular(12),
-                                border: Border.all(
-                                  color: isSelected ? const Color(0xFFFF3B30) : Colors.transparent,
-                                  width: 2.5,
-                                ),
-                                color: isSelected ? const Color(0xFFFF3B30).withAlpha(50) : Colors.transparent,
-                              ),
-                            ),
-                            Positioned(
-                              top: 6,
-                              right: 6,
-                              child: Container(
-                                width: 22,
-                                height: 22,
-                                decoration: BoxDecoration(
-                                  shape: BoxShape.circle,
-                                  color: isSelected ? const Color(0xFFFF3B30) : Colors.black45,
-                                  border: Border.all(color: Colors.white70, width: 1.5),
-                                ),
-                                child: isSelected
-                                    ? const Icon(Icons.check, size: 14, color: Colors.white)
-                                    : null,
-                              ),
-                            ),
-                          ],
-                        ),
-                      );
-                    },
-                  ),
-                ),
-                const SizedBox(height: 12),
-                SizedBox(
-                  width: double.infinity,
-                  child: PressableScale(
-                    onTap: selectedCandidateIds.isEmpty
-                        ? null
-                        : () async {
-                            final messenger = ScaffoldMessenger.of(context);
-                            Navigator.pop(ctx);
-                            await widget.controller.addItemsToAlbum(
-                              widget.albumId,
-                              selectedCandidateIds,
-                            );
-                            if (!mounted) return;
-                            messenger.showSnackBar(
-                              SnackBar(
-                                content: Text('Added ${selectedCandidateIds.length} wallpapers to album'),
-                                backgroundColor: const Color(0xFF34C759),
-                              ),
-                            );
-                          },
-                    child: Container(
-                      padding: const EdgeInsets.symmetric(vertical: 14),
-                      decoration: BoxDecoration(
-                        gradient: selectedCandidateIds.isEmpty
-                            ? null
-                            : const LinearGradient(
-                                colors: [Color(0xFFFF3B30), Color(0xFFFF5E3A)],
-                              ),
-                        color: selectedCandidateIds.isEmpty ? const Color(0xFF222634) : null,
-                        borderRadius: BorderRadius.circular(16),
-                      ),
-                      alignment: Alignment.center,
-                      child: Text(
-                        'Add (${selectedCandidateIds.length}) to Album',
-                        style: TextStyle(
-                          color: selectedCandidateIds.isEmpty ? Colors.white38 : Colors.white,
-                          fontWeight: FontWeight.bold,
-                          fontSize: 15,
-                        ),
-                      ),
-                    ),
-                  ),
-                ),
-              ],
+              ),
             ),
           );
         },
@@ -443,22 +458,25 @@ class _AlbumDetailScreenState extends State<AlbumDetailScreen> {
           borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
         ),
         builder: (ctx) => SafeArea(
-          child: Padding(
-            padding: const EdgeInsets.fromLTRB(20, 16, 20, 24),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Center(
-                  child: Container(
-                    width: 40,
-                    height: 4,
-                    decoration: BoxDecoration(
-                      color: Colors.white24,
-                      borderRadius: BorderRadius.circular(2),
+          child: Center(
+            child: ConstrainedBox(
+              constraints: const BoxConstraints(maxWidth: 540),
+              child: Padding(
+                padding: const EdgeInsets.fromLTRB(20, 16, 20, 24),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Center(
+                      child: Container(
+                        width: 40,
+                        height: 4,
+                        decoration: BoxDecoration(
+                          color: Colors.white24,
+                          borderRadius: BorderRadius.circular(2),
+                        ),
+                      ),
                     ),
-                  ),
-                ),
                 const SizedBox(height: 16),
                 Text(
                   'Update $count Selected Wallpapers',
@@ -504,10 +522,12 @@ class _AlbumDetailScreenState extends State<AlbumDetailScreen> {
                   onTap: () => Navigator.pop(ctx, 'exclude'),
                 ),
               ],
+              ),
             ),
           ),
         ),
-      );
+      ),
+    );
 
       if (action == 'include' && mounted) {
         final ids = Set<String>.from(_selectedIds);
@@ -558,22 +578,25 @@ class _AlbumDetailScreenState extends State<AlbumDetailScreen> {
         borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
       ),
       builder: (ctx) => SafeArea(
-        child: Padding(
-          padding: const EdgeInsets.fromLTRB(20, 16, 20, 24),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Center(
-                child: Container(
-                  width: 40,
-                  height: 4,
-                  decoration: BoxDecoration(
-                    color: Colors.white24,
-                    borderRadius: BorderRadius.circular(2),
+        child: Center(
+          child: ConstrainedBox(
+            constraints: const BoxConstraints(maxWidth: 540),
+            child: Padding(
+              padding: const EdgeInsets.fromLTRB(20, 16, 20, 24),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Center(
+                    child: Container(
+                      width: 40,
+                      height: 4,
+                      decoration: BoxDecoration(
+                        color: Colors.white24,
+                        borderRadius: BorderRadius.circular(2),
+                      ),
+                    ),
                   ),
-                ),
-              ),
               const SizedBox(height: 16),
               Text(
                 'Delete $count Wallpaper${count == 1 ? '' : 's'}?',
@@ -621,7 +644,9 @@ class _AlbumDetailScreenState extends State<AlbumDetailScreen> {
                 shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                 onTap: () => Navigator.pop(ctx, 'delete'),
               ),
-            ],
+                ],
+              ),
+            ),
           ),
         ),
       ),
@@ -664,6 +689,14 @@ class _AlbumDetailScreenState extends State<AlbumDetailScreen> {
     }
   }
 
+  int _calculateWallpaperColumns(double width) {
+    if (width >= 1200) return 6;
+    if (width >= 960) return 5;
+    if (width >= 720) return 4;
+    if (width >= 480) return 3;
+    return 2;
+  }
+
   @override
   Widget build(BuildContext context) {
     return ListenableBuilder(
@@ -702,24 +735,29 @@ class _AlbumDetailScreenState extends State<AlbumDetailScreen> {
                   Expanded(
                     child: items.isEmpty
                         ? _buildEmptyState(context)
-                        : GridView.builder(
-                            padding: const EdgeInsets.fromLTRB(16, 8, 16, 100),
-                            gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                              crossAxisCount: 2,
-                              crossAxisSpacing: 14,
-                              mainAxisSpacing: 14,
-                              childAspectRatio: 0.58,
-                            ),
-                            itemCount: items.length,
-                            itemBuilder: (context, index) {
-                              final item = items[index];
-                              final isSelected = _selectedIds.contains(item.id);
+                        : LayoutBuilder(
+                            builder: (context, constraints) {
+                              final cols = _calculateWallpaperColumns(constraints.maxWidth);
+                              return GridView.builder(
+                                padding: const EdgeInsets.fromLTRB(16, 8, 16, 150),
+                                gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                                  crossAxisCount: cols,
+                                  crossAxisSpacing: 14,
+                                  mainAxisSpacing: 14,
+                                  childAspectRatio: 0.58,
+                                ),
+                                itemCount: items.length,
+                                itemBuilder: (context, index) {
+                                  final item = items[index];
+                                  final isSelected = _selectedIds.contains(item.id);
 
-                              return _buildWallpaperCard(
-                                context: context,
-                                item: item,
-                                index: index,
-                                isSelected: isSelected,
+                                  return _buildWallpaperCard(
+                                    context: context,
+                                    item: item,
+                                    index: index,
+                                    isSelected: isSelected,
+                                  );
+                                },
                               );
                             },
                           ),

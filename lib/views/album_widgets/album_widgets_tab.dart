@@ -100,40 +100,45 @@ class _AlbumWidgetsTabState extends State<AlbumWidgetsTab> with WidgetsBindingOb
         borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
       ),
       builder: (ctx) => SafeArea(
-        child: SingleChildScrollView(
-          child: Padding(
-            padding: const EdgeInsets.symmetric(vertical: 16),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
-                  child: Text(
-                    'Widget #${widgetConfig.widgetId} Shuffle Interval',
-                    style: const TextStyle(
-                      color: Colors.white,
-                      fontSize: 18,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                ),
-                for (final opt in options)
-                  ListTile(
-                    title: Text(
-                      opt.$2,
-                      style: TextStyle(
-                        color: current == opt.$1 ? const Color(0xFFFF3B30) : Colors.white,
-                        fontWeight: current == opt.$1 ? FontWeight.bold : FontWeight.normal,
+        child: Center(
+          child: ConstrainedBox(
+            constraints: const BoxConstraints(maxWidth: 540),
+            child: SingleChildScrollView(
+              child: Padding(
+                padding: const EdgeInsets.symmetric(vertical: 16),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
+                      child: Text(
+                        'Widget #${widgetConfig.widgetId} Shuffle Interval',
+                        style: const TextStyle(
+                          color: Colors.white,
+                          fontSize: 18,
+                          fontWeight: FontWeight.bold,
+                        ),
                       ),
                     ),
-                    trailing: current == opt.$1 ? const Icon(Icons.check, color: Color(0xFFFF3B30)) : null,
-                    onTap: () {
-                      widget.controller.updateAlbumWidgetConfig(widgetConfig.copyWith(intervalMinutes: opt.$1));
-                      Navigator.pop(ctx);
-                    },
-                  ),
-              ],
+                    for (final opt in options)
+                      ListTile(
+                        title: Text(
+                          opt.$2,
+                          style: TextStyle(
+                            color: current == opt.$1 ? const Color(0xFFFF3B30) : Colors.white,
+                            fontWeight: current == opt.$1 ? FontWeight.bold : FontWeight.normal,
+                          ),
+                        ),
+                        trailing: current == opt.$1 ? const Icon(Icons.check, color: Color(0xFFFF3B30)) : null,
+                        onTap: () {
+                          widget.controller.updateAlbumWidgetConfig(widgetConfig.copyWith(intervalMinutes: opt.$1));
+                          Navigator.pop(ctx);
+                        },
+                      ),
+                  ],
+                ),
+              ),
             ),
           ),
         ),
@@ -152,76 +157,81 @@ class _AlbumWidgetsTabState extends State<AlbumWidgetsTab> with WidgetsBindingOb
         borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
       ),
       builder: (ctx) => SafeArea(
-        child: SingleChildScrollView(
-          child: Padding(
-            padding: const EdgeInsets.symmetric(vertical: 16),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
-                  child: Text(
-                    'Assign Album to Widget #${widgetConfig.widgetId}',
-                    style: const TextStyle(
-                      color: Colors.white,
-                      fontSize: 18,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                ),
-                ListTile(
-                  title: Text(
-                    'All Photos (Full Gallery)',
-                    style: TextStyle(
-                      color: (currentId == 'all' || currentId == 'all_photos' || currentId.isEmpty)
-                          ? const Color(0xFFFF3B30)
-                          : Colors.white,
-                      fontWeight: (currentId == 'all' || currentId == 'all_photos' || currentId.isEmpty)
-                          ? FontWeight.bold
-                          : FontWeight.normal,
-                    ),
-                  ),
-                  subtitle: Text(
-                    '${widget.controller.items.length} photos',
-                    style: const TextStyle(color: Colors.white54, fontSize: 12),
-                  ),
-                  trailing: (currentId == 'all' || currentId == 'all_photos' || currentId.isEmpty)
-                      ? const Icon(Icons.check, color: Color(0xFFFF3B30))
-                      : null,
-                  onTap: () {
-                    widget.controller.updateAlbumWidgetConfig(widgetConfig.copyWith(
-                      albumId: 'all_photos',
-                      albumName: 'All Photos',
-                    ));
-                    Navigator.pop(ctx);
-                  },
-                ),
-                for (final album in albums)
-                  ListTile(
-                    title: Text(
-                      album.name,
-                      style: TextStyle(
-                        color: currentId == album.id ? const Color(0xFFFF3B30) : Colors.white,
-                        fontWeight: currentId == album.id ? FontWeight.bold : FontWeight.normal,
+        child: Center(
+          child: ConstrainedBox(
+            constraints: const BoxConstraints(maxWidth: 540),
+            child: SingleChildScrollView(
+              child: Padding(
+                padding: const EdgeInsets.symmetric(vertical: 16),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
+                      child: Text(
+                        'Assign Album to Widget #${widgetConfig.widgetId}',
+                        style: const TextStyle(
+                          color: Colors.white,
+                          fontSize: 18,
+                          fontWeight: FontWeight.bold,
+                        ),
                       ),
                     ),
-                    subtitle: Text(
-                      '${album.count} photos',
-                      style: const TextStyle(color: Colors.white54, fontSize: 12),
+                    ListTile(
+                      title: Text(
+                        'All Photos (Full Gallery)',
+                        style: TextStyle(
+                          color: (currentId == 'all' || currentId == 'all_photos' || currentId.isEmpty)
+                              ? const Color(0xFFFF3B30)
+                              : Colors.white,
+                          fontWeight: (currentId == 'all' || currentId == 'all_photos' || currentId.isEmpty)
+                              ? FontWeight.bold
+                              : FontWeight.normal,
+                        ),
+                      ),
+                      subtitle: Text(
+                        '${widget.controller.items.length} photos',
+                        style: const TextStyle(color: Colors.white54, fontSize: 12),
+                      ),
+                      trailing: (currentId == 'all' || currentId == 'all_photos' || currentId.isEmpty)
+                          ? const Icon(Icons.check, color: Color(0xFFFF3B30))
+                          : null,
+                      onTap: () {
+                        widget.controller.updateAlbumWidgetConfig(widgetConfig.copyWith(
+                          albumId: 'all_photos',
+                          albumName: 'All Photos',
+                        ));
+                        Navigator.pop(ctx);
+                      },
                     ),
-                    trailing: currentId == album.id
-                        ? const Icon(Icons.check, color: Color(0xFFFF3B30))
-                        : null,
-                    onTap: () {
-                      widget.controller.updateAlbumWidgetConfig(widgetConfig.copyWith(
-                        albumId: album.id,
-                        albumName: album.name,
-                      ));
-                      Navigator.pop(ctx);
-                    },
-                  ),
-              ],
+                    for (final album in albums)
+                      ListTile(
+                        title: Text(
+                          album.name,
+                          style: TextStyle(
+                            color: currentId == album.id ? const Color(0xFFFF3B30) : Colors.white,
+                            fontWeight: currentId == album.id ? FontWeight.bold : FontWeight.normal,
+                          ),
+                        ),
+                        subtitle: Text(
+                          '${album.count} photos',
+                          style: const TextStyle(color: Colors.white54, fontSize: 12),
+                        ),
+                        trailing: currentId == album.id
+                            ? const Icon(Icons.check, color: Color(0xFFFF3B30))
+                            : null,
+                        onTap: () {
+                          widget.controller.updateAlbumWidgetConfig(widgetConfig.copyWith(
+                            albumId: album.id,
+                            albumName: album.name,
+                          ));
+                          Navigator.pop(ctx);
+                        },
+                      ),
+                  ],
+                ),
+              ),
             ),
           ),
         ),
@@ -326,123 +336,151 @@ class _AlbumWidgetsTabState extends State<AlbumWidgetsTab> with WidgetsBindingOb
 
           // Main Content
           SliverToBoxAdapter(
-            child: Padding(
-              padding: const EdgeInsets.fromLTRB(20, 8, 20, 110),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  // Subtitle & Status Card
-                  Container(
-                    width: double.infinity,
-                    padding: const EdgeInsets.all(16),
-                    decoration: BoxDecoration(
-                      gradient: const LinearGradient(
-                        colors: [Color(0xFF161A28), Color(0xFF12141E)],
-                        begin: Alignment.topLeft,
-                        end: Alignment.bottomRight,
-                      ),
-                      borderRadius: BorderRadius.circular(20),
-                      border: Border.all(color: const Color(0xFF23283E)),
-                      boxShadow: [
-                        BoxShadow(
-                          color: Colors.black.withAlpha(80),
-                          blurRadius: 16,
-                          offset: const Offset(0, 6),
-                        ),
-                      ],
-                    ),
-                    child: Row(
-                      children: [
-                        Container(
-                          width: 44,
-                          height: 44,
-                          decoration: BoxDecoration(
-                            color: const Color(0xFF38BDF8).withAlpha(35),
-                            borderRadius: BorderRadius.circular(14),
-                            border: Border.all(color: const Color(0xFF38BDF8).withAlpha(80)),
-                          ),
-                          child: const Icon(
-                            Icons.dashboard_customize_rounded,
-                            color: Color(0xFF38BDF8),
-                            size: 22,
-                          ),
-                        ),
-                        const SizedBox(width: 14),
-                        Expanded(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              const Text(
-                                'Desktop Photo Frames',
-                                style: TextStyle(
-                                  color: Colors.white,
-                                  fontSize: 15,
-                                  fontWeight: FontWeight.w700,
-                                ),
-                              ),
-                              const SizedBox(height: 2),
-                              Text(
-                                albumWidgets.isNotEmpty
-                                    ? '${albumWidgets.length} active widget${albumWidgets.length > 1 ? 's' : ''} placed on home screen'
-                                    : 'Rotate album photos on your home screen without changing wallpaper',
-                                style: const TextStyle(
-                                  color: Colors.white60,
-                                  fontSize: 12.5,
-                                  height: 1.25,
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-
-                  const SizedBox(height: 24),
-
-                  // Section Header
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            child: Center(
+              child: ConstrainedBox(
+                constraints: const BoxConstraints(maxWidth: 850),
+                child: Padding(
+                  padding: const EdgeInsets.fromLTRB(20, 8, 20, 150),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text(
-                        albumWidgets.isNotEmpty ? 'Placed Widgets' : 'Get Started',
-                        style: const TextStyle(
-                          color: Colors.white,
-                          fontSize: 17,
-                          fontWeight: FontWeight.w800,
-                          letterSpacing: -0.3,
+                      // Subtitle & Status Card
+                      Container(
+                        width: double.infinity,
+                        padding: const EdgeInsets.all(16),
+                        decoration: BoxDecoration(
+                          gradient: const LinearGradient(
+                            colors: [Color(0xFF161A28), Color(0xFF12141E)],
+                            begin: Alignment.topLeft,
+                            end: Alignment.bottomRight,
+                          ),
+                          borderRadius: BorderRadius.circular(20),
+                          border: Border.all(color: const Color(0xFF23283E)),
+                          boxShadow: [
+                            BoxShadow(
+                              color: Colors.black.withAlpha(80),
+                              blurRadius: 16,
+                              offset: const Offset(0, 6),
+                            ),
+                          ],
+                        ),
+                        child: Row(
+                          children: [
+                            Container(
+                              width: 44,
+                              height: 44,
+                              decoration: BoxDecoration(
+                                color: const Color(0xFF38BDF8).withAlpha(35),
+                                borderRadius: BorderRadius.circular(14),
+                                border: Border.all(color: const Color(0xFF38BDF8).withAlpha(80)),
+                              ),
+                              child: const Icon(
+                                Icons.dashboard_customize_rounded,
+                                color: Color(0xFF38BDF8),
+                                size: 22,
+                              ),
+                            ),
+                            const SizedBox(width: 14),
+                            Expanded(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  const Text(
+                                    'Desktop Photo Frames',
+                                    style: TextStyle(
+                                      color: Colors.white,
+                                      fontSize: 15,
+                                      fontWeight: FontWeight.w700,
+                                    ),
+                                  ),
+                                  const SizedBox(height: 2),
+                                  Text(
+                                    albumWidgets.isNotEmpty
+                                        ? '${albumWidgets.length} active widget${albumWidgets.length > 1 ? 's' : ''} placed on home screen'
+                                        : 'Rotate album photos on your home screen without changing wallpaper',
+                                    style: const TextStyle(
+                                      color: Colors.white60,
+                                      fontSize: 12.5,
+                                      height: 1.25,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ],
                         ),
                       ),
-                      if (albumWidgets.isNotEmpty)
-                        Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-                          decoration: BoxDecoration(
-                            color: const Color(0xFF38BDF8).withAlpha(30),
-                            borderRadius: BorderRadius.circular(12),
-                          ),
-                          child: Text(
-                            '${albumWidgets.length} Active',
+
+                      const SizedBox(height: 24),
+
+                      // Section Header
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Text(
+                            albumWidgets.isNotEmpty ? 'Placed Widgets' : 'Get Started',
                             style: const TextStyle(
-                              color: Color(0xFF38BDF8),
-                              fontSize: 11.5,
-                              fontWeight: FontWeight.bold,
+                              color: Colors.white,
+                              fontSize: 17,
+                              fontWeight: FontWeight.w800,
+                              letterSpacing: -0.3,
                             ),
                           ),
+                          if (albumWidgets.isNotEmpty)
+                            Container(
+                              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                              decoration: BoxDecoration(
+                                color: const Color(0xFF38BDF8).withAlpha(30),
+                                borderRadius: BorderRadius.circular(12),
+                              ),
+                              child: Text(
+                                '${albumWidgets.length} Active',
+                                style: const TextStyle(
+                                  color: Color(0xFF38BDF8),
+                                  fontSize: 11.5,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                            ),
+                        ],
+                      ),
+
+                      const SizedBox(height: 12),
+
+                      if (albumWidgets.isEmpty) ...[
+                        _buildOnboardingCard(context),
+                      ] else ...[
+                        LayoutBuilder(
+                          builder: (context, constraints) {
+                            if (constraints.maxWidth >= 600) {
+                              return GridView.builder(
+                                shrinkWrap: true,
+                                physics: const NeverScrollableScrollPhysics(),
+                                gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                                  crossAxisCount: 2,
+                                  crossAxisSpacing: 16,
+                                  mainAxisSpacing: 16,
+                                  mainAxisExtent: 350,
+                                ),
+                                itemCount: albumWidgets.length,
+                                itemBuilder: (context, index) =>
+                                    _buildAlbumWidgetCard(context, albumWidgets[index]),
+                              );
+                            }
+                            return Column(
+                              children: [
+                                for (int i = 0; i < albumWidgets.length; i++) ...[
+                                  if (i > 0) const SizedBox(height: 16),
+                                  _buildAlbumWidgetCard(context, albumWidgets[i]),
+                                ],
+                              ],
+                            );
+                          },
                         ),
+                      ],
                     ],
                   ),
-
-                  const SizedBox(height: 12),
-
-                  if (albumWidgets.isEmpty) ...[
-                    _buildOnboardingCard(context),
-                  ] else ...[
-                    for (int i = 0; i < albumWidgets.length; i++) ...[
-                      if (i > 0) const SizedBox(height: 16),
-                      _buildAlbumWidgetCard(context, albumWidgets[i]),
-                    ],
-                  ],
-                ],
+                ),
               ),
             ),
           ),
@@ -566,41 +604,50 @@ class _AlbumWidgetsTabState extends State<AlbumWidgetsTab> with WidgetsBindingOb
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Row(
-                children: [
-                  Container(
-                    width: 32,
-                    height: 32,
-                    decoration: BoxDecoration(
-                      color: const Color(0xFF38BDF8).withAlpha(30),
-                      borderRadius: BorderRadius.circular(10),
-                    ),
-                    child: const Icon(
-                      Icons.photo_size_select_actual_rounded,
-                      color: Color(0xFF38BDF8),
-                      size: 17,
-                    ),
-                  ),
-                  const SizedBox(width: 10),
-                  Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        'Widget #${widgetConfig.widgetId}',
-                        style: const TextStyle(
-                          color: Colors.white,
-                          fontSize: 14.5,
-                          fontWeight: FontWeight.bold,
-                        ),
+              Expanded(
+                child: Row(
+                  children: [
+                    Container(
+                      width: 32,
+                      height: 32,
+                      decoration: BoxDecoration(
+                        color: const Color(0xFF38BDF8).withAlpha(30),
+                        borderRadius: BorderRadius.circular(10),
                       ),
-                      Text(
-                        '$totalCount photo${totalCount == 1 ? '' : 's'} in queue',
-                        style: const TextStyle(color: Colors.white54, fontSize: 11.5),
+                      child: const Icon(
+                        Icons.photo_size_select_actual_rounded,
+                        color: Color(0xFF38BDF8),
+                        size: 17,
                       ),
-                    ],
-                  ),
-                ],
+                    ),
+                    const SizedBox(width: 10),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            'Widget #${widgetConfig.widgetId}',
+                            style: const TextStyle(
+                              color: Colors.white,
+                              fontSize: 14.5,
+                              fontWeight: FontWeight.bold,
+                            ),
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                          Text(
+                            '$totalCount photo${totalCount == 1 ? '' : 's'} in queue',
+                            style: const TextStyle(color: Colors.white54, fontSize: 11.5),
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
               ),
+              const SizedBox(width: 8),
               PressableScale(
                 onTap: () => widget.controller.shuffleAlbumWidget(widgetConfig.widgetId),
                 child: Container(
@@ -750,13 +797,18 @@ class _AlbumWidgetsTabState extends State<AlbumWidgetsTab> with WidgetsBindingOb
                   const Icon(Icons.photo_library_rounded, color: Colors.white54, size: 18),
                   const SizedBox(width: 10),
                   const Text('Album', style: TextStyle(color: Colors.white70, fontSize: 13)),
-                  const Spacer(),
-                  Text(
-                    widgetConfig.albumName.isNotEmpty ? widgetConfig.albumName : 'All Photos',
-                    style: const TextStyle(
-                      color: Colors.white,
-                      fontSize: 13,
-                      fontWeight: FontWeight.bold,
+                  const SizedBox(width: 8),
+                  Expanded(
+                    child: Text(
+                      widgetConfig.albumName.isNotEmpty ? widgetConfig.albumName : 'All Photos',
+                      textAlign: TextAlign.end,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: const TextStyle(
+                        color: Colors.white,
+                        fontSize: 13,
+                        fontWeight: FontWeight.bold,
+                      ),
                     ),
                   ),
                   const SizedBox(width: 4),

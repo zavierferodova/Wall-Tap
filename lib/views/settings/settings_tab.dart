@@ -25,9 +25,13 @@ class SettingsTab extends StatelessWidget {
         return Scaffold(
       backgroundColor: const Color(0xFF0D0E12),
       body: SafeArea(
-        child: ListView(
-          padding: const EdgeInsets.fromLTRB(18, 12, 18, 100),
-          children: [
+        bottom: false,
+        child: Center(
+          child: ConstrainedBox(
+            constraints: const BoxConstraints(maxWidth: 720),
+            child: ListView(
+              padding: const EdgeInsets.fromLTRB(18, 12, 18, 150),
+              children: [
             // Top Bar
             const Padding(
               padding: EdgeInsets.only(bottom: 20, top: 4),
@@ -438,7 +442,9 @@ class SettingsTab extends StatelessWidget {
           ],
         ),
       ),
-        );
+    ),
+  ),
+);
       },
     );
   }

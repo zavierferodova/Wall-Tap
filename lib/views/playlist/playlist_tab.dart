@@ -511,31 +511,36 @@ class _PlaylistTabState extends State<PlaylistTab> {
 
 
   Widget _buildSegmentSwitcher() {
-    return Container(
-      margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
-      padding: const EdgeInsets.all(4),
-      decoration: BoxDecoration(
-        color: const Color(0xFF161824),
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: const Color(0xFF262B3A)),
-      ),
-      child: Row(
-        children: [
-          Expanded(
-            child: _buildSegmentButton(
-              index: 0,
-              label: 'All Wallpapers',
-              count: widget.controller.items.length,
-            ),
+    return Center(
+      child: ConstrainedBox(
+        constraints: const BoxConstraints(maxWidth: 500),
+        child: Container(
+          margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+          padding: const EdgeInsets.all(4),
+          decoration: BoxDecoration(
+            color: const Color(0xFF161824),
+            borderRadius: BorderRadius.circular(16),
+            border: Border.all(color: const Color(0xFF262B3A)),
           ),
-          Expanded(
-            child: _buildSegmentButton(
-              index: 1,
-              label: 'Albums',
-              count: widget.controller.albums.length,
-            ),
+          child: Row(
+            children: [
+              Expanded(
+                child: _buildSegmentButton(
+                  index: 0,
+                  label: 'All Wallpapers',
+                  count: widget.controller.items.length,
+                ),
+              ),
+              Expanded(
+                child: _buildSegmentButton(
+                  index: 1,
+                  label: 'Albums',
+                  count: widget.controller.albums.length,
+                ),
+              ),
+            ],
           ),
-        ],
+        ),
       ),
     );
   }
@@ -601,34 +606,39 @@ class _PlaylistTabState extends State<PlaylistTab> {
         child: Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                const Text(
-                  'Gallery',
-                  style: TextStyle(
-                    color: Colors.white,
-                    fontSize: 24,
-                    fontWeight: FontWeight.w800,
-                    letterSpacing: -0.5,
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const Text(
+                    'Gallery',
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontSize: 24,
+                      fontWeight: FontWeight.w800,
+                      letterSpacing: -0.5,
+                    ),
                   ),
-                ),
-                Text(
-                  _selectedSegment == 1
-                      ? (_albumSearchQuery.trim().isNotEmpty
-                          ? '${filteredAlbums.length} of ${albums.length} albums found'
-                          : '${albums.length} album${albums.length == 1 ? '' : 's'}${widget.controller.activeAlbum != null ? ' • Active: ${widget.controller.activeAlbum!.name}' : ''}')
-                      : (widget.controller.activeAlbum != null
-                          ? 'Active: ${widget.controller.activeAlbum!.name} (${widget.controller.activeItems.length})'
-                          : '${items.length} wallpapers • ${widget.controller.activeItems.length} active'),
-                  style: const TextStyle(
-                    color: Colors.white54,
-                    fontSize: 12.5,
-                    fontWeight: FontWeight.w500,
+                  Text(
+                    _selectedSegment == 1
+                        ? (_albumSearchQuery.trim().isNotEmpty
+                            ? '${filteredAlbums.length} of ${albums.length} albums found'
+                            : '${albums.length} album${albums.length == 1 ? '' : 's'}${widget.controller.activeAlbum != null ? ' • Active: ${widget.controller.activeAlbum!.name}' : ''}')
+                        : (widget.controller.activeAlbum != null
+                            ? 'Active: ${widget.controller.activeAlbum!.name} (${widget.controller.activeItems.length})'
+                            : '${items.length} wallpapers • ${widget.controller.activeItems.length} active'),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: const TextStyle(
+                      color: Colors.white54,
+                      fontSize: 12.5,
+                      fontWeight: FontWeight.w500,
+                    ),
                   ),
-                ),
-              ],
+                ],
+              ),
             ),
+            const SizedBox(width: 8),
             Row(
               children: [
                 if (_selectedSegment == 0 && items.isNotEmpty) ...[
@@ -1069,75 +1079,80 @@ class _PlaylistTabState extends State<PlaylistTab> {
     final isFocused = _albumSearchFocusNode.hasFocus;
     final hasQuery = _albumSearchQuery.isNotEmpty;
 
-    return Container(
-      margin: const EdgeInsets.fromLTRB(16, 6, 16, 8),
-      decoration: BoxDecoration(
-        color: const Color(0xFF161824),
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(
-          color: isFocused
-              ? const Color(0xFFFF3B30)
-              : (hasQuery ? const Color(0xFFFF3B30).withAlpha(120) : const Color(0xFF262B3A)),
-          width: isFocused ? 1.4 : 1.0,
-        ),
-        boxShadow: isFocused
-            ? [
-                BoxShadow(
-                  color: const Color(0xFFFF3B30).withAlpha(40),
-                  blurRadius: 10,
-                  offset: const Offset(0, 2),
-                ),
-              ]
-            : null,
-      ),
-      child: TextField(
-        controller: _albumSearchController,
-        focusNode: _albumSearchFocusNode,
-        style: const TextStyle(
-          color: Colors.white,
-          fontSize: 14,
-          fontWeight: FontWeight.w500,
-        ),
-        cursorColor: const Color(0xFFFF3B30),
-        textInputAction: TextInputAction.search,
-        decoration: InputDecoration(
-          hintText: 'Search albums...',
-          hintStyle: const TextStyle(
-            color: Colors.white38,
-            fontSize: 14,
-          ),
-          prefixIcon: Icon(
-            Icons.search_rounded,
-            color: isFocused || hasQuery ? const Color(0xFFFF3B30) : Colors.white38,
-            size: 20,
-          ),
-          suffixIcon: hasQuery
-              ? PressableScale(
-                  onTap: () {
-                    HapticFeedback.selectionClick();
-                    _albumSearchController.clear();
-                    setState(() {
-                      _albumSearchQuery = '';
-                    });
-                  },
-                  child: const Padding(
-                    padding: EdgeInsets.all(10),
-                    child: Icon(
-                      Icons.close_rounded,
-                      color: Colors.white60,
-                      size: 18,
+    return Center(
+      child: ConstrainedBox(
+        constraints: const BoxConstraints(maxWidth: 600),
+        child: Container(
+          margin: const EdgeInsets.fromLTRB(16, 6, 16, 8),
+          decoration: BoxDecoration(
+            color: const Color(0xFF161824),
+            borderRadius: BorderRadius.circular(16),
+            border: Border.all(
+              color: isFocused
+                  ? const Color(0xFFFF3B30)
+                  : (hasQuery ? const Color(0xFFFF3B30).withAlpha(120) : const Color(0xFF262B3A)),
+              width: isFocused ? 1.4 : 1.0,
+            ),
+            boxShadow: isFocused
+                ? [
+                    BoxShadow(
+                      color: const Color(0xFFFF3B30).withAlpha(40),
+                      blurRadius: 10,
+                      offset: const Offset(0, 2),
                     ),
-                  ),
-                )
-              : null,
-          border: InputBorder.none,
-          contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+                  ]
+                : null,
+          ),
+          child: TextField(
+            controller: _albumSearchController,
+            focusNode: _albumSearchFocusNode,
+            style: const TextStyle(
+              color: Colors.white,
+              fontSize: 14,
+              fontWeight: FontWeight.w500,
+            ),
+            cursorColor: const Color(0xFFFF3B30),
+            textInputAction: TextInputAction.search,
+            decoration: InputDecoration(
+              hintText: 'Search albums...',
+              hintStyle: const TextStyle(
+                color: Colors.white38,
+                fontSize: 14,
+              ),
+              prefixIcon: Icon(
+                Icons.search_rounded,
+                color: isFocused || hasQuery ? const Color(0xFFFF3B30) : Colors.white38,
+                size: 20,
+              ),
+              suffixIcon: hasQuery
+                  ? PressableScale(
+                      onTap: () {
+                        HapticFeedback.selectionClick();
+                        _albumSearchController.clear();
+                        setState(() {
+                          _albumSearchQuery = '';
+                        });
+                      },
+                      child: const Padding(
+                        padding: EdgeInsets.all(10),
+                        child: Icon(
+                          Icons.close_rounded,
+                          color: Colors.white60,
+                          size: 18,
+                        ),
+                      ),
+                    )
+                  : null,
+              border: InputBorder.none,
+              contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+            ),
+            onChanged: (val) {
+              setState(() {
+                _albumSearchQuery = val;
+              });
+            },
+          ),
         ),
-        onChanged: (val) {
-          setState(() {
-            _albumSearchQuery = val;
-          });
-        },
       ),
     );
   }
@@ -1217,6 +1232,21 @@ class _PlaylistTabState extends State<PlaylistTab> {
     );
   }
 
+  int _calculateAlbumColumns(double width) {
+    if (width >= 1200) return 5;
+    if (width >= 960) return 4;
+    if (width >= 640) return 3;
+    return 2;
+  }
+
+  int _calculateWallpaperColumns(double width) {
+    if (width >= 1200) return 6;
+    if (width >= 960) return 5;
+    if (width >= 720) return 4;
+    if (width >= 480) return 3;
+    return 2;
+  }
+
   Widget _buildAlbumsGrid() {
     final allAlbums = widget.controller.albums;
     if (allAlbums.isEmpty) {
@@ -1232,23 +1262,29 @@ class _PlaylistTabState extends State<PlaylistTab> {
       return _buildNoAlbumSearchResultsState(_albumSearchQuery.trim());
     }
 
-    return GridView.builder(
-      padding: const EdgeInsets.fromLTRB(16, 4, 16, 100),
-      gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-        crossAxisCount: 2,
-        crossAxisSpacing: 14,
-        mainAxisSpacing: 14,
-        childAspectRatio: 0.82,
-      ),
-      itemCount: filteredAlbums.length,
-      itemBuilder: (context, index) {
-        final album = filteredAlbums[index];
-        final isActive = widget.controller.activeAlbumId == album.id;
-        final albumItems = widget.controller.getAlbumItems(album.id);
-        final coverItem = albumItems.isNotEmpty ? albumItems.first : null;
-        final activeCount = albumItems.where((i) => i.isEnabled).length;
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final crossAxisCount = _calculateAlbumColumns(constraints.maxWidth);
 
-        return _buildAlbumCard(album, coverItem, isActive, activeCount);
+        return GridView.builder(
+          padding: const EdgeInsets.fromLTRB(16, 4, 16, 150),
+          gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+            crossAxisCount: crossAxisCount,
+            crossAxisSpacing: 14,
+            mainAxisSpacing: 14,
+            childAspectRatio: 0.82,
+          ),
+          itemCount: filteredAlbums.length,
+          itemBuilder: (context, index) {
+            final album = filteredAlbums[index];
+            final isActive = widget.controller.activeAlbumId == album.id;
+            final albumItems = widget.controller.getAlbumItems(album.id);
+            final coverItem = albumItems.isNotEmpty ? albumItems.first : null;
+            final activeCount = albumItems.where((i) => i.isEnabled).length;
+
+            return _buildAlbumCard(album, coverItem, isActive, activeCount);
+          },
+        );
       },
     );
   }
@@ -1467,6 +1503,7 @@ class _PlaylistTabState extends State<PlaylistTab> {
       child: Scaffold(
         backgroundColor: const Color(0xFF0D0E12),
         body: SafeArea(
+          bottom: false,
           child: Column(
             children: [
               AnimatedSwitcher(
@@ -1482,20 +1519,26 @@ class _PlaylistTabState extends State<PlaylistTab> {
                 child: _selectedSegment == 0
                     ? (items.isEmpty
                         ? _buildEmptyState()
-                        : GridView.builder(
-                            padding: const EdgeInsets.fromLTRB(16, 8, 16, 100),
-                            gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                              crossAxisCount: 2,
-                              crossAxisSpacing: 14,
-                              mainAxisSpacing: 14,
-                              childAspectRatio: 0.70,
-                            ),
-                            itemCount: items.length,
-                            itemBuilder: (context, index) {
-                              final item = items[index];
-                              final isCurrent = controller.currentWallpaper?.id == item.id;
-                              final isSelected = _selectedIds.contains(item.id);
-                              return _buildGalleryCard(context, item, isCurrent, isSelected);
+                        : LayoutBuilder(
+                            builder: (context, constraints) {
+                              final crossAxisCount = _calculateWallpaperColumns(constraints.maxWidth);
+
+                              return GridView.builder(
+                                padding: const EdgeInsets.fromLTRB(16, 8, 16, 150),
+                                gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                                  crossAxisCount: crossAxisCount,
+                                  crossAxisSpacing: 14,
+                                  mainAxisSpacing: 14,
+                                  childAspectRatio: 0.70,
+                                ),
+                                itemCount: items.length,
+                                itemBuilder: (context, index) {
+                                  final item = items[index];
+                                  final isCurrent = controller.currentWallpaper?.id == item.id;
+                                  final isSelected = _selectedIds.contains(item.id);
+                                  return _buildGalleryCard(context, item, isCurrent, isSelected);
+                                },
+                              );
                             },
                           ))
                     : _buildAlbumsGrid(),

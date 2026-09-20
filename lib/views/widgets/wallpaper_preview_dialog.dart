@@ -225,9 +225,12 @@ class _WallpaperPreviewDialogState extends State<WallpaperPreviewDialog>
                       ),
                       child: SafeArea(
                         bottom: false,
-                        child: Padding(
-                          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
-                          child: Row(
+                        child: Center(
+                          child: ConstrainedBox(
+                            constraints: const BoxConstraints(maxWidth: 800),
+                            child: Padding(
+                              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+                              child: Row(
                             children: [
                               // Close button
                               PressableScale(
@@ -301,6 +304,8 @@ class _WallpaperPreviewDialogState extends State<WallpaperPreviewDialog>
                   ),
                 ),
               ),
+            ),
+          ),
 
               // Bottom Sheet / Action Panel Overlay
               AnimatedPositioned(
@@ -314,7 +319,10 @@ class _WallpaperPreviewDialogState extends State<WallpaperPreviewDialog>
                   opacity: _showControls ? 1.0 : 0.0,
                   child: IgnorePointer(
                     ignoring: !_showControls,
-                    child: Container(
+                    child: Center(
+                      child: ConstrainedBox(
+                        constraints: const BoxConstraints(maxWidth: 600),
+                        child: Container(
                       decoration: BoxDecoration(
                         color: const Color(0xFF161822).withAlpha(240),
                         borderRadius: const BorderRadius.vertical(top: Radius.circular(28)),
@@ -540,6 +548,8 @@ class _WallpaperPreviewDialogState extends State<WallpaperPreviewDialog>
                     ),
                   ),
                 ),
+              ),
+            ),
               ),
             ],
           ),
