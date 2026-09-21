@@ -576,8 +576,10 @@ class _SlideshowTabState extends State<SlideshowTab> with SingleTickerProviderSt
                       Container(
                         width: 7,
                         height: 7,
-                        decoration: const BoxDecoration(
-                          color: Color(0xFF34C759),
+                        decoration: BoxDecoration(
+                          color: config.isSlideshowEnabled
+                              ? const Color(0xFF34C759)
+                              : Colors.white38,
                           shape: BoxShape.circle,
                         ),
                       ),
@@ -719,31 +721,87 @@ class _SlideshowTabState extends State<SlideshowTab> with SingleTickerProviderSt
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
+          // Card Header with Status and Running Switch
           Row(
             children: [
-              Container(
-                padding: const EdgeInsets.all(6),
-                decoration: BoxDecoration(
-                  color: const Color(0xFFFF3B30).withAlpha(30),
-                  borderRadius: BorderRadius.circular(8),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    const Text(
+                      'Wallpaper Configuration',
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: TextStyle(
+                        color: Colors.white,
+                        fontSize: 15,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    const SizedBox(height: 2),
+                    Row(
+                      children: [
+                        Container(
+                          width: 6,
+                          height: 6,
+                          decoration: BoxDecoration(
+                            shape: BoxShape.circle,
+                            color: config.isSlideshowEnabled
+                                ? const Color(0xFF34C759)
+                                : Colors.white38,
+                          ),
+                        ),
+                        const SizedBox(width: 5),
+                        Text(
+                          config.isSlideshowEnabled ? 'Running' : 'Inactive',
+                          style: TextStyle(
+                            color: config.isSlideshowEnabled
+                                ? const Color(0xFF34C759)
+                                : Colors.white38,
+                            fontSize: 11,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
                 ),
-                child: const Icon(Icons.tune_rounded, color: Color(0xFFFF3B30), size: 16),
               ),
-              const SizedBox(width: 8),
-              const Expanded(
-                child: Text(
-                  'Wallpaper Configuration',
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                  style: TextStyle(
-                    color: Colors.white,
-                    fontSize: 15,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
+              Switch.adaptive(
+                key: const Key('switch_slideshow_running'),
+                value: config.isSlideshowEnabled,
+                activeThumbColor: const Color(0xFFFF3B30),
+                activeTrackColor: const Color(0xFFFF3B30).withAlpha(100),
+                onChanged: (val) async {
+                  await controller.toggleSlideshowEnabled(val);
+                },
               ),
             ],
           ),
+          if (!config.isSlideshowEnabled) ...[
+            const SizedBox(height: 10),
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 7),
+              decoration: BoxDecoration(
+                color: const Color(0xFF1B1D26),
+                borderRadius: BorderRadius.circular(10),
+                border: Border.all(color: const Color(0xFF282C3C)),
+              ),
+              child: const Row(
+                children: [
+                  Icon(Icons.info_outline_rounded, size: 14, color: Colors.white38),
+                  SizedBox(width: 8),
+                  Expanded(
+                    child: Text(
+                      'Shuffle is inactive. Turn switch on to apply changes to wallpaper.',
+                      style: TextStyle(color: Colors.white54, fontSize: 11, height: 1.2),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
           const SizedBox(height: 14),
 
           // Target Screen Selector

@@ -8,7 +8,7 @@ class AlarmReceiver : BroadcastReceiver() {
     override fun onReceive(context: Context, intent: Intent) {
         if (intent.action == Scheduler.ACTION_ALARM_TICK) {
             val prefs = context.getSharedPreferences("FlutterSharedPreferences", Context.MODE_PRIVATE)
-            val isEnabled = prefs.getBoolean("flutter.walltap_slideshow_enabled", true)
+            val isEnabled = prefs.getBoolean("flutter.walltap_slideshow_enabled", false)
             val intervalMinutes = prefs.getLong("flutter.walltap_interval_minutes", 0L).toInt()
 
             if (!isEnabled || intervalMinutes <= 0) {

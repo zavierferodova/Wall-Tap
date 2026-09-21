@@ -115,7 +115,11 @@ class WallpaperController extends ChangeNotifier {
         await _wallpaperService.setPersistentNotification(true);
       }
       _isBatteryOptimizationIgnored = await _wallpaperService.isBatteryOptimizationIgnored();
-      await _wallpaperService.updateSchedule(_config.intervalMinutes);
+      if (_config.isSlideshowEnabled && _config.intervalMinutes > 0) {
+        await _wallpaperService.updateSchedule(_config.intervalMinutes);
+      } else {
+        await _wallpaperService.updateSchedule(0);
+      }
       await _syncWidgetAndPlaylist();
       await loadAlbumWidgets();
     } catch (e) {
@@ -412,13 +416,15 @@ class WallpaperController extends ChangeNotifier {
     await _storageService.saveConfig(_config);
     notifyListeners();
 
-    final current = currentWallpaper;
-    if (current != null) {
-      return await _wallpaperService.setWallpaper(
-        filePath: current.path,
-        targetScreen: _config.targetScreen,
-        scaleType: _config.scaleType,
-      );
+    if (_config.isSlideshowEnabled) {
+      final current = currentWallpaper;
+      if (current != null) {
+        return await _wallpaperService.setWallpaper(
+          filePath: current.path,
+          targetScreen: _config.targetScreen,
+          scaleType: _config.scaleType,
+        );
+      }
     }
     return true;
   }
@@ -428,13 +434,15 @@ class WallpaperController extends ChangeNotifier {
     await _storageService.saveConfig(_config);
     notifyListeners();
 
-    final current = currentWallpaper;
-    if (current != null) {
-      return await _wallpaperService.setWallpaper(
-        filePath: current.path,
-        targetScreen: _config.targetScreen,
-        scaleType: _config.scaleType,
-      );
+    if (_config.isSlideshowEnabled) {
+      final current = currentWallpaper;
+      if (current != null) {
+        return await _wallpaperService.setWallpaper(
+          filePath: current.path,
+          targetScreen: _config.targetScreen,
+          scaleType: _config.scaleType,
+        );
+      }
     }
     return true;
   }
@@ -477,13 +485,34 @@ class WallpaperController extends ChangeNotifier {
     _config = _config.copyWith(isSlideshowEnabled: enabled);
     await _storageService.saveConfig(_config);
     await _syncWidgetAndPlaylist();
+
+    if (enabled) {
+      if (_config.intervalMinutes > 0) {
+        await _wallpaperService.updateSchedule(_config.intervalMinutes);
+      }
+      final current = currentWallpaper;
+      if (current != null) {
+        await _wallpaperService.setWallpaper(
+          filePath: current.path,
+          targetScreen: _config.targetScreen,
+          scaleType: _config.scaleType,
+        );
+      }
+    } else {
+      await _wallpaperService.updateSchedule(0);
+    }
+
     notifyListeners();
   }
 
   Future<void> updateInterval(int minutes) async {
     _config = _config.copyWith(intervalMinutes: minutes);
     await _storageService.saveConfig(_config);
-    await _wallpaperService.updateSchedule(minutes);
+    if (_config.isSlideshowEnabled && minutes > 0) {
+      await _wallpaperService.updateSchedule(minutes);
+    } else {
+      await _wallpaperService.updateSchedule(0);
+    }
     notifyListeners();
   }
 

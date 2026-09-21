@@ -155,7 +155,7 @@ class MainActivity : FlutterActivity() {
                         val (resolvedName, paths) = AlbumWidgetProvider.getAlbumImagePaths(applicationContext, albumId)
                         val savedName = prefs.getString("flutter.album_widget_${widgetId}_album_name", null)
                         val albumName = if (!savedName.isNullOrEmpty()) savedName else resolvedName
-                        val intervalMinutes = prefs.getLong("flutter.album_widget_${widgetId}_interval_minutes", 15L).toInt()
+                        val intervalMinutes = prefs.getLong("flutter.album_widget_${widgetId}_interval_minutes", 0L).toInt()
                         val isRandom = prefs.getBoolean("flutter.album_widget_${widgetId}_is_random", true)
                         val rawIndex = prefs.getLong("flutter.album_widget_${widgetId}_current_index", 0L).toInt()
                         val safeIndex = if (paths.isNotEmpty() && rawIndex in paths.indices) rawIndex else 0
@@ -181,7 +181,7 @@ class MainActivity : FlutterActivity() {
                     val widgetId = call.argument<Int>("widgetId")
                     val albumId = call.argument<String>("albumId") ?: "all_photos"
                     val albumName = call.argument<String>("albumName") ?: "Album"
-                    val intervalMinutes = call.argument<Int>("intervalMinutes") ?: 15
+                    val intervalMinutes = call.argument<Int>("intervalMinutes") ?: 0
                     val isRandom = call.argument<Boolean>("isRandom") ?: false
 
                     if (widgetId == null) {

@@ -181,7 +181,7 @@ class AlbumWidgetConfigureActivity : Activity() {
         val prefs = getSharedPreferences("FlutterSharedPreferences", Context.MODE_PRIVATE)
         val isExisting = prefs.contains("flutter.album_widget_${appWidgetId}_album_id")
         val savedAlbumId = prefs.getString("flutter.album_widget_${appWidgetId}_album_id", null)
-        val savedInterval = prefs.getLong("flutter.album_widget_${appWidgetId}_interval_minutes", 15L).toInt()
+        val savedInterval = prefs.getLong("flutter.album_widget_${appWidgetId}_interval_minutes", 0L).toInt()
         val savedIsRandom = prefs.getBoolean("flutter.album_widget_${appWidgetId}_is_random", true)
 
         if (isExisting) {
@@ -199,7 +199,7 @@ class AlbumWidgetConfigureActivity : Activity() {
             if (intervalIndex >= 0) {
                 spinnerInterval.setSelection(intervalIndex)
             } else {
-                val defaultIndex = intervalOptions.indexOfFirst { it.first == 15 }.coerceAtLeast(0)
+                val defaultIndex = intervalOptions.indexOfFirst { it.first == 0 }.coerceAtLeast(0)
                 spinnerInterval.setSelection(defaultIndex)
             }
 
@@ -212,7 +212,7 @@ class AlbumWidgetConfigureActivity : Activity() {
             btnSave.text = "Apply & Add Widget"
             btnShuffleNow.visibility = View.GONE
             radioRandom.isChecked = true
-            val defaultIndex = intervalOptions.indexOfFirst { it.first == 15 }.coerceAtLeast(0)
+            val defaultIndex = intervalOptions.indexOfFirst { it.first == 0 }.coerceAtLeast(0)
             spinnerInterval.setSelection(defaultIndex)
         }
     }

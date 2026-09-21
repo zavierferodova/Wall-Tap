@@ -123,10 +123,10 @@ void main() {
     await tester.pumpAndSettle();
     expect(controller.config.targetScreen, 'lock');
 
-    // Tap 'Center Crop' to switch scale mode
-    await tester.tap(find.text('Center Crop'));
+    // Tap 'Fit' to switch scale mode
+    await tester.tap(find.text('Fit'));
     await tester.pumpAndSettle();
-    expect(controller.config.scaleType, 'crop');
+    expect(controller.config.scaleType, 'fit');
   });
 
   testWidgets('SlideshowTab renders Help button and opens WidgetGuideDialog on tap', (tester) async {
@@ -218,14 +218,20 @@ void main() {
       ),
     );
 
-    // Tap 'Home' to switch target screen
+    // Tap 'Home' to switch target screen while inactive (does NOT apply wallpaper)
     await tester.tap(find.text('Home'));
     await tester.pumpAndSettle();
     expect(controller.config.targetScreen, 'home');
+    expect(fakeWallpaperService.lastWallpaperSet, isNull);
+
+    // Toggle switch to turn on Running state
+    await tester.tap(find.byKey(const Key('switch_slideshow_running')));
+    await tester.pumpAndSettle();
+    expect(controller.config.isSlideshowEnabled, true);
     expect(fakeWallpaperService.lastWallpaperSet, '/mock/wall_active.jpg');
     expect(fakeWallpaperService.lastTargetScreen, 'home');
 
-    // Tap 'Fit' to switch scale mode
+    // Tap 'Fit' to switch scale mode while running (immediately applies)
     await tester.tap(find.text('Fit'));
     await tester.pumpAndSettle();
     expect(controller.config.scaleType, 'fit');

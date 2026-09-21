@@ -13,10 +13,10 @@ void main() {
       expect(config.widgetId, 101);
       expect(config.albumId, 'album_1');
       expect(config.albumName, 'Cars');
-      expect(config.intervalMinutes, 15);
+      expect(config.intervalMinutes, 0);
       expect(config.isRandom, true);
       expect(config.currentIndex, 0);
-      expect(config.intervalLabel, '15 minutes');
+      expect(config.intervalLabel, 'Manual');
     });
 
     test('intervalLabel formats correctly', () {

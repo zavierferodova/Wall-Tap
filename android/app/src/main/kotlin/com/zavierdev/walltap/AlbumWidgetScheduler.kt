@@ -77,7 +77,7 @@ object AlbumWidgetScheduler {
         val prefs = context.getSharedPreferences("FlutterSharedPreferences", Context.MODE_PRIVATE)
 
         for (widgetId in allWidgetIds) {
-            val interval = prefs.getLong("flutter.album_widget_${widgetId}_interval_minutes", 15L).toInt()
+            val interval = prefs.getLong("flutter.album_widget_${widgetId}_interval_minutes", 0L).toInt()
             if (interval > 0) {
                 schedule(context, widgetId, interval)
             }

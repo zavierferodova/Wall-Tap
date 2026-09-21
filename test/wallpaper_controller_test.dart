@@ -298,14 +298,27 @@ void main() {
       expect(fakeWallpaperService.lastWallpaperSet, '/path/2.jpg');
     });
 
-    test('updateInterval updates config and schedules alarm', () async {
+    test('updateInterval updates config and schedules alarm when running, but not when inactive', () async {
       await controller.initialize();
       expect(fakeWallpaperService.lastScheduledInterval, 0);
 
+      // Inactive: updates config, but does not schedule alarm (remains 0)
       await controller.updateInterval(15);
       expect(controller.config.intervalMinutes, 15);
       expect(fakeStorage.storedConfig.intervalMinutes, 15);
+      expect(fakeWallpaperService.lastScheduledInterval, 0);
+
+      // Turn on running state: schedules alarm with configured interval
+      await controller.toggleSlideshowEnabled(true);
       expect(fakeWallpaperService.lastScheduledInterval, 15);
+
+      // Updating interval while running immediately reschedules
+      await controller.updateInterval(30);
+      expect(fakeWallpaperService.lastScheduledInterval, 30);
+
+      // Disabling running state cancels schedule
+      await controller.toggleSlideshowEnabled(false);
+      expect(fakeWallpaperService.lastScheduledInterval, 0);
     });
 
     test('Battery optimization flow can be requested and checked', () async {
@@ -625,37 +638,48 @@ void main() {
       expect(controller.currentWallpaper?.id, '2');
     });
 
-    test('updateTargetScreen updates config and immediately applies to current device wallpaper', () async {
+    test('updateTargetScreen updates config without applying wallpaper when inactive, applies when running', () async {
       fakeStorage.storedItems = [
         WallpaperItem(id: '1', path: '/path/to/wall1.jpg', fileName: 'wall1.jpg', width: 1080, height: 1920, fileSize: 100, isEnabled: true, dateAdded: DateTime.now()),
       ];
-      fakeStorage.storedConfig = const SlideshowConfig(targetScreen: 'both', scaleType: 'full', currentIndex: 0);
+      fakeStorage.storedConfig = const SlideshowConfig(targetScreen: 'both', scaleType: 'full', currentIndex: 0, isSlideshowEnabled: false);
       await controller.initialize();
 
+      // Inactive: updates config but does NOT set wallpaper
       await controller.updateTargetScreen('home');
       expect(controller.config.targetScreen, 'home');
-      expect(fakeWallpaperService.lastWallpaperSet, '/path/to/wall1.jpg');
-      expect(fakeWallpaperService.lastTargetScreen, 'home');
-      expect(fakeWallpaperService.lastScaleType, 'full');
+      expect(fakeWallpaperService.lastWallpaperSet, isNull);
 
+      // Turn on running state
+      await controller.toggleSlideshowEnabled(true);
+      expect(controller.config.isSlideshowEnabled, true);
+      expect(fakeWallpaperService.lastWallpaperSet, '/path/to/wall1.jpg');
+
+      // Now running: changing target screen immediately applies to wallpaper
       await controller.updateTargetScreen('lock');
       expect(controller.config.targetScreen, 'lock');
       expect(fakeWallpaperService.lastTargetScreen, 'lock');
     });
 
-    test('updateScaleType updates config and immediately applies to current device wallpaper', () async {
+    test('updateScaleType updates config without applying wallpaper when inactive, applies when running', () async {
       fakeStorage.storedItems = [
         WallpaperItem(id: '1', path: '/path/to/wall1.jpg', fileName: 'wall1.jpg', width: 1080, height: 1920, fileSize: 100, isEnabled: true, dateAdded: DateTime.now()),
       ];
-      fakeStorage.storedConfig = const SlideshowConfig(targetScreen: 'both', scaleType: 'full', currentIndex: 0);
+      fakeStorage.storedConfig = const SlideshowConfig(targetScreen: 'both', scaleType: 'full', currentIndex: 0, isSlideshowEnabled: false);
       await controller.initialize();
 
+      // Inactive: updates config but does NOT set wallpaper
       await controller.updateScaleType('crop');
       expect(controller.config.scaleType, 'crop');
+      expect(fakeWallpaperService.lastWallpaperSet, isNull);
+
+      // Turn on running state
+      await controller.toggleSlideshowEnabled(true);
+      expect(controller.config.isSlideshowEnabled, true);
       expect(fakeWallpaperService.lastWallpaperSet, '/path/to/wall1.jpg');
-      expect(fakeWallpaperService.lastTargetScreen, 'both');
       expect(fakeWallpaperService.lastScaleType, 'crop');
 
+      // Now running: changing scale type immediately applies to wallpaper
       await controller.updateScaleType('fit');
       expect(controller.config.scaleType, 'fit');
       expect(fakeWallpaperService.lastScaleType, 'fit');

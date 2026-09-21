@@ -8,7 +8,7 @@ class WallpaperService {
   Future<bool> setWallpaper({
     required String filePath,
     String targetScreen = 'both',
-    String scaleType = 'full',
+    String scaleType = 'crop',
   }) async {
     try {
       final result = await _channel.invokeMethod<bool>('setWallpaper', {

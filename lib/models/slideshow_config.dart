@@ -14,13 +14,13 @@ class SlideshowConfig {
 
   const SlideshowConfig({
     this.targetScreen = 'both',
-    this.scaleType = 'full',
+    this.scaleType = 'crop',
     this.defaultHomePath,
     this.defaultLockPath,
-    this.defaultScaleType = 'full',
+    this.defaultScaleType = 'crop',
     this.currentIndex = 0,
     this.isRandom = false,
-    this.isSlideshowEnabled = true,
+    this.isSlideshowEnabled = false,
     this.intervalMinutes = 0,
     this.showPersistentNotification = false,
   });
@@ -104,13 +104,13 @@ class SlideshowConfig {
   factory SlideshowConfig.fromMap(Map<String, dynamic> map) {
     return SlideshowConfig(
       targetScreen: map['targetScreen'] as String? ?? 'both',
-      scaleType: map['scaleType'] as String? ?? 'full',
+      scaleType: map['scaleType'] as String? ?? 'crop',
       defaultHomePath: map['defaultHomePath'] as String?,
       defaultLockPath: map['defaultLockPath'] as String?,
-      defaultScaleType: map['defaultScaleType'] as String? ?? 'full',
+      defaultScaleType: map['defaultScaleType'] as String? ?? 'crop',
       currentIndex: (map['currentIndex'] as num?)?.toInt() ?? 0,
       isRandom: map['isRandom'] as bool? ?? false,
-      isSlideshowEnabled: map['isSlideshowEnabled'] as bool? ?? true,
+      isSlideshowEnabled: map['isSlideshowEnabled'] as bool? ?? false,
       intervalMinutes: (map['intervalMinutes'] as num?)?.toInt() ?? 0,
       showPersistentNotification: map['showPersistentNotification'] as bool? ?? false,
     );

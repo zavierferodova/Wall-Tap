@@ -68,9 +68,12 @@ void main() {
     test('Default values and label getters', () {
       const config = SlideshowConfig();
       expect(config.targetScreen, 'both');
-      expect(config.scaleType, 'full');
+      expect(config.scaleType, 'crop');
       expect(config.targetScreenLabel, 'Home and Lock screen');
-      expect(config.scaleTypeLabel, 'Full image');
+      expect(config.scaleTypeLabel, 'Center crop');
+      expect(config.intervalMinutes, 0);
+      expect(config.intervalLabel, 'Off (Manual)');
+      expect(config.isSlideshowEnabled, false);
     });
 
     test('Serializes to and from JSON', () {
