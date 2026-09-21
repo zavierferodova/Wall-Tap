@@ -501,7 +501,12 @@ class _SlideshowTabState extends State<SlideshowTab> with SingleTickerProviderSt
                     return FadeTransition(
                       opacity: animation,
                       child: ScaleTransition(
-                        scale: Tween<double>(begin: 0.98, end: 1.0).animate(animation),
+                        scale: Tween<double>(begin: 0.98, end: 1.0).animate(
+                          CurvedAnimation(
+                            parent: animation,
+                            curve: Curves.easeOutCubic,
+                          ),
+                        ),
                         child: child,
                       ),
                     );

@@ -259,5 +259,46 @@ void main() {
     expect(controller.albumWidgets.first.intervalLabel, '3 minutes');
     expect(find.text('3 minutes'), findsOneWidget);
   });
+
+  testWidgets('AlbumWidgetsTab uses AnimatedSwitcher for transition animation on image preview', (tester) async {
+    final fakeStorage = FakeStorageService();
+    final fakeWallpaperService = FakeWallpaperService();
+    fakeWallpaperService.widgets = [
+      const AlbumWidgetConfig(
+        widgetId: 101,
+        albumId: 'all_photos',
+        albumName: 'All Photos',
+        intervalMinutes: 15,
+        isRandom: true,
+      ),
+    ];
+
+    final controller = WallpaperController(
+      storageService: fakeStorage,
+      wallpaperService: fakeWallpaperService,
+    );
+    await controller.initialize();
+
+    tester.view.physicalSize = const Size(1080, 2400);
+    tester.view.devicePixelRatio = 1.0;
+    addTearDown(() {
+      tester.view.resetPhysicalSize();
+      tester.view.resetDevicePixelRatio();
+    });
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: AlbumWidgetsTab(controller: controller),
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    // Verify AnimatedSwitcher is rendered inside the card
+    expect(find.byType(AnimatedSwitcher), findsOneWidget);
+    final animatedSwitcher = tester.widget<AnimatedSwitcher>(find.byType(AnimatedSwitcher));
+    expect(animatedSwitcher.duration, const Duration(milliseconds: 350));
+  });
 }
 

@@ -700,32 +700,63 @@ class _AlbumWidgetsTabState extends State<AlbumWidgetsTab> with WidgetsBindingOb
             child: Stack(
               fit: StackFit.expand,
               children: [
-                if (currentItem != null && File(currentItem.path).existsSync())
-                  Image.file(
-                    File(currentItem.path),
-                    fit: BoxFit.cover,
-                  )
-                else
-                  Center(
-                    child: Column(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Icon(
-                          Icons.photo_library_outlined,
-                          size: 32,
-                          color: Colors.white.withAlpha(80),
-                        ),
-                        const SizedBox(height: 6),
-                        Text(
-                          totalCount == 0 ? 'Album has no photos' : 'Photo unavailable',
-                          style: TextStyle(
-                            color: Colors.white.withAlpha(120),
-                            fontSize: 12,
+                AnimatedSwitcher(
+                  duration: const Duration(milliseconds: 350),
+                  layoutBuilder: (currentChild, previousChildren) {
+                    return Stack(
+                      fit: StackFit.expand,
+                      children: <Widget>[
+                        ...previousChildren,
+                        ?currentChild,
+                      ],
+                    );
+                  },
+                  transitionBuilder: (child, animation) {
+                    return FadeTransition(
+                      opacity: animation,
+                      child: ScaleTransition(
+                        scale: Tween<double>(begin: 0.97, end: 1.0).animate(
+                          CurvedAnimation(
+                            parent: animation,
+                            curve: Curves.easeOutCubic,
                           ),
                         ),
-                      ],
-                    ),
-                  ),
+                        child: child,
+                      ),
+                    );
+                  },
+                  child: currentItem != null && File(currentItem.path).existsSync()
+                      ? Image.file(
+                          key: ValueKey<String>('widget_${widgetConfig.widgetId}_${currentItem.id}'),
+                          File(currentItem.path),
+                          fit: BoxFit.cover,
+                          width: double.infinity,
+                          height: double.infinity,
+                        )
+                      : Container(
+                          key: ValueKey<String>('widget_${widgetConfig.widgetId}_empty'),
+                          color: const Color(0xFF0E1017),
+                          alignment: Alignment.center,
+                          child: Column(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Icon(
+                                Icons.photo_library_outlined,
+                                size: 32,
+                                color: Colors.white.withAlpha(80),
+                              ),
+                              const SizedBox(height: 6),
+                              Text(
+                                totalCount == 0 ? 'Album has no photos' : 'Photo unavailable',
+                                style: TextStyle(
+                                  color: Colors.white.withAlpha(120),
+                                  fontSize: 12,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                ),
 
                 // Dark gradient overlay at bottom
                 Positioned(

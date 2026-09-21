@@ -130,7 +130,7 @@ class AlbumWidgetProvider : AppWidgetProvider() {
                 )
 
                 if (paths.isEmpty()) {
-                    views.setViewVisibility(R.id.widget_album_image, View.GONE)
+                    views.setViewVisibility(R.id.widget_album_flipper, View.GONE)
                     views.setViewVisibility(R.id.widget_album_controls_container, View.GONE)
                     views.setViewVisibility(R.id.widget_album_empty_container, View.VISIBLE)
                     views.setTextViewText(
@@ -139,12 +139,16 @@ class AlbumWidgetProvider : AppWidgetProvider() {
                     )
                     views.setOnClickPendingIntent(R.id.widget_album_empty_container, configurePendingIntent)
                     views.setOnClickPendingIntent(R.id.album_widget_root, configurePendingIntent)
+                    prefs.edit().remove("flutter.album_widget_${appWidgetId}_last_path").apply()
                 } else {
                     views.setViewVisibility(R.id.widget_album_empty_container, View.GONE)
-                    views.setViewVisibility(R.id.widget_album_image, View.VISIBLE)
+                    views.setViewVisibility(R.id.widget_album_flipper, View.VISIBLE)
 
                     val safeIndex = if (currentIndex in paths.indices) currentIndex else 0
                     val currentPath = paths[safeIndex]
+
+                    val lastPath = prefs.getString("flutter.album_widget_${appWidgetId}_last_path", null)
+                    val currentChild = prefs.getInt("flutter.album_widget_${appWidgetId}_flipper_child", 0)
 
                     val sampledBitmap = WallpaperHelper.decodeSampledBitmapFromFile(
                         currentPath,
@@ -153,9 +157,33 @@ class AlbumWidgetProvider : AppWidgetProvider() {
                         Bitmap.Config.RGB_565
                     )
                     if (sampledBitmap != null) {
-                        views.setImageViewBitmap(R.id.widget_album_image, sampledBitmap)
+                        if (lastPath == null) {
+                            // Initial load: set directly on child 0 without animation
+                            views.setImageViewBitmap(R.id.widget_album_image_1, sampledBitmap)
+                            views.setContentDescription(R.id.widget_album_image_1, "Album Photo")
+                            prefs.edit()
+                                .putString("flutter.album_widget_${appWidgetId}_last_path", currentPath)
+                                .putInt("flutter.album_widget_${appWidgetId}_flipper_child", 0)
+                                .apply()
+                        } else if (lastPath != currentPath) {
+                            // Image changed: set on alternate child and trigger smooth transition flip
+                            val nextChild = if (currentChild == 0) 1 else 0
+                            val targetViewId = if (nextChild == 0) R.id.widget_album_image_1 else R.id.widget_album_image_2
+                            views.setImageViewBitmap(targetViewId, sampledBitmap)
+                            views.setContentDescription(targetViewId, "Album Photo")
+                            views.showNext(R.id.widget_album_flipper)
+                            prefs.edit()
+                                .putString("flutter.album_widget_${appWidgetId}_last_path", currentPath)
+                                .putInt("flutter.album_widget_${appWidgetId}_flipper_child", nextChild)
+                                .apply()
+                        } else {
+                            // Unchanged path: update currently displayed child
+                            val targetViewId = if (currentChild == 0) R.id.widget_album_image_1 else R.id.widget_album_image_2
+                            views.setImageViewBitmap(targetViewId, sampledBitmap)
+                        }
                     } else {
-                        views.setImageViewResource(R.id.widget_album_image, android.R.color.transparent)
+                        views.setImageViewResource(R.id.widget_album_image_1, android.R.color.transparent)
+                        views.setImageViewResource(R.id.widget_album_image_2, android.R.color.transparent)
                     }
 
                     // Tapping the widget image or root toggles the controls overlay (Settings & Next)
@@ -169,7 +197,9 @@ class AlbumWidgetProvider : AppWidgetProvider() {
                         toggleIntent,
                         flags
                     )
-                    views.setOnClickPendingIntent(R.id.widget_album_image, togglePendingIntent)
+                    views.setOnClickPendingIntent(R.id.widget_album_flipper, togglePendingIntent)
+                    views.setOnClickPendingIntent(R.id.widget_album_image_1, togglePendingIntent)
+                    views.setOnClickPendingIntent(R.id.widget_album_image_2, togglePendingIntent)
                     views.setOnClickPendingIntent(R.id.album_widget_root, togglePendingIntent)
 
                     // Controls overlay visibility

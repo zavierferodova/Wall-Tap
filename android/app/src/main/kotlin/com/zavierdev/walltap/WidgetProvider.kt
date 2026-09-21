@@ -65,6 +65,9 @@ class WidgetProvider : AppWidgetProvider() {
                     nextPath = paths[safeNextIndex]
                 }
 
+                val lastPath = prefs.getString("flutter.widget_${appWidgetId}_last_path", null)
+                val currentChild = prefs.getInt("flutter.widget_${appWidgetId}_displayed_child", 0)
+
                 if (nextPath != null && File(nextPath).exists()) {
                     val widgetThumb = WallpaperHelper.decodeSampledBitmapFromFile(
                         nextPath,
@@ -73,16 +76,41 @@ class WidgetProvider : AppWidgetProvider() {
                         android.graphics.Bitmap.Config.RGB_565
                     )
                     if (widgetThumb != null) {
-                        views.setImageViewBitmap(R.id.widget_wallpaper_image, widgetThumb)
+                        if (lastPath == null) {
+                            // Initial load: set on child 0 directly without animation
+                            views.setImageViewBitmap(R.id.widget_wallpaper_image_1, widgetThumb)
+                            views.setContentDescription(R.id.widget_wallpaper_image_1, "Next Wallpaper")
+                            prefs.edit()
+                                .putString("flutter.widget_${appWidgetId}_last_path", nextPath)
+                                .putInt("flutter.widget_${appWidgetId}_displayed_child", 0)
+                                .apply()
+                        } else if (lastPath != nextPath) {
+                            // Wallpaper changed: set on alternative child and trigger smooth transition flip
+                            val nextChild = if (currentChild == 0) 1 else 0
+                            val targetViewId = if (nextChild == 0) R.id.widget_wallpaper_image_1 else R.id.widget_wallpaper_image_2
+                            views.setImageViewBitmap(targetViewId, widgetThumb)
+                            views.setContentDescription(targetViewId, "Next Wallpaper")
+                            views.showNext(R.id.widget_wallpaper_flipper)
+                            prefs.edit()
+                                .putString("flutter.widget_${appWidgetId}_last_path", nextPath)
+                                .putInt("flutter.widget_${appWidgetId}_displayed_child", nextChild)
+                                .apply()
+                        } else {
+                            // Unchanged path: update currently displayed child
+                            val targetViewId = if (currentChild == 0) R.id.widget_wallpaper_image_1 else R.id.widget_wallpaper_image_2
+                            views.setImageViewBitmap(targetViewId, widgetThumb)
+                        }
                     } else {
-                        views.setImageViewResource(R.id.widget_wallpaper_image, android.R.color.transparent)
+                        views.setImageViewResource(R.id.widget_wallpaper_image_1, android.R.color.transparent)
+                        views.setImageViewResource(R.id.widget_wallpaper_image_2, android.R.color.transparent)
                     }
                     views.setViewVisibility(R.id.widget_badge_container, android.view.View.VISIBLE)
                     views.setTextViewText(R.id.widget_badge_text, "NEXT")
-                    views.setContentDescription(R.id.widget_wallpaper_image, "Next Wallpaper")
                 } else {
-                    views.setImageViewResource(R.id.widget_wallpaper_image, android.R.color.transparent)
+                    views.setImageViewResource(R.id.widget_wallpaper_image_1, android.R.color.transparent)
+                    views.setImageViewResource(R.id.widget_wallpaper_image_2, android.R.color.transparent)
                     views.setViewVisibility(R.id.widget_badge_container, android.view.View.GONE)
+                    prefs.edit().remove("flutter.widget_${appWidgetId}_last_path").apply()
                 }
 
                 // PendingIntent for Settings / Launch App
