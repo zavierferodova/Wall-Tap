@@ -57,6 +57,27 @@
             android:letterSpacing="0.08" />
     </LinearLayout>
 
+    <!-- Empty State View -->
+    <LinearLayout
+        android:id="@+id/widget_empty_container"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:gravity="center"
+        android:orientation="vertical"
+        android:padding="16dp"
+        android:visibility="gone">
+
+        <TextView
+            android:id="@+id/widget_empty_text"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:gravity="center"
+            android:text="No wallpapers added\nTap to open WallTap"
+            android:textColor="#94A3B8"
+            android:textSize="12sp"
+            android:textStyle="bold" />
+    </LinearLayout>
+
     <!-- Bottom Controls Bar with background gradient -->
     <LinearLayout
         android:id="@+id/widget_controls_container"

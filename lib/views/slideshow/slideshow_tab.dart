@@ -456,10 +456,16 @@ class _SlideshowTabState extends State<SlideshowTab> with SingleTickerProviderSt
     final cornerRadius = (mockupWidth * 0.16).clamp(20.0, 34.0);
 
     return Center(
-      child: Container(
-        key: const Key('hero_device_mockup'),
-        width: mockupWidth,
-        height: mockupHeight,
+      child: GestureDetector(
+        onHorizontalDragEnd: (details) {
+          if (details.primaryVelocity != null && (details.primaryVelocity! < -200 || details.primaryVelocity! > 200)) {
+            widget.controller.shuffleNext();
+          }
+        },
+        child: Container(
+          key: const Key('hero_device_mockup'),
+          width: mockupWidth,
+          height: mockupHeight,
         decoration: BoxDecoration(
           color: const Color(0xFF161820),
           borderRadius: BorderRadius.circular(cornerRadius),
@@ -609,8 +615,9 @@ class _SlideshowTabState extends State<SlideshowTab> with SingleTickerProviderSt
           ),
         ),
       ),
-    );
-  }
+    ),
+  );
+}
 
   Widget _buildSourceSelectorChip(WallpaperController controller) {
     return Center(
@@ -1068,6 +1075,7 @@ class _SlideshowTabState extends State<SlideshowTab> with SingleTickerProviderSt
         itemBuilder: (context, index) {
           final item = items[index];
           final isCurrent = currentItem?.id == item.id;
+          final isNext = controller.nextWallpaper?.id == item.id && !isCurrent;
 
           return PressableScale(
             onTap: () {
@@ -1082,8 +1090,10 @@ class _SlideshowTabState extends State<SlideshowTab> with SingleTickerProviderSt
               decoration: BoxDecoration(
                 borderRadius: BorderRadius.circular(16),
                 border: Border.all(
-                  color: isCurrent ? const Color(0xFFFF3B30) : const Color(0xFF262A38),
-                  width: isCurrent ? 2.5 : 1.0,
+                  color: isCurrent
+                      ? const Color(0xFFFF3B30)
+                      : (isNext ? const Color(0xFF007AFF) : const Color(0xFF262A38)),
+                  width: (isCurrent || isNext) ? 2.5 : 1.0,
                 ),
                 boxShadow: isCurrent
                     ? [
@@ -1092,7 +1102,14 @@ class _SlideshowTabState extends State<SlideshowTab> with SingleTickerProviderSt
                           blurRadius: 10,
                         ),
                       ]
-                    : null,
+                    : (isNext
+                        ? [
+                            BoxShadow(
+                              color: const Color(0xFF007AFF).withAlpha(80),
+                              blurRadius: 10,
+                            ),
+                          ]
+                        : null),
               ),
               child: ClipRRect(
                 borderRadius: BorderRadius.circular(14),
@@ -1118,6 +1135,26 @@ class _SlideshowTabState extends State<SlideshowTab> with SingleTickerProviderSt
                           ),
                           child: const Text(
                             'LIVE',
+                            style: TextStyle(
+                              color: Colors.white,
+                              fontSize: 8.5,
+                              fontWeight: FontWeight.w900,
+                            ),
+                          ),
+                        ),
+                      ),
+                    if (isNext)
+                      Positioned(
+                        top: 5,
+                        left: 5,
+                        child: Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 2),
+                          decoration: BoxDecoration(
+                            color: const Color(0xFF007AFF),
+                            borderRadius: BorderRadius.circular(6),
+                          ),
+                          child: const Text(
+                            'NEXT',
                             style: TextStyle(
                               color: Colors.white,
                               fontSize: 8.5,

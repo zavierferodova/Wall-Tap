@@ -5,6 +5,22 @@ import '../models/album_widget_config.dart';
 class WallpaperService {
   static const MethodChannel _channel = MethodChannel('com.walltap.app/wallpaper');
 
+  VoidCallback? onWidgetSync;
+
+  WallpaperService() {
+    try {
+      _channel.setMethodCallHandler(_handleMethodCall);
+    } catch (_) {
+      // Safely ignore in unit test environments without initialized BinaryMessenger
+    }
+  }
+
+  Future<dynamic> _handleMethodCall(MethodCall call) async {
+    if (call.method == 'onWidgetSync') {
+      onWidgetSync?.call();
+    }
+  }
+
   Future<bool> setWallpaper({
     required String filePath,
     String targetScreen = 'both',

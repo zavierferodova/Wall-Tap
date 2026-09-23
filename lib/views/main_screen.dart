@@ -36,6 +36,7 @@ class _MainScreenState extends State<MainScreen> with WidgetsBindingObserver {
   void didChangeAppLifecycleState(AppLifecycleState state) {
     if (state == AppLifecycleState.resumed) {
       widget.controller.reloadFromStorage();
+      widget.controller.loadAlbumWidgets();
     }
   }
 
@@ -134,9 +135,8 @@ class _MainScreenState extends State<MainScreen> with WidgetsBindingObserver {
             setState(() {
               _currentIndex = index;
             });
-            if (index == 2) {
-              widget.controller.loadAlbumWidgets();
-            }
+            widget.controller.reloadFromStorage();
+            widget.controller.loadAlbumWidgets();
           }
         },
         child: AnimatedContainer(

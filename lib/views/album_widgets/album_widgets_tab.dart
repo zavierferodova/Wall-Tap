@@ -104,6 +104,7 @@ class _AlbumWidgetsTabState extends State<AlbumWidgetsTab> with WidgetsBindingOb
       ),
       builder: (ctx) => SafeArea(
         child: Center(
+          heightFactor: 1.0,
           child: ConstrainedBox(
             constraints: const BoxConstraints(maxWidth: 540),
             child: SingleChildScrollView(
@@ -161,6 +162,7 @@ class _AlbumWidgetsTabState extends State<AlbumWidgetsTab> with WidgetsBindingOb
       ),
       builder: (ctx) => SafeArea(
         child: Center(
+          heightFactor: 1.0,
           child: ConstrainedBox(
             constraints: const BoxConstraints(maxWidth: 540),
             child: SingleChildScrollView(
@@ -432,22 +434,6 @@ class _AlbumWidgetsTabState extends State<AlbumWidgetsTab> with WidgetsBindingOb
                               letterSpacing: -0.3,
                             ),
                           ),
-                          if (albumWidgets.isNotEmpty)
-                            Container(
-                              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-                              decoration: BoxDecoration(
-                                color: const Color(0xFF38BDF8).withAlpha(30),
-                                borderRadius: BorderRadius.circular(12),
-                              ),
-                              child: Text(
-                                '${albumWidgets.length} Active',
-                                style: const TextStyle(
-                                  color: Color(0xFF38BDF8),
-                                  fontSize: 11.5,
-                                  fontWeight: FontWeight.bold,
-                                ),
-                              ),
-                            ),
                         ],
                       ),
 
@@ -778,42 +764,27 @@ class _AlbumWidgetsTabState extends State<AlbumWidgetsTab> with WidgetsBindingOb
                   ),
                 ),
 
-                // Active badge & photo index
-                Positioned(
-                  left: 10,
-                  bottom: 8,
-                  child: Row(
-                    children: [
-                      Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 3),
-                        decoration: BoxDecoration(
-                          color: const Color(0xFFFF3B30),
-                          borderRadius: BorderRadius.circular(6),
-                        ),
-                        child: const Text(
-                          'ON HOME SCREEN',
-                          style: TextStyle(
-                            color: Colors.white,
-                            fontSize: 9.5,
-                            fontWeight: FontWeight.w900,
-                            letterSpacing: 0.3,
-                          ),
+                // Photo index
+                if (totalCount > 0)
+                  Positioned(
+                    left: 10,
+                    bottom: 8,
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 3),
+                      decoration: BoxDecoration(
+                        color: Colors.black.withAlpha(120),
+                        borderRadius: BorderRadius.circular(6),
+                      ),
+                      child: Text(
+                        '${((widgetConfig.currentIndex) % totalCount) + 1} / $totalCount',
+                        style: const TextStyle(
+                          color: Colors.white70,
+                          fontSize: 11,
+                          fontWeight: FontWeight.w600,
                         ),
                       ),
-                      if (totalCount > 0) ...[
-                        const SizedBox(width: 8),
-                        Text(
-                          '${((widgetConfig.currentIndex) % totalCount) + 1} / $totalCount',
-                          style: const TextStyle(
-                            color: Colors.white70,
-                            fontSize: 11,
-                            fontWeight: FontWeight.w600,
-                          ),
-                        ),
-                      ],
-                    ],
+                    ),
                   ),
-                ),
               ],
             ),
           ),

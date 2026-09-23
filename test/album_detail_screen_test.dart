@@ -296,4 +296,95 @@ void main() {
     expect(controller.items.first.id, 'wp2');
     expect(controller.albums.first.wallpaperIds, ['wp2']);
   });
+
+  testWidgets('Selection header does not overflow on narrow screens (e.g. 360x800)', (tester) async {
+    tester.view.physicalSize = const Size(360, 800);
+    tester.view.devicePixelRatio = 1.0;
+    addTearDown(tester.view.reset);
+
+    final now = DateTime.now();
+    fakeStorage.storedItems = [
+      WallpaperItem(
+        id: 'wp1',
+        fileName: 'Album Wall 1.jpg',
+        path: '/dummy/path1.jpg',
+        width: 1080,
+        height: 1920,
+        fileSize: 1024,
+        dateAdded: now,
+        isEnabled: true,
+      ),
+      WallpaperItem(
+        id: 'wp2',
+        fileName: 'Album Wall 2.jpg',
+        path: '/dummy/path2.jpg',
+        width: 1080,
+        height: 1920,
+        fileSize: 2048,
+        dateAdded: now,
+        isEnabled: true,
+      ),
+    ];
+    fakeStorage.storedAlbums = [
+      Album(
+        id: 'album_1',
+        name: 'Favorites',
+        wallpaperIds: ['wp1', 'wp2'],
+        dateCreated: now,
+      ),
+    ];
+
+    await controller.initialize();
+    await tester.pumpWidget(buildTestWidget('album_1'));
+    await tester.pumpAndSettle();
+
+    // Long press to enter selection mode
+    await tester.longPress(find.text('1080x1920').first);
+    await tester.pumpAndSettle();
+
+    // Verify selection header is visible without overflow errors
+    expect(find.text('1 selected'), findsOneWidget);
+    expect(find.text('Select All'), findsOneWidget);
+    expect(find.text('Exclude'), findsOneWidget);
+    expect(find.text('Delete (1)'), findsOneWidget);
+  });
+
+  testWidgets('Album header with very long title does not overflow and preserves spacing', (tester) async {
+    tester.view.physicalSize = const Size(360, 800);
+    tester.view.devicePixelRatio = 1.0;
+    addTearDown(tester.view.reset);
+
+    final now = DateTime.now();
+    fakeStorage.storedItems = [
+      WallpaperItem(
+        id: 'wp1',
+        fileName: 'Album Wall 1.jpg',
+        path: '/dummy/path1.jpg',
+        width: 1080,
+        height: 1920,
+        fileSize: 1024,
+        dateAdded: now,
+        isEnabled: true,
+      ),
+    ];
+    fakeStorage.storedAlbums = [
+      Album(
+        id: 'album_long',
+        name: 'Super Long Album Name That Definitely Needs Truncation And Spacing',
+        wallpaperIds: ['wp1'],
+        dateCreated: now,
+      ),
+    ];
+
+    await controller.initialize();
+    await tester.pumpWidget(buildTestWidget('album_long'));
+    await tester.pumpAndSettle();
+
+    expect(find.textContaining('Super Long Album Name'), findsOneWidget);
+    expect(find.byIcon(Icons.edit_rounded), findsOneWidget);
+    expect(find.byIcon(Icons.checklist_rounded), findsOneWidget);
+    expect(find.text('Add'), findsOneWidget);
+  });
 }
+
+

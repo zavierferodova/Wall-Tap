@@ -22,6 +22,7 @@ class AlbumWidgetProvider : AppWidgetProvider() {
         const val ACTION_TOGGLE_CONTROLS = "com.walltap.app.ACTION_TOGGLE_ALBUM_CONTROLS"
         const val ACTION_HIDE_CONTROLS = "com.walltap.app.ACTION_HIDE_ALBUM_CONTROLS"
         const val ACTION_OPEN_SETTINGS = "com.walltap.app.ACTION_OPEN_ALBUM_SETTINGS"
+        const val ACTION_WIDGET_UPDATED = "com.walltap.app.ACTION_ALBUM_WIDGET_UPDATED"
 
         fun updateAllWidgets(context: Context) {
             val appWidgetManager = AppWidgetManager.getInstance(context)
@@ -150,40 +151,37 @@ class AlbumWidgetProvider : AppWidgetProvider() {
                     val lastPath = prefs.getString("flutter.album_widget_${appWidgetId}_last_path", null)
                     val currentChild = prefs.getInt("flutter.album_widget_${appWidgetId}_flipper_child", 0)
 
-                    val sampledBitmap = WallpaperHelper.decodeSampledBitmapFromFile(
+                    var updatedChild = currentChild
+
+                    val sampledBitmap = WallpaperHelper.decodeWidgetBitmap(
                         currentPath,
                         400,
-                        400,
-                        Bitmap.Config.RGB_565
+                        400
                     )
                     if (sampledBitmap != null) {
                         if (lastPath == null) {
-                            // Initial load: set directly on child 0 without animation
+                            // Initial load: set directly on child 0 and ensure child 0 is displayed
                             views.setImageViewBitmap(R.id.widget_album_image_1, sampledBitmap)
                             views.setContentDescription(R.id.widget_album_image_1, "Album Photo")
-                            prefs.edit()
-                                .putString("flutter.album_widget_${appWidgetId}_last_path", currentPath)
-                                .putInt("flutter.album_widget_${appWidgetId}_flipper_child", 0)
-                                .apply()
+                            views.setInt(R.id.widget_album_flipper, "setDisplayedChild", 0)
+                            updatedChild = 0
                         } else if (lastPath != currentPath) {
-                            // Image changed: set on alternate child and trigger smooth transition flip
+                            // Image changed: set on alternate child and switch displayed child with animation
                             val nextChild = if (currentChild == 0) 1 else 0
                             val targetViewId = if (nextChild == 0) R.id.widget_album_image_1 else R.id.widget_album_image_2
                             views.setImageViewBitmap(targetViewId, sampledBitmap)
                             views.setContentDescription(targetViewId, "Album Photo")
-                            views.showNext(R.id.widget_album_flipper)
-                            prefs.edit()
-                                .putString("flutter.album_widget_${appWidgetId}_last_path", currentPath)
-                                .putInt("flutter.album_widget_${appWidgetId}_flipper_child", nextChild)
-                                .apply()
+                            views.setInt(R.id.widget_album_flipper, "setDisplayedChild", nextChild)
+                            updatedChild = nextChild
                         } else {
-                            // Unchanged path: update currently displayed child
-                            val targetViewId = if (currentChild == 0) R.id.widget_album_image_1 else R.id.widget_album_image_2
+                            // Unchanged path (e.g. toggle controls, launcher restart): update current child and enforce display
+                            val safeChild = if (currentChild == 1) 1 else 0
+                            val targetViewId = if (safeChild == 0) R.id.widget_album_image_1 else R.id.widget_album_image_2
                             views.setImageViewBitmap(targetViewId, sampledBitmap)
+                            views.setContentDescription(targetViewId, "Album Photo")
+                            views.setInt(R.id.widget_album_flipper, "setDisplayedChild", safeChild)
+                            updatedChild = safeChild
                         }
-                    } else {
-                        views.setImageViewResource(R.id.widget_album_image_1, android.R.color.transparent)
-                        views.setImageViewResource(R.id.widget_album_image_2, android.R.color.transparent)
                     }
 
                     // Tapping the widget image or root toggles the controls overlay (Settings & Next)
@@ -233,11 +231,24 @@ class AlbumWidgetProvider : AppWidgetProvider() {
                         flags
                     )
                     views.setOnClickPendingIntent(R.id.btn_album_widget_next, nextPendingIntent)
-                }
 
-                appWidgetManager.updateAppWidget(appWidgetId, views)
+                    appWidgetManager.updateAppWidget(appWidgetId, views)
+
+                    if (sampledBitmap != null) {
+                        prefs.edit()
+                            .putString("flutter.album_widget_${appWidgetId}_last_path", currentPath)
+                            .putInt("flutter.album_widget_${appWidgetId}_flipper_child", updatedChild)
+                            .apply()
+                    }
+                    val syncIntent = Intent(ACTION_WIDGET_UPDATED).apply {
+                        putExtra(AppWidgetManager.EXTRA_APPWIDGET_ID, appWidgetId)
+                        setPackage(context.packageName)
+                    }
+                    context.sendBroadcast(syncIntent)
+                    MainActivity.notifyWidgetSync(context)
+                }
             } catch (e: Exception) {
-                e.printStackTrace()
+                android.util.Log.e("AlbumWidgetProvider", "Error updating widget $appWidgetId: ${e.message}", e)
             }
         }
 

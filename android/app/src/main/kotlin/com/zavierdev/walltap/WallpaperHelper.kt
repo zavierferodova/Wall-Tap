@@ -52,7 +52,7 @@ object WallpaperHelper {
         if (height > reqHeight || width > reqWidth) {
             val halfHeight = height / 2
             val halfWidth = width / 2
-            while ((halfHeight / inSampleSize) >= reqHeight && (halfWidth / inSampleSize) >= reqWidth) {
+            while ((halfHeight / inSampleSize) >= reqHeight || (halfWidth / inSampleSize) >= reqWidth) {
                 inSampleSize *= 2
             }
         }
@@ -61,7 +61,91 @@ object WallpaperHelper {
             this.inSampleSize = inSampleSize
             inPreferredConfig = config
         }
-        return BitmapFactory.decodeFile(path, decodeOptions)
+        return try {
+            BitmapFactory.decodeFile(path, decodeOptions)
+        } catch (e: OutOfMemoryError) {
+            try {
+                decodeOptions.inSampleSize = inSampleSize * 2
+                BitmapFactory.decodeFile(path, decodeOptions)
+            } catch (t: Throwable) {
+                null
+            }
+        } catch (e: Exception) {
+            null
+        }
+    }
+
+    /**
+     * Decodes and strictly scales an image for RemoteViews widgets.
+     * Guarantees that the resulting bitmap fits comfortably within the Android Binder
+     * transaction buffer limit (1MB) by capping dimensions to reqWidth/reqHeight and
+     * using RGB_565 (with ARGB_8888 fallback).
+     */
+    fun decodeWidgetBitmap(
+        path: String,
+        reqWidth: Int,
+        reqHeight: Int
+    ): Bitmap? {
+        val file = File(path)
+        if (!file.exists() || !file.canRead()) return null
+
+        return try {
+            val boundsOptions = BitmapFactory.Options().apply {
+                inJustDecodeBounds = true
+            }
+            BitmapFactory.decodeFile(path, boundsOptions)
+
+            val origWidth = boundsOptions.outWidth
+            val origHeight = boundsOptions.outHeight
+            if (origWidth <= 0 || origHeight <= 0) return null
+
+            // Calculate inSampleSize such that both dimensions are comfortably downsampled
+            var inSampleSize = 1
+            while ((origWidth / inSampleSize) > reqWidth * 2 || (origHeight / inSampleSize) > reqHeight * 2) {
+                inSampleSize *= 2
+            }
+
+            val decodeOptions = BitmapFactory.Options().apply {
+                this.inSampleSize = inSampleSize
+                inPreferredConfig = Bitmap.Config.RGB_565
+            }
+
+            var decoded: Bitmap? = try {
+                BitmapFactory.decodeFile(path, decodeOptions)
+            } catch (e: OutOfMemoryError) {
+                decodeOptions.inSampleSize = inSampleSize * 2
+                BitmapFactory.decodeFile(path, decodeOptions)
+            }
+
+            if (decoded == null) {
+                // Fallback to ARGB_8888 if RGB_565 decoding is unsupported for this format
+                decodeOptions.inPreferredConfig = Bitmap.Config.ARGB_8888
+                decoded = BitmapFactory.decodeFile(path, decodeOptions)
+            }
+
+            if (decoded == null) return null
+
+            // Strictly scale down so that neither dimension exceeds reqWidth / reqHeight
+            val currentW = decoded.width
+            val currentH = decoded.height
+            val scale = min(reqWidth.toFloat() / currentW, reqHeight.toFloat() / currentH)
+
+            if (scale < 1.0f) {
+                val targetW = max(1, (currentW * scale).toInt())
+                val targetH = max(1, (currentH * scale).toInt())
+                val scaled = Bitmap.createScaledBitmap(decoded, targetW, targetH, true)
+                if (scaled != decoded) {
+                    decoded.recycle()
+                }
+                scaled
+            } else {
+                decoded
+            }
+        } catch (e: OutOfMemoryError) {
+            null
+        } catch (e: Exception) {
+            null
+        }
     }
 
     fun scaleBitmap(src: Bitmap, targetWidth: Int, targetHeight: Int, scaleType: String): Bitmap {

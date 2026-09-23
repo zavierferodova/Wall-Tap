@@ -25,6 +25,18 @@ import java.util.concurrent.Executors
 class MainActivity : FlutterActivity() {
     companion object {
         private const val ENGINE_ID = "walltap_flutter_engine"
+        private const val CHANNEL = "com.walltap.app/wallpaper"
+        private var activeChannel: MethodChannel? = null
+
+        fun notifyWidgetSync(context: Context) {
+            Handler(Looper.getMainLooper()).post {
+                try {
+                    activeChannel?.invokeMethod("onWidgetSync", null)
+                } catch (e: Exception) {
+                    e.printStackTrace()
+                }
+            }
+        }
     }
 
     private val CHANNEL = "com.walltap.app/wallpaper"
@@ -45,6 +57,7 @@ class MainActivity : FlutterActivity() {
 
     override fun cleanUpFlutterEngine(flutterEngine: FlutterEngine) {
         if (!isChangingConfigurations) {
+            activeChannel = null
             FlutterEngineCache.getInstance().remove(ENGINE_ID)
             super.cleanUpFlutterEngine(flutterEngine)
         }
@@ -54,7 +67,9 @@ class MainActivity : FlutterActivity() {
         super.configureFlutterEngine(flutterEngine)
         FlutterEngineCache.getInstance().put(ENGINE_ID, flutterEngine)
 
-        MethodChannel(flutterEngine.dartExecutor.binaryMessenger, CHANNEL).setMethodCallHandler { call, result ->
+        val channel = MethodChannel(flutterEngine.dartExecutor.binaryMessenger, CHANNEL)
+        activeChannel = channel
+        channel.setMethodCallHandler { call, result ->
             when (call.method) {
                 "setWallpaper" -> {
                     val filePath = call.argument<String>("filePath")
@@ -162,7 +177,14 @@ class MainActivity : FlutterActivity() {
                         if (rawIndex != safeIndex && paths.isNotEmpty()) {
                             prefs.edit().putLong("flutter.album_widget_${widgetId}_current_index", safeIndex.toLong()).apply()
                         }
-                        val currentImagePath = if (paths.isNotEmpty()) paths[safeIndex] else ""
+                        val lastPath = prefs.getString("flutter.album_widget_${widgetId}_last_path", null)
+                        val currentImagePath = if (!lastPath.isNullOrEmpty() && File(lastPath).exists()) {
+                            lastPath
+                        } else if (paths.isNotEmpty()) {
+                            paths[safeIndex]
+                        } else {
+                            ""
+                        }
 
                         widgetList.add(mapOf(
                             "widgetId" to widgetId,

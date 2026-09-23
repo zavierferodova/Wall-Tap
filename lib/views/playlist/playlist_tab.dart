@@ -790,131 +790,157 @@ class _PlaylistTabState extends State<PlaylistTab> {
               ),
             ],
           ),
-          child: Row(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
             children: [
-              PressableScale(
-                onTap: _exitSelectionMode,
-                child: Container(
-                  padding: const EdgeInsets.all(6),
-                  decoration: BoxDecoration(
-                    color: Colors.white.withAlpha(20),
-                    shape: BoxShape.circle,
-                  ),
-                  child: const Icon(Icons.close_rounded, color: Colors.white, size: 18),
-                ),
-              ),
-              const SizedBox(width: 10),
-              Expanded(
-                child: Text(
-                  '$count selected',
-                  style: const TextStyle(
-                    color: Colors.white,
-                    fontSize: 15,
-                    fontWeight: FontWeight.w700,
-                  ),
-                ),
-              ),
-              PressableScale(
-                onTap: _toggleSelectAll,
-                child: Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 6),
-                  child: Text(
-                    _selectedIds.length == items.length ? 'Deselect All' : 'Select All',
-                    style: const TextStyle(
-                      color: Color(0xFFFF5E3A),
-                      fontSize: 12.5,
-                      fontWeight: FontWeight.w600,
-                    ),
-                  ),
-                ),
-              ),
-              const SizedBox(width: 6),
-              PressableScale(
-                onTap: count == 0 ? null : () => _handleBatchIncludeExclude(items),
-                child: Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 7),
-                  decoration: BoxDecoration(
-                    color: count == 0
-                        ? Colors.white.withAlpha(15)
-                        : (allExcluded
-                            ? const Color(0xFF34C759).withAlpha(40)
-                            : const Color(0xFFFF9F0A).withAlpha(40)),
-                    borderRadius: BorderRadius.circular(10),
-                    border: Border.all(
-                      color: count == 0
-                          ? const Color(0xFF383F56)
-                          : (allExcluded
-                              ? const Color(0xFF34C759).withAlpha(140)
-                              : const Color(0xFFFF9F0A).withAlpha(140)),
-                    ),
-                  ),
-                  child: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Icon(
-                        allExcluded ? Icons.add_circle_outline_rounded : Icons.remove_circle_outline_rounded,
-                        color: count == 0
-                            ? Colors.white30
-                            : (allExcluded ? const Color(0xFF34C759) : const Color(0xFFFF9F0A)),
-                        size: 16,
+              Row(
+                children: [
+                  PressableScale(
+                    onTap: _exitSelectionMode,
+                    child: Container(
+                      padding: const EdgeInsets.all(6),
+                      decoration: BoxDecoration(
+                        color: Colors.white.withAlpha(20),
+                        shape: BoxShape.circle,
                       ),
-                      const SizedBox(width: 4),
-                      Text(
-                        allExcluded ? 'Include' : 'Exclude',
-                        style: TextStyle(
-                          color: count == 0
-                              ? Colors.white30
-                              : (allExcluded ? const Color(0xFF34C759) : const Color(0xFFFF9F0A)),
-                          fontSize: 12,
-                          fontWeight: FontWeight.bold,
+                      child: const Icon(Icons.close_rounded, color: Colors.white, size: 18),
+                    ),
+                  ),
+                  const SizedBox(width: 10),
+                  Expanded(
+                    child: Text(
+                      '$count selected',
+                      style: const TextStyle(
+                        color: Colors.white,
+                        fontSize: 15,
+                        fontWeight: FontWeight.w700,
+                      ),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  ),
+                  PressableScale(
+                    onTap: _toggleSelectAll,
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 6),
+                      child: Text(
+                        _selectedIds.length == items.length ? 'Deselect All' : 'Select All',
+                        style: const TextStyle(
+                          color: Color(0xFFFF5E3A),
+                          fontSize: 13.5,
+                          fontWeight: FontWeight.w600,
                         ),
                       ),
-                    ],
+                    ),
                   ),
-                ),
+                ],
               ),
-              const SizedBox(width: 6),
-              PressableScale(
-                onTap: _selectedIds.isEmpty ? null : _confirmBatchDelete,
-                child: Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 7),
-                  decoration: BoxDecoration(
-                    color: _selectedIds.isEmpty
-                        ? Colors.white.withAlpha(15)
-                        : const Color(0xFFFF3B30),
-                    borderRadius: BorderRadius.circular(10),
-                    boxShadow: _selectedIds.isEmpty
-                        ? null
-                        : [
-                            BoxShadow(
-                              color: const Color(0xFFFF3B30).withAlpha(100),
-                              blurRadius: 10,
-                              offset: const Offset(0, 3),
-                            ),
-                          ],
-                  ),
-                  child: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Icon(
-                        Icons.delete_outline_rounded,
-                        color: _selectedIds.isEmpty ? Colors.white30 : Colors.white,
-                        size: 16,
-                      ),
-                      if (_selectedIds.isNotEmpty) ...[
-                        const SizedBox(width: 4),
-                        Text(
-                          '${_selectedIds.length}',
-                          style: const TextStyle(
-                            color: Colors.white,
-                            fontSize: 12,
-                            fontWeight: FontWeight.bold,
+              const SizedBox(height: 10),
+              Row(
+                children: [
+                  Expanded(
+                    child: PressableScale(
+                      onTap: count == 0 ? null : () => _handleBatchIncludeExclude(items),
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(vertical: 9, horizontal: 8),
+                        decoration: BoxDecoration(
+                          color: count == 0
+                              ? Colors.white.withAlpha(15)
+                              : (allExcluded
+                                  ? const Color(0xFF34C759).withAlpha(40)
+                                  : const Color(0xFFFF9F0A).withAlpha(40)),
+                          borderRadius: BorderRadius.circular(10),
+                          border: Border.all(
+                            color: count == 0
+                                ? const Color(0xFF383F56)
+                                : (allExcluded
+                                    ? const Color(0xFF34C759).withAlpha(140)
+                                    : const Color(0xFFFF9F0A).withAlpha(140)),
                           ),
                         ),
-                      ],
-                    ],
+                        child: FittedBox(
+                          fit: BoxFit.scaleDown,
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Icon(
+                                allExcluded ? Icons.add_circle_outline_rounded : Icons.remove_circle_outline_rounded,
+                                color: count == 0
+                                    ? Colors.white30
+                                    : (allExcluded ? const Color(0xFF34C759) : const Color(0xFFFF9F0A)),
+                                size: 16,
+                              ),
+                              const SizedBox(width: 6),
+                              Text(
+                                allExcluded ? 'Include' : 'Exclude',
+                                style: TextStyle(
+                                  color: count == 0
+                                      ? Colors.white30
+                                      : (allExcluded ? const Color(0xFF34C759) : const Color(0xFFFF9F0A)),
+                                  fontSize: 13,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+                    ),
                   ),
-                ),
+                  const SizedBox(width: 10),
+                  Expanded(
+                    child: PressableScale(
+                      onTap: _selectedIds.isEmpty ? null : _confirmBatchDelete,
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(vertical: 9, horizontal: 8),
+                        decoration: BoxDecoration(
+                          color: _selectedIds.isEmpty
+                              ? Colors.white.withAlpha(15)
+                              : const Color(0xFFFF3B30),
+                          borderRadius: BorderRadius.circular(10),
+                          border: Border.all(
+                            color: _selectedIds.isEmpty
+                                ? const Color(0xFF383F56)
+                                : const Color(0xFFFF3B30),
+                          ),
+                          boxShadow: _selectedIds.isEmpty
+                              ? null
+                              : [
+                                  BoxShadow(
+                                    color: const Color(0xFFFF3B30).withAlpha(100),
+                                    blurRadius: 8,
+                                    offset: const Offset(0, 2),
+                                  ),
+                                ],
+                        ),
+                        child: FittedBox(
+                          fit: BoxFit.scaleDown,
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Icon(
+                                Icons.delete_outline_rounded,
+                                color: _selectedIds.isEmpty ? Colors.white30 : Colors.white,
+                                size: 16,
+                              ),
+                              if (_selectedIds.isNotEmpty) ...[
+                                const SizedBox(width: 6),
+                                Text(
+                                  'Delete (${_selectedIds.length})',
+                                  style: const TextStyle(
+                                    color: Colors.white,
+                                    fontSize: 13,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
+                              ],
+                            ],
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
               ),
             ],
           ),
@@ -1559,6 +1585,7 @@ class _PlaylistTabState extends State<PlaylistTab> {
     bool isSelected,
   ) {
     final fileExists = File(item.path).existsSync();
+    final isNext = widget.controller.nextWallpaper?.id == item.id && !isCurrent;
 
     return PressableScale(
       onTap: () {
@@ -1585,8 +1612,10 @@ class _PlaylistTabState extends State<PlaylistTab> {
           border: Border.all(
             color: isSelected
                 ? const Color(0xFFFF3B30)
-                : (isCurrent ? const Color(0xFFFF3B30) : const Color(0xFF232734)),
-            width: (isSelected || isCurrent) ? 2.5 : 1.0,
+                : (isCurrent
+                    ? const Color(0xFFFF3B30)
+                    : (isNext ? const Color(0xFF007AFF) : const Color(0xFF232734))),
+            width: (isSelected || isCurrent || isNext) ? 2.5 : 1.0,
           ),
           boxShadow: [
             if (isSelected)
@@ -1598,6 +1627,12 @@ class _PlaylistTabState extends State<PlaylistTab> {
             else if (isCurrent)
               BoxShadow(
                 color: const Color(0xFFFF3B30).withAlpha(80),
+                blurRadius: 14,
+                offset: const Offset(0, 4),
+              )
+            else if (isNext)
+              BoxShadow(
+                color: const Color(0xFF007AFF).withAlpha(80),
                 blurRadius: 14,
                 offset: const Offset(0, 4),
               )
@@ -1656,7 +1691,7 @@ class _PlaylistTabState extends State<PlaylistTab> {
                 ),
               ),
 
-              if (!_isSelectionMode && (isCurrent || !item.isEnabled))
+              if (!_isSelectionMode && (isCurrent || isNext || !item.isEnabled))
                 Positioned(
                   top: 8,
                   left: 8,
@@ -1677,7 +1712,32 @@ class _PlaylistTabState extends State<PlaylistTab> {
                             ],
                           ),
                           child: const Text(
-                            'CURRENT',
+                            'LIVE',
+                            style: TextStyle(
+                              color: Colors.white,
+                              fontSize: 9.5,
+                              fontWeight: FontWeight.w900,
+                              letterSpacing: 0.4,
+                            ),
+                          ),
+                        ),
+                        if (!item.isEnabled || isNext) const SizedBox(width: 5),
+                      ],
+                      if (isNext) ...[
+                        Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 3),
+                          decoration: BoxDecoration(
+                            color: const Color(0xFF007AFF),
+                            borderRadius: BorderRadius.circular(7),
+                            boxShadow: [
+                              BoxShadow(
+                                color: const Color(0xFF007AFF).withAlpha(120),
+                                blurRadius: 6,
+                              ),
+                            ],
+                          ),
+                          child: const Text(
+                            'NEXT',
                             style: TextStyle(
                               color: Colors.white,
                               fontSize: 9.5,

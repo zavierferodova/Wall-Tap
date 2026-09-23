@@ -21,14 +21,34 @@ class WallpaperController extends ChangeNotifier {
   bool _isBatteryOptimizationIgnored = false;
   String? _statusMessage;
   String? _currentWallpaperId;
+  int? _nextIndex;
 
   String? get currentWallpaperId => _currentWallpaperId;
+  int? get nextIndex => _nextIndex;
+
+  WallpaperItem? get nextWallpaper {
+    final active = activeItems;
+    if (active.isEmpty) return null;
+    if (_nextIndex != null && _nextIndex! >= 0 && _nextIndex! < active.length) {
+      return active[_nextIndex!];
+    }
+    if (active.length > 1) {
+      final nextIdx = (_config.currentIndex + 1) % active.length;
+      return active[nextIdx];
+    }
+    return null;
+  }
 
   WallpaperController({
     StorageService? storageService,
     WallpaperService? wallpaperService,
   })  : _storageService = storageService ?? StorageService(),
-        _wallpaperService = wallpaperService ?? WallpaperService();
+        _wallpaperService = wallpaperService ?? WallpaperService() {
+    _wallpaperService.onWidgetSync = () {
+      reloadFromStorage();
+      loadAlbumWidgets();
+    };
+  }
 
   List<WallpaperItem> get items => List.unmodifiable(_items);
   List<Album> get albums => List.unmodifiable(_albums);
@@ -102,6 +122,7 @@ class WallpaperController extends ChangeNotifier {
         await _storageService.saveActiveAlbumId(null);
       }
       _config = await _storageService.loadConfig();
+      _nextIndex = await _storageService.loadNextIndex();
       _currentWallpaperId = await _storageService.loadCurrentWallpaperId();
       if (_currentWallpaperId == null && activeItems.isNotEmpty) {
         final idx = _config.currentIndex;
@@ -150,6 +171,7 @@ class WallpaperController extends ChangeNotifier {
           nextIdx = (_config.currentIndex + 1) % paths.length;
         }
       }
+      _nextIndex = nextIdx;
       await _storageService.saveNextIndex(nextIdx);
     }
     await _wallpaperService.updateWidget();
@@ -689,12 +711,17 @@ class WallpaperController extends ChangeNotifier {
         _isBatteryOptimizationIgnored = freshBattery;
         changed = true;
       }
+      final freshNextIndex = await _storageService.loadNextIndex();
+      if (_nextIndex != freshNextIndex) {
+        _nextIndex = freshNextIndex;
+        changed = true;
+      }
       final freshWallpaperId = await _storageService.loadCurrentWallpaperId();
       if (_currentWallpaperId != freshWallpaperId) {
         _currentWallpaperId = freshWallpaperId;
         changed = true;
       }
-      if (_config.currentIndex != freshConfig.currentIndex) {
+      if (_currentWallpaperId == null || _currentWallpaperId!.isEmpty) {
         final active = activeItems;
         if (freshConfig.currentIndex >= 0 && freshConfig.currentIndex < active.length) {
           _currentWallpaperId = active[freshConfig.currentIndex].id;

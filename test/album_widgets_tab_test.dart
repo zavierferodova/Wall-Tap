@@ -42,6 +42,10 @@ class FakeStorageService extends StorageService {
   Future<void> saveCurrentWallpaperId(String? id) async {
     storedCurrentWallpaperId = id;
   }
+  @override
+  Future<int?> loadNextIndex() async => 0;
+  @override
+  Future<void> saveNextIndex(int index) async {}
 }
 
 class FakeWallpaperService extends WallpaperService {
@@ -111,6 +115,8 @@ void main() {
     expect(find.text('Desktop Photo Frames'), findsOneWidget);
     expect(find.text('How to Add an Album Widget'), findsOneWidget);
     expect(find.text('Check Placed Widgets'), findsOneWidget);
+
+    await tester.pumpWidget(const SizedBox());
   });
 
   testWidgets('AlbumWidgetsTab renders placed widgets and handles shuffle and order toggles', (tester) async {
@@ -169,6 +175,8 @@ void main() {
     await tester.tap(find.text('Sync All'));
     await tester.pumpAndSettle();
     expect(fakeWallpaperService.syncAllCalled, true);
+
+    await tester.pumpWidget(const SizedBox());
   });
 
   testWidgets('AlbumWidgetsTab does not have refresh button in app bar and supports pull-down to refresh', (tester) async {
@@ -204,6 +212,8 @@ void main() {
 
     // Verify still stable
     expect(find.text('Album Widgets'), findsOneWidget);
+
+    await tester.pumpWidget(const SizedBox());
   });
 
   testWidgets('AlbumWidgetsTab interval picker supports 3m, 5m, 10m, and 45m options', (tester) async {
@@ -258,6 +268,8 @@ void main() {
     expect(controller.albumWidgets.first.intervalMinutes, 3);
     expect(controller.albumWidgets.first.intervalLabel, '3 minutes');
     expect(find.text('3 minutes'), findsOneWidget);
+
+    await tester.pumpWidget(const SizedBox());
   });
 
   testWidgets('AlbumWidgetsTab uses AnimatedSwitcher for transition animation on image preview', (tester) async {
@@ -299,6 +311,8 @@ void main() {
     expect(find.byType(AnimatedSwitcher), findsOneWidget);
     final animatedSwitcher = tester.widget<AnimatedSwitcher>(find.byType(AnimatedSwitcher));
     expect(animatedSwitcher.duration, const Duration(milliseconds: 350));
+
+    await tester.pumpWidget(const SizedBox());
   });
 }
 

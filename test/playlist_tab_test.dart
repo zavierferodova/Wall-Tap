@@ -442,13 +442,57 @@ void main() {
 
     // Bottom sheet confirmation should appear
     expect(find.text('Delete 1 Wallpaper?'), findsOneWidget);
-    expect(find.text('Delete (1)'), findsOneWidget);
+    expect(find.text('Delete (1)'), findsWidgets);
 
-    // Tap confirm delete
-    await tester.tap(find.text('Delete (1)'));
+    // Tap confirm delete on the bottom sheet action button
+    await tester.tap(find.text('Delete (1)').last);
     await tester.pumpAndSettle();
 
     expect(controller.items.length, 1);
     expect(controller.items.first.id, 'wp2');
+  });
+
+  testWidgets('Selection header does not overflow on narrow screens (e.g. 360x800) in PlaylistTab', (tester) async {
+    tester.view.physicalSize = const Size(360, 800);
+    tester.view.devicePixelRatio = 1.0;
+    addTearDown(tester.view.reset);
+
+    final now = DateTime.now();
+    fakeStorage.storedItems = [
+      WallpaperItem(
+        id: 'wp1',
+        fileName: 'Wall 1.jpg',
+        path: '/dummy/path1.jpg',
+        width: 1080,
+        height: 1920,
+        fileSize: 1024,
+        dateAdded: now,
+        isEnabled: true,
+      ),
+      WallpaperItem(
+        id: 'wp2',
+        fileName: 'Wall 2.jpg',
+        path: '/dummy/path2.jpg',
+        width: 1080,
+        height: 1920,
+        fileSize: 2048,
+        dateAdded: now,
+        isEnabled: true,
+      ),
+    ];
+
+    await controller.initialize();
+    await tester.pumpWidget(buildTestWidget());
+    await tester.pumpAndSettle();
+
+    // Long press to enter selection mode
+    await tester.longPress(find.text('1080x1920').first);
+    await tester.pumpAndSettle();
+
+    // Verify selection header is visible without overflow errors
+    expect(find.text('1 selected'), findsOneWidget);
+    expect(find.text('Select All'), findsOneWidget);
+    expect(find.text('Exclude'), findsOneWidget);
+    expect(find.text('Delete (1)'), findsOneWidget);
   });
 }

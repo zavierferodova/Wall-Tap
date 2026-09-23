@@ -126,10 +126,11 @@ class _AlbumDetailScreenState extends State<AlbumDetailScreen> {
       ),
       builder: (ctx) => SafeArea(
         child: Center(
+          heightFactor: 1.0,
           child: ConstrainedBox(
             constraints: const BoxConstraints(maxWidth: 540),
             child: Padding(
-              padding: const EdgeInsets.symmetric(vertical: 20, horizontal: 16),
+              padding: const EdgeInsets.fromLTRB(16, 16, 16, 12),
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -221,183 +222,209 @@ class _AlbumDetailScreenState extends State<AlbumDetailScreen> {
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
+      useSafeArea: true,
       backgroundColor: const Color(0xFF12141E),
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
       ),
       builder: (ctx) => StatefulBuilder(
         builder: (ctx, setModalState) {
-          return Center(
-            child: ConstrainedBox(
-              constraints: const BoxConstraints(maxWidth: 640),
-              child: Container(
-                height: MediaQuery.of(context).size.height * 0.75,
-                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          final mediaQuery = MediaQuery.of(context);
+          final sheetHeight = mediaQuery.size.height - mediaQuery.padding.top;
+          return SafeArea(
+            top: false,
+            child: Align(
+              alignment: Alignment.bottomCenter,
+              child: ConstrainedBox(
+                constraints: const BoxConstraints(maxWidth: 640),
+                child: SizedBox(
+                  height: sheetHeight,
+                  child: Padding(
+                    padding: const EdgeInsets.fromLTRB(16, 8, 16, 16),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            const Text(
-                              'Add Existing Wallpapers',
-                              style: TextStyle(
-                                color: Colors.white,
-                                fontSize: 18,
-                                fontWeight: FontWeight.bold,
-                              ),
+                        Center(
+                          child: Container(
+                            width: 38,
+                            height: 4.5,
+                            margin: const EdgeInsets.only(top: 4, bottom: 12),
+                            decoration: BoxDecoration(
+                              color: Colors.white24,
+                              borderRadius: BorderRadius.circular(2.5),
                             ),
-                            Text(
-                              '${selectedCandidateIds.length} selected',
-                              style: const TextStyle(color: Colors.white54, fontSize: 12),
+                          ),
+                        ),
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                const Text(
+                                  'Add Existing Wallpapers',
+                                  style: TextStyle(
+                                    color: Colors.white,
+                                    fontSize: 18,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
+                                Text(
+                                  '${selectedCandidateIds.length} selected',
+                                  style: const TextStyle(color: Colors.white54, fontSize: 12),
+                                ),
+                              ],
+                            ),
+                            PressableScale(
+                              onTap: () {
+                                setModalState(() {
+                                  if (selectedCandidateIds.length == candidateItems.length) {
+                                    selectedCandidateIds.clear();
+                                  } else {
+                                    selectedCandidateIds.clear();
+                                    selectedCandidateIds.addAll(candidateItems.map((e) => e.id));
+                                  }
+                                });
+                              },
+                              child: Padding(
+                                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                                child: Text(
+                                  selectedCandidateIds.length == candidateItems.length ? 'Deselect All' : 'Select All',
+                                  style: const TextStyle(
+                                    color: Color(0xFFFF3B30),
+                                    fontWeight: FontWeight.bold,
+                                    fontSize: 13,
+                                  ),
+                                ),
+                              ),
                             ),
                           ],
                         ),
-                        PressableScale(
-                          onTap: () {
-                            setModalState(() {
-                              if (selectedCandidateIds.length == candidateItems.length) {
-                                selectedCandidateIds.clear();
-                              } else {
-                                selectedCandidateIds.clear();
-                                selectedCandidateIds.addAll(candidateItems.map((e) => e.id));
-                              }
-                            });
-                          },
-                          child: Padding(
-                            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                            child: Text(
-                              selectedCandidateIds.length == candidateItems.length ? 'Deselect All' : 'Select All',
-                              style: const TextStyle(
-                                color: Color(0xFFFF3B30),
-                                fontWeight: FontWeight.bold,
-                                fontSize: 13,
+                        const SizedBox(height: 14),
+                        Expanded(
+                          child: LayoutBuilder(
+                            builder: (context, constraints) {
+                              final cols = constraints.maxWidth >= 900
+                                  ? 5
+                                  : constraints.maxWidth >= 700
+                                      ? 4
+                                      : constraints.maxWidth >= 500
+                                          ? 3
+                                          : 2;
+                              return GridView.builder(
+                                itemCount: candidateItems.length,
+                                gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                                  crossAxisCount: cols,
+                                  crossAxisSpacing: 10,
+                                  mainAxisSpacing: 10,
+                                  childAspectRatio: 0.65,
+                                ),
+                                itemBuilder: (context, index) {
+                                  final item = candidateItems[index];
+                                  final isSelected = selectedCandidateIds.contains(item.id);
+                                  final file = File(item.path);
+
+                                  return GestureDetector(
+                                    onTap: () {
+                                      setModalState(() {
+                                        if (isSelected) {
+                                          selectedCandidateIds.remove(item.id);
+                                        } else {
+                                          selectedCandidateIds.add(item.id);
+                                        }
+                                      });
+                                    },
+                                    child: Stack(
+                                      fit: StackFit.expand,
+                                      children: [
+                                        ClipRRect(
+                                          borderRadius: BorderRadius.circular(12),
+                                          child: file.existsSync()
+                                              ? Image.file(file, fit: BoxFit.cover)
+                                              : Container(color: Colors.grey.shade900),
+                                        ),
+                                        AnimatedContainer(
+                                          duration: const Duration(milliseconds: 150),
+                                          decoration: BoxDecoration(
+                                            borderRadius: BorderRadius.circular(12),
+                                            border: Border.all(
+                                              color: isSelected ? const Color(0xFFFF3B30) : Colors.transparent,
+                                              width: 2.5,
+                                            ),
+                                            color: isSelected ? const Color(0xFFFF3B30).withAlpha(50) : Colors.transparent,
+                                          ),
+                                        ),
+                                        Positioned(
+                                          top: 8,
+                                          right: 8,
+                                          child: Container(
+                                            width: 24,
+                                            height: 24,
+                                            decoration: BoxDecoration(
+                                              shape: BoxShape.circle,
+                                              color: isSelected ? const Color(0xFFFF3B30) : Colors.black54,
+                                              border: Border.all(color: Colors.white, width: 1.5),
+                                            ),
+                                            child: isSelected
+                                                ? const Icon(Icons.check, size: 15, color: Colors.white)
+                                                : null,
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  );
+                                },
+                              );
+                            },
+                          ),
+                        ),
+                        const SizedBox(height: 12),
+                        SizedBox(
+                          width: double.infinity,
+                          child: PressableScale(
+                            onTap: selectedCandidateIds.isEmpty
+                                ? null
+                                : () async {
+                                    final messenger = ScaffoldMessenger.of(context);
+                                    Navigator.pop(ctx);
+                                    await widget.controller.addItemsToAlbum(
+                                      widget.albumId,
+                                      selectedCandidateIds,
+                                    );
+                                    if (!mounted) return;
+                                    messenger.showSnackBar(
+                                      SnackBar(
+                                        content: Text('Added ${selectedCandidateIds.length} wallpapers to album'),
+                                        backgroundColor: const Color(0xFF34C759),
+                                      ),
+                                    );
+                                  },
+                            child: Container(
+                              padding: const EdgeInsets.symmetric(vertical: 14),
+                              decoration: BoxDecoration(
+                                gradient: selectedCandidateIds.isEmpty
+                                    ? null
+                                    : const LinearGradient(
+                                        colors: [Color(0xFFFF3B30), Color(0xFFFF5E3A)],
+                                      ),
+                                color: selectedCandidateIds.isEmpty ? const Color(0xFF222634) : null,
+                                borderRadius: BorderRadius.circular(16),
+                              ),
+                              alignment: Alignment.center,
+                              child: Text(
+                                'Add (${selectedCandidateIds.length}) to Album',
+                                style: TextStyle(
+                                  color: selectedCandidateIds.isEmpty ? Colors.white38 : Colors.white,
+                                  fontWeight: FontWeight.bold,
+                                  fontSize: 15,
+                                ),
                               ),
                             ),
                           ),
                         ),
                       ],
                     ),
-                    const SizedBox(height: 12),
-                    Expanded(
-                      child: LayoutBuilder(
-                        builder: (context, constraints) {
-                          final cols = (constraints.maxWidth / 110).floor().clamp(3, 6);
-                          return GridView.builder(
-                            itemCount: candidateItems.length,
-                            gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                              crossAxisCount: cols,
-                              crossAxisSpacing: 8,
-                              mainAxisSpacing: 8,
-                              childAspectRatio: 0.65,
-                            ),
-                            itemBuilder: (context, index) {
-                              final item = candidateItems[index];
-                              final isSelected = selectedCandidateIds.contains(item.id);
-                              final file = File(item.path);
-
-                              return GestureDetector(
-                                onTap: () {
-                                  setModalState(() {
-                                    if (isSelected) {
-                                      selectedCandidateIds.remove(item.id);
-                                    } else {
-                                      selectedCandidateIds.add(item.id);
-                                    }
-                                  });
-                                },
-                                child: Stack(
-                                  fit: StackFit.expand,
-                                  children: [
-                                    ClipRRect(
-                                      borderRadius: BorderRadius.circular(12),
-                                      child: file.existsSync()
-                                          ? Image.file(file, fit: BoxFit.cover)
-                                          : Container(color: Colors.grey.shade900),
-                                    ),
-                                    AnimatedContainer(
-                                      duration: const Duration(milliseconds: 150),
-                                      decoration: BoxDecoration(
-                                        borderRadius: BorderRadius.circular(12),
-                                        border: Border.all(
-                                          color: isSelected ? const Color(0xFFFF3B30) : Colors.transparent,
-                                          width: 2.5,
-                                        ),
-                                        color: isSelected ? const Color(0xFFFF3B30).withAlpha(50) : Colors.transparent,
-                                      ),
-                                    ),
-                                    Positioned(
-                                      top: 6,
-                                      right: 6,
-                                      child: Container(
-                                        width: 22,
-                                        height: 22,
-                                        decoration: BoxDecoration(
-                                          shape: BoxShape.circle,
-                                          color: isSelected ? const Color(0xFFFF3B30) : Colors.black45,
-                                          border: Border.all(color: Colors.white70, width: 1.5),
-                                        ),
-                                        child: isSelected
-                                            ? const Icon(Icons.check, size: 14, color: Colors.white)
-                                            : null,
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                              );
-                            },
-                          );
-                        },
-                      ),
-                    ),
-                    const SizedBox(height: 12),
-                    SizedBox(
-                      width: double.infinity,
-                      child: PressableScale(
-                        onTap: selectedCandidateIds.isEmpty
-                            ? null
-                            : () async {
-                                final messenger = ScaffoldMessenger.of(context);
-                                Navigator.pop(ctx);
-                                await widget.controller.addItemsToAlbum(
-                                  widget.albumId,
-                                  selectedCandidateIds,
-                                );
-                                if (!mounted) return;
-                                messenger.showSnackBar(
-                                  SnackBar(
-                                    content: Text('Added ${selectedCandidateIds.length} wallpapers to album'),
-                                    backgroundColor: const Color(0xFF34C759),
-                                  ),
-                                );
-                              },
-                        child: Container(
-                          padding: const EdgeInsets.symmetric(vertical: 14),
-                          decoration: BoxDecoration(
-                            gradient: selectedCandidateIds.isEmpty
-                                ? null
-                                : const LinearGradient(
-                                    colors: [Color(0xFFFF3B30), Color(0xFFFF5E3A)],
-                                  ),
-                            color: selectedCandidateIds.isEmpty ? const Color(0xFF222634) : null,
-                            borderRadius: BorderRadius.circular(16),
-                          ),
-                          alignment: Alignment.center,
-                          child: Text(
-                            'Add (${selectedCandidateIds.length}) to Album',
-                            style: TextStyle(
-                              color: selectedCandidateIds.isEmpty ? Colors.white38 : Colors.white,
-                              fontWeight: FontWeight.bold,
-                              fontSize: 15,
-                            ),
-                          ),
-                        ),
-                      ),
-                    ),
-                  ],
+                  ),
                 ),
               ),
             ),
@@ -459,10 +486,11 @@ class _AlbumDetailScreenState extends State<AlbumDetailScreen> {
         ),
         builder: (ctx) => SafeArea(
           child: Center(
+            heightFactor: 1.0,
             child: ConstrainedBox(
               constraints: const BoxConstraints(maxWidth: 540),
               child: Padding(
-                padding: const EdgeInsets.fromLTRB(20, 16, 20, 24),
+                padding: const EdgeInsets.fromLTRB(20, 16, 20, 16),
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -579,10 +607,11 @@ class _AlbumDetailScreenState extends State<AlbumDetailScreen> {
       ),
       builder: (ctx) => SafeArea(
         child: Center(
+          heightFactor: 1.0,
           child: ConstrainedBox(
             constraints: const BoxConstraints(maxWidth: 540),
             child: Padding(
-              padding: const EdgeInsets.fromLTRB(20, 16, 20, 24),
+              padding: const EdgeInsets.fromLTRB(20, 16, 20, 16),
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -729,9 +758,12 @@ class _AlbumDetailScreenState extends State<AlbumDetailScreen> {
               bottom: false,
               child: Column(
                 children: [
-                  _isSelectionMode
-                      ? _buildSelectionHeader(items)
-                      : _buildHeader(album, items.length, items.where((i) => i.isEnabled).length, isActiveShuffle),
+                  AnimatedSwitcher(
+                    duration: const Duration(milliseconds: 200),
+                    child: _isSelectionMode
+                        ? _buildSelectionHeader(items)
+                        : _buildHeader(album, items.length, items.where((i) => i.isEnabled).length, isActiveShuffle),
+                  ),
                   Expanded(
                     child: items.isEmpty
                         ? _buildEmptyState(context)
@@ -772,53 +804,17 @@ class _AlbumDetailScreenState extends State<AlbumDetailScreen> {
   }
 
   Widget _buildHeader(Album album, int itemCount, int activeCount, bool isActiveShuffle) {
-    return Padding(
-      padding: const EdgeInsets.fromLTRB(16, 12, 16, 12),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            children: [
-              PressableScale(
-                onTap: () => Navigator.pop(context),
-                child: Container(
-                  padding: const EdgeInsets.all(10),
-                  decoration: BoxDecoration(
-                    color: const Color(0xFF1B1D26),
-                    borderRadius: BorderRadius.circular(14),
-                    border: Border.all(color: const Color(0xFF2C3040)),
-                  ),
-                  child: const Icon(Icons.arrow_back_rounded, color: Colors.white, size: 20),
-                ),
-              ),
-              const SizedBox(width: 12),
-              Expanded(
-                child: GestureDetector(
-                  onTap: () => _showRenameDialog(context, album.name),
-                  child: Row(
-                    children: [
-                      Flexible(
-                        child: Text(
-                          album.name,
-                          style: const TextStyle(
-                            color: Colors.white,
-                            fontSize: 22,
-                            fontWeight: FontWeight.w800,
-                            letterSpacing: -0.4,
-                          ),
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                        ),
-                      ),
-                      const SizedBox(width: 6),
-                      const Icon(Icons.edit_rounded, color: Colors.white38, size: 16),
-                    ],
-                  ),
-                ),
-              ),
-              if (itemCount > 0) ...[
+    return KeyedSubtree(
+      key: const ValueKey('album_header'),
+      child: Padding(
+        padding: const EdgeInsets.fromLTRB(16, 12, 16, 12),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
                 PressableScale(
-                  onTap: () => _enterSelectionMode(),
+                  onTap: () => Navigator.pop(context),
                   child: Container(
                     padding: const EdgeInsets.all(10),
                     decoration: BoxDecoration(
@@ -826,92 +822,135 @@ class _AlbumDetailScreenState extends State<AlbumDetailScreen> {
                       borderRadius: BorderRadius.circular(14),
                       border: Border.all(color: const Color(0xFF2C3040)),
                     ),
-                    child: const Icon(Icons.checklist_rounded, color: Colors.white70, size: 20),
+                    child: const Icon(Icons.arrow_back_rounded, color: Colors.white, size: 20),
+                  ),
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: GestureDetector(
+                    onTap: () => _showRenameDialog(context, album.name),
+                    child: Row(
+                      children: [
+                        Flexible(
+                          child: Text(
+                            album.name,
+                            style: const TextStyle(
+                              color: Colors.white,
+                              fontSize: 22,
+                              fontWeight: FontWeight.w800,
+                              letterSpacing: -0.4,
+                            ),
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                        ),
+                        const SizedBox(width: 6),
+                        const Icon(Icons.edit_rounded, color: Colors.white38, size: 16),
+                      ],
+                    ),
+                  ),
+                ),
+                const SizedBox(width: 12),
+                if (itemCount > 0) ...[
+                  PressableScale(
+                    onTap: () => _enterSelectionMode(),
+                    child: Container(
+                      padding: const EdgeInsets.all(10),
+                      decoration: BoxDecoration(
+                        color: const Color(0xFF1B1D26),
+                        borderRadius: BorderRadius.circular(14),
+                        border: Border.all(color: const Color(0xFF2C3040)),
+                      ),
+                      child: const Icon(Icons.checklist_rounded, color: Colors.white70, size: 20),
+                    ),
+                  ),
+                  const SizedBox(width: 8),
+                ],
+                PressableScale(
+                  onTap: () => _showAddOptions(context),
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+                    decoration: BoxDecoration(
+                      gradient: const LinearGradient(
+                        colors: [Color(0xFFFF3B30), Color(0xFFFF5E3A)],
+                      ),
+                      borderRadius: BorderRadius.circular(14),
+                    ),
+                    child: const Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Icon(Icons.add, color: Colors.white, size: 18),
+                        SizedBox(width: 4),
+                        Text(
+                          'Add',
+                          style: TextStyle(
+                            color: Colors.white,
+                            fontWeight: FontWeight.bold,
+                            fontSize: 13,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 12),
+            Row(
+              children: [
+                Expanded(
+                  child: Text(
+                    '$itemCount wallpaper${itemCount == 1 ? '' : 's'} • $activeCount active',
+                    style: const TextStyle(color: Colors.white54, fontSize: 13, fontWeight: FontWeight.w500),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
                   ),
                 ),
                 const SizedBox(width: 8),
-              ],
-              PressableScale(
-                onTap: () => _showAddOptions(context),
-                child: Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
-                  decoration: BoxDecoration(
-                    gradient: const LinearGradient(
-                      colors: [Color(0xFFFF3B30), Color(0xFFFF5E3A)],
-                    ),
-                    borderRadius: BorderRadius.circular(14),
-                  ),
-                  child: const Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Icon(Icons.add, color: Colors.white, size: 18),
-                      SizedBox(width: 4),
-                      Text(
-                        'Add',
-                        style: TextStyle(
-                          color: Colors.white,
-                          fontWeight: FontWeight.bold,
-                          fontSize: 13,
-                        ),
+                PressableScale(
+                  onTap: () async {
+                    HapticFeedback.selectionClick();
+                    if (isActiveShuffle) {
+                      await widget.controller.setActiveAlbum(null);
+                    } else {
+                      await widget.controller.setActiveAlbum(album.id);
+                    }
+                  },
+                  child: AnimatedContainer(
+                    duration: const Duration(milliseconds: 200),
+                    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                    decoration: BoxDecoration(
+                      color: isActiveShuffle ? const Color(0xFFFF3B30).withAlpha(40) : const Color(0xFF1B1D26),
+                      borderRadius: BorderRadius.circular(12),
+                      border: Border.all(
+                        color: isActiveShuffle ? const Color(0xFFFF3B30) : const Color(0xFF2C3040),
                       ),
-                    ],
-                  ),
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 12),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Text(
-                '$itemCount wallpaper${itemCount == 1 ? '' : 's'} • $activeCount active',
-                style: const TextStyle(color: Colors.white54, fontSize: 13, fontWeight: FontWeight.w500),
-              ),
-              PressableScale(
-                onTap: () async {
-                  HapticFeedback.selectionClick();
-                  if (isActiveShuffle) {
-                    await widget.controller.setActiveAlbum(null);
-                  } else {
-                    await widget.controller.setActiveAlbum(album.id);
-                  }
-                },
-                child: AnimatedContainer(
-                  duration: const Duration(milliseconds: 200),
-                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-                  decoration: BoxDecoration(
-                    color: isActiveShuffle ? const Color(0xFFFF3B30).withAlpha(40) : const Color(0xFF1B1D26),
-                    borderRadius: BorderRadius.circular(12),
-                    border: Border.all(
-                      color: isActiveShuffle ? const Color(0xFFFF3B30) : const Color(0xFF2C3040),
-                      width: 1.2,
                     ),
-                  ),
-                  child: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Icon(
-                        isActiveShuffle ? Icons.check_circle_rounded : Icons.play_circle_outline_rounded,
-                        color: isActiveShuffle ? const Color(0xFFFF3B30) : Colors.white70,
-                        size: 16,
-                      ),
-                      const SizedBox(width: 6),
-                      Text(
-                        isActiveShuffle ? 'Active Shuffle' : 'Set as Shuffle',
-                        style: TextStyle(
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Icon(
+                          isActiveShuffle ? Icons.check_circle_rounded : Icons.play_arrow_rounded,
                           color: isActiveShuffle ? const Color(0xFFFF3B30) : Colors.white70,
-                          fontSize: 12,
-                          fontWeight: FontWeight.bold,
+                          size: 15,
                         ),
-                      ),
-                    ],
+                        const SizedBox(width: 5),
+                        Text(
+                          isActiveShuffle ? 'Active' : 'Use in Shuffle',
+                          style: TextStyle(
+                            color: isActiveShuffle ? const Color(0xFFFF3B30) : Colors.white70,
+                            fontSize: 12,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                      ],
+                    ),
                   ),
                 ),
-              ),
-            ],
-          ),
-        ],
+              ],
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -922,144 +961,182 @@ class _AlbumDetailScreenState extends State<AlbumDetailScreen> {
     final selectedItems = items.where((i) => _selectedIds.contains(i.id)).toList();
     final allExcluded = selectedItems.isNotEmpty && selectedItems.every((i) => !i.isEnabled);
 
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-      decoration: BoxDecoration(
-        color: const Color(0xFF161824),
-        border: Border(
-          bottom: BorderSide(
-            color: const Color(0xFFFF3B30).withAlpha(80),
-            width: 1.5,
-          ),
-        ),
-      ),
-      child: Row(
-        children: [
-          PressableScale(
-            onTap: _exitSelectionMode,
-            child: Container(
-              padding: const EdgeInsets.all(6),
-              decoration: BoxDecoration(
-                color: Colors.white.withAlpha(20),
-                shape: BoxShape.circle,
+    return KeyedSubtree(
+      key: const ValueKey('selection_header'),
+      child: Padding(
+        padding: const EdgeInsets.fromLTRB(16, 10, 16, 6),
+        child: Container(
+          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+          decoration: BoxDecoration(
+            color: const Color(0xFF1B1D28),
+            borderRadius: BorderRadius.circular(18),
+            border: Border.all(color: const Color(0xFFFF3B30).withAlpha(90)),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withAlpha(80),
+                blurRadius: 10,
+                offset: const Offset(0, 3),
               ),
-              child: const Icon(Icons.close_rounded, color: Colors.white, size: 18),
-            ),
+            ],
           ),
-          const SizedBox(width: 12),
-          Text(
-            '$count selected',
-            style: const TextStyle(
-              color: Colors.white,
-              fontSize: 16,
-              fontWeight: FontWeight.bold,
-            ),
-          ),
-          const Spacer(),
-          PressableScale(
-            onTap: () {
-              HapticFeedback.selectionClick();
-              _toggleSelectAll(items);
-            },
-            child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 6),
-              child: Text(
-                allSelected ? 'Deselect All' : 'Select All',
-                style: const TextStyle(
-                  color: Color(0xFFFF5E3A),
-                  fontSize: 13,
-                  fontWeight: FontWeight.w600,
-                ),
-              ),
-            ),
-          ),
-          const SizedBox(width: 6),
-          PressableScale(
-            onTap: count == 0 ? null : () => _handleBatchIncludeExclude(items),
-            child: Container(
-              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
-              decoration: BoxDecoration(
-                color: count == 0
-                    ? Colors.white.withAlpha(15)
-                    : (allExcluded
-                        ? const Color(0xFF34C759).withAlpha(40)
-                        : const Color(0xFFFF9F0A).withAlpha(40)),
-                borderRadius: BorderRadius.circular(12),
-                border: Border.all(
-                  color: count == 0
-                      ? const Color(0xFF383F56)
-                      : (allExcluded
-                          ? const Color(0xFF34C759).withAlpha(140)
-                          : const Color(0xFFFF9F0A).withAlpha(140)),
-                ),
-              ),
-              child: Row(
-                mainAxisSize: MainAxisSize.min,
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Row(
                 children: [
-                  Icon(
-                    allExcluded ? Icons.add_circle_outline_rounded : Icons.remove_circle_outline_rounded,
-                    color: count == 0
-                        ? Colors.white30
-                        : (allExcluded ? const Color(0xFF34C759) : const Color(0xFFFF9F0A)),
-                    size: 16,
-                  ),
-                  const SizedBox(width: 4),
-                  Text(
-                    allExcluded ? 'Include' : 'Exclude',
-                    style: TextStyle(
-                      color: count == 0
-                          ? Colors.white30
-                          : (allExcluded ? const Color(0xFF34C759) : const Color(0xFFFF9F0A)),
-                      fontSize: 12,
-                      fontWeight: FontWeight.bold,
+                  PressableScale(
+                    onTap: _exitSelectionMode,
+                    child: Container(
+                      padding: const EdgeInsets.all(6),
+                      decoration: BoxDecoration(
+                        color: Colors.white.withAlpha(20),
+                        shape: BoxShape.circle,
+                      ),
+                      child: const Icon(Icons.close_rounded, color: Colors.white, size: 18),
                     ),
                   ),
-                ],
-              ),
-            ),
-          ),
-          const SizedBox(width: 6),
-          PressableScale(
-            onTap: count == 0 ? null : () => _showBatchDeleteSheet(),
-            child: Container(
-              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
-              decoration: BoxDecoration(
-                color: count > 0 ? const Color(0xFFFF3B30) : const Color(0xFF1B1D26),
-                borderRadius: BorderRadius.circular(12),
-                boxShadow: count > 0
-                    ? [
-                        BoxShadow(
-                          color: const Color(0xFFFF3B30).withAlpha(100),
-                          blurRadius: 10,
-                          offset: const Offset(0, 3),
-                        ),
-                      ]
-                    : null,
-              ),
-              child: Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Icon(
-                    Icons.delete_outline_rounded,
-                    color: count > 0 ? Colors.white : Colors.white30,
-                    size: 18,
-                  ),
-                  if (count > 0) ...[
-                    const SizedBox(width: 4),
-                    Text(
-                      'Delete ($count)',
+                  const SizedBox(width: 10),
+                  Expanded(
+                    child: Text(
+                      '$count selected',
                       style: const TextStyle(
                         color: Colors.white,
-                        fontSize: 12,
+                        fontSize: 15,
                         fontWeight: FontWeight.bold,
                       ),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
                     ),
-                  ],
+                  ),
+                  PressableScale(
+                    onTap: () {
+                      HapticFeedback.selectionClick();
+                      _toggleSelectAll(items);
+                    },
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 6),
+                      child: Text(
+                        allSelected ? 'Deselect All' : 'Select All',
+                        style: const TextStyle(
+                          color: Color(0xFFFF5E3A),
+                          fontSize: 13.5,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                    ),
+                  ),
                 ],
               ),
-            ),
+              const SizedBox(height: 10),
+              Row(
+                children: [
+                  Expanded(
+                    child: PressableScale(
+                      onTap: count == 0 ? null : () => _handleBatchIncludeExclude(items),
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(vertical: 9, horizontal: 8),
+                        decoration: BoxDecoration(
+                          color: count == 0
+                              ? Colors.white.withAlpha(15)
+                              : (allExcluded
+                                  ? const Color(0xFF34C759).withAlpha(40)
+                                  : const Color(0xFFFF9F0A).withAlpha(40)),
+                          borderRadius: BorderRadius.circular(10),
+                          border: Border.all(
+                            color: count == 0
+                                ? const Color(0xFF383F56)
+                                : (allExcluded
+                                    ? const Color(0xFF34C759).withAlpha(140)
+                                    : const Color(0xFFFF9F0A).withAlpha(140)),
+                          ),
+                        ),
+                        child: FittedBox(
+                          fit: BoxFit.scaleDown,
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Icon(
+                                allExcluded ? Icons.add_circle_outline_rounded : Icons.remove_circle_outline_rounded,
+                                color: count == 0
+                                    ? Colors.white30
+                                    : (allExcluded ? const Color(0xFF34C759) : const Color(0xFFFF9F0A)),
+                                size: 16,
+                              ),
+                              const SizedBox(width: 6),
+                              Text(
+                                allExcluded ? 'Include' : 'Exclude',
+                                style: TextStyle(
+                                  color: count == 0
+                                      ? Colors.white30
+                                      : (allExcluded ? const Color(0xFF34C759) : const Color(0xFFFF9F0A)),
+                                  fontSize: 13,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(width: 10),
+                  Expanded(
+                    child: PressableScale(
+                      onTap: count == 0 ? null : () => _showBatchDeleteSheet(),
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(vertical: 9, horizontal: 8),
+                        decoration: BoxDecoration(
+                          color: count == 0
+                              ? Colors.white.withAlpha(15)
+                              : const Color(0xFFFF3B30),
+                          borderRadius: BorderRadius.circular(10),
+                          border: Border.all(
+                            color: count == 0
+                                ? const Color(0xFF383F56)
+                                : const Color(0xFFFF3B30),
+                          ),
+                          boxShadow: count > 0
+                              ? [
+                                  BoxShadow(
+                                    color: const Color(0xFFFF3B30).withAlpha(100),
+                                    blurRadius: 8,
+                                    offset: const Offset(0, 2),
+                                  ),
+                                ]
+                              : null,
+                        ),
+                        child: FittedBox(
+                          fit: BoxFit.scaleDown,
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Icon(
+                                Icons.delete_outline_rounded,
+                                color: count > 0 ? Colors.white : Colors.white30,
+                                size: 16,
+                              ),
+                              if (count > 0) ...[
+                                const SizedBox(width: 6),
+                                Text(
+                                  'Delete ($count)',
+                                  style: const TextStyle(
+                                    color: Colors.white,
+                                    fontSize: 13,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
+                              ],
+                            ],
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ],
           ),
-        ],
+        ),
       ),
     );
   }
@@ -1149,6 +1226,7 @@ class _AlbumDetailScreenState extends State<AlbumDetailScreen> {
   }) {
     final file = File(item.path);
     final isCurrent = widget.controller.currentWallpaper?.id == item.id;
+    final isNext = widget.controller.nextWallpaper?.id == item.id && !isCurrent;
 
     return GestureDetector(
       onLongPress: () {
@@ -1174,17 +1252,36 @@ class _AlbumDetailScreenState extends State<AlbumDetailScreen> {
           border: Border.all(
             color: isSelected
                 ? const Color(0xFFFF3B30)
-                : const Color(0xFF242836),
-            width: isSelected ? 2.5 : 1.0,
+                : (isCurrent
+                    ? const Color(0xFFFF3B30)
+                    : (isNext ? const Color(0xFF007AFF) : const Color(0xFF242836))),
+            width: (isSelected || isCurrent || isNext) ? 2.5 : 1.0,
           ),
           boxShadow: [
-            BoxShadow(
-              color: isSelected
-                  ? const Color(0xFFFF3B30).withAlpha(90)
-                  : Colors.black.withAlpha(80),
-              blurRadius: isSelected ? 16 : 8,
-              offset: const Offset(0, 4),
-            ),
+            if (isSelected)
+              BoxShadow(
+                color: const Color(0xFFFF3B30).withAlpha(90),
+                blurRadius: 16,
+                offset: const Offset(0, 4),
+              )
+            else if (isCurrent)
+              BoxShadow(
+                color: const Color(0xFFFF3B30).withAlpha(80),
+                blurRadius: 14,
+                offset: const Offset(0, 4),
+              )
+            else if (isNext)
+              BoxShadow(
+                color: const Color(0xFF007AFF).withAlpha(80),
+                blurRadius: 14,
+                offset: const Offset(0, 4),
+              )
+            else
+              BoxShadow(
+                color: Colors.black.withAlpha(80),
+                blurRadius: 8,
+                offset: const Offset(0, 3),
+              ),
           ],
         ),
         child: ClipRRect(
@@ -1232,7 +1329,7 @@ class _AlbumDetailScreenState extends State<AlbumDetailScreen> {
                   color: const Color(0xFFFF3B30).withAlpha(45),
                 ),
 
-              if (!_isSelectionMode)
+              if (!_isSelectionMode && (isCurrent || isNext || !item.isEnabled))
                 Positioned(
                   top: 8,
                   left: 8,
@@ -1253,7 +1350,32 @@ class _AlbumDetailScreenState extends State<AlbumDetailScreen> {
                             ],
                           ),
                           child: const Text(
-                            'CURRENT',
+                            'LIVE',
+                            style: TextStyle(
+                              color: Colors.white,
+                              fontSize: 9.5,
+                              fontWeight: FontWeight.w900,
+                              letterSpacing: 0.4,
+                            ),
+                          ),
+                        ),
+                        if (!item.isEnabled || isNext) const SizedBox(width: 5),
+                      ],
+                      if (isNext) ...[
+                        Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 3),
+                          decoration: BoxDecoration(
+                            color: const Color(0xFF007AFF),
+                            borderRadius: BorderRadius.circular(7),
+                            boxShadow: [
+                              BoxShadow(
+                                color: const Color(0xFF007AFF).withAlpha(120),
+                                blurRadius: 6,
+                              ),
+                            ],
+                          ),
+                          child: const Text(
+                            'NEXT',
                             style: TextStyle(
                               color: Colors.white,
                               fontSize: 9.5,
@@ -1308,23 +1430,30 @@ class _AlbumDetailScreenState extends State<AlbumDetailScreen> {
 
               if (_isSelectionMode)
                 Positioned(
-                  top: 10,
-                  right: 10,
+                  top: 8,
+                  right: 8,
                   child: AnimatedContainer(
-                    duration: const Duration(milliseconds: 200),
-                    width: 26,
-                    height: 26,
+                    duration: const Duration(milliseconds: 150),
+                    padding: const EdgeInsets.all(3),
                     decoration: BoxDecoration(
                       shape: BoxShape.circle,
-                      color: isSelected ? const Color(0xFFFF3B30) : Colors.black45,
+                      color: isSelected ? const Color(0xFFFF3B30) : Colors.black.withAlpha(150),
                       border: Border.all(
-                        color: isSelected ? Colors.white : Colors.white70,
-                        width: 2,
+                        color: isSelected ? const Color(0xFFFF3B30) : Colors.white70,
+                        width: 1.5,
                       ),
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.black.withAlpha(100),
+                          blurRadius: 6,
+                        ),
+                      ],
                     ),
-                    child: isSelected
-                        ? const Icon(Icons.check, size: 16, color: Colors.white)
-                        : null,
+                    child: Icon(
+                      isSelected ? Icons.check : Icons.circle,
+                      color: isSelected ? Colors.white : Colors.transparent,
+                      size: 16,
+                    ),
                   ),
                 ),
 
