@@ -235,22 +235,13 @@ class SettingsTab extends StatelessWidget {
                       ),
                     ],
                   ),
-                  const SizedBox(height: 14),
-                  Container(
-                    width: double.infinity,
-                    padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
-                    decoration: BoxDecoration(
-                      color: const Color(0xFF1B1E2B),
-                      borderRadius: BorderRadius.circular(12),
-                      border: Border.all(color: const Color(0xFF282D3D)),
-                    ),
-                    child: const Text(
-                      'Designed for automatic wallpaper scheduling, album rotation, and home screen widgets.',
-                      style: TextStyle(
-                        color: Colors.white70,
-                        fontSize: 12.5,
-                        height: 1.45,
-                      ),
+                  const SizedBox(height: 12),
+                  const Text(
+                    'Designed for automatic wallpaper scheduling, album rotation, and home screen widgets.',
+                    style: TextStyle(
+                      color: Colors.white70,
+                      fontSize: 12.5,
+                      height: 1.45,
                     ),
                   ),
                 ],

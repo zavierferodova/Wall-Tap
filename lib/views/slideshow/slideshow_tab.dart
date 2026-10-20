@@ -984,40 +984,19 @@ class _SlideshowTabState extends State<SlideshowTab> with SingleTickerProviderSt
                 ),
               ),
               const SizedBox(width: 8),
-              GestureDetector(
+              PressableScale(
                 onTap: () => _showIntervalPicker(context),
-                child: isCustomInterval
-                    ? Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
-                        decoration: BoxDecoration(
-                          color: const Color(0xFFFF3B30).withAlpha(25),
-                          borderRadius: BorderRadius.circular(6),
-                          border: Border.all(color: const Color(0xFFFF3B30).withAlpha(90)),
-                        ),
-                        child: Row(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            const Icon(Icons.check_circle_rounded, color: Color(0xFFFF3B30), size: 12),
-                            const SizedBox(width: 4),
-                            Text(
-                              'More options (${_formatShortInterval(config.intervalMinutes)})',
-                              style: const TextStyle(
-                                color: Color(0xFFFF3B30),
-                                fontSize: 11.5,
-                                fontWeight: FontWeight.bold,
-                              ),
-                            ),
-                          ],
-                        ),
-                      )
-                    : const Text(
-                        'More options',
-                        style: TextStyle(
-                          color: Color(0xFFFF3B30),
-                          fontSize: 11.5,
-                          fontWeight: FontWeight.w600,
-                        ),
-                      ),
+                child: const Padding(
+                  padding: EdgeInsets.symmetric(vertical: 4, horizontal: 2),
+                  child: Text(
+                    'More options',
+                    style: TextStyle(
+                      color: Color(0xFFFF3B30),
+                      fontSize: 12,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                ),
               ),
             ],
           ),
@@ -1071,46 +1050,6 @@ class _SlideshowTabState extends State<SlideshowTab> with SingleTickerProviderSt
               ],
             ),
           ),
-          if (isCustomInterval) ...[
-            const SizedBox(height: 8),
-            Container(
-              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
-              decoration: BoxDecoration(
-                color: const Color(0xFFFF3B30).withAlpha(20),
-                borderRadius: BorderRadius.circular(8),
-                border: Border.all(color: const Color(0xFFFF3B30).withAlpha(60)),
-              ),
-              child: Row(
-                children: [
-                  const Icon(Icons.check_circle_rounded, color: Color(0xFFFF3B30), size: 14),
-                  const SizedBox(width: 6),
-                  Expanded(
-                    child: Text(
-                      'Custom interval active: ${config.intervalLabel}',
-                      style: const TextStyle(
-                        color: Colors.white,
-                        fontSize: 12,
-                        fontWeight: FontWeight.w600,
-                      ),
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                  ),
-                  GestureDetector(
-                    onTap: () => _showIntervalPicker(context),
-                    child: const Text(
-                      'Change',
-                      style: TextStyle(
-                        color: Color(0xFFFF3B30),
-                        fontSize: 11.5,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ],
         ],
       ),
     );

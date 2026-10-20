@@ -595,10 +595,6 @@ class _PlaylistTabState extends State<PlaylistTab> {
 
   Widget _buildNormalHeader(List<WallpaperItem> items) {
     final albums = widget.controller.albums;
-    final query = _albumSearchQuery.trim().toLowerCase();
-    final filteredAlbums = query.isEmpty
-        ? albums
-        : albums.where((a) => a.name.toLowerCase().contains(query)).toList();
 
     return KeyedSubtree(
       key: const ValueKey('normal_header'),
@@ -607,36 +603,15 @@ class _PlaylistTabState extends State<PlaylistTab> {
         child: Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  const Text(
-                    'Gallery',
-                    style: TextStyle(
-                      color: Colors.white,
-                      fontSize: 24,
-                      fontWeight: FontWeight.w800,
-                      letterSpacing: -0.5,
-                    ),
-                  ),
-                  Text(
-                    _selectedSegment == 1
-                        ? (_albumSearchQuery.trim().isNotEmpty
-                            ? '${filteredAlbums.length} of ${albums.length} albums found'
-                            : '${albums.length} album${albums.length == 1 ? '' : 's'}${widget.controller.activeAlbum != null ? ' • Active: ${widget.controller.activeAlbum!.name}' : ''}')
-                        : (widget.controller.activeAlbum != null
-                            ? 'Active: ${widget.controller.activeAlbum!.name} (${widget.controller.activeItems.length})'
-                            : '${items.length} wallpapers • ${widget.controller.activeItems.length} active'),
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                    style: const TextStyle(
-                      color: Colors.white54,
-                      fontSize: 12.5,
-                      fontWeight: FontWeight.w500,
-                    ),
-                  ),
-                ],
+            const Expanded(
+              child: Text(
+                'Gallery',
+                style: TextStyle(
+                  color: Colors.white,
+                  fontSize: 24,
+                  fontWeight: FontWeight.w800,
+                  letterSpacing: -0.5,
+                ),
               ),
             ),
             const SizedBox(width: 8),

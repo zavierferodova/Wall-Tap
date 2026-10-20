@@ -1,34 +1,34 @@
 # 07 - Developer Setup, Build & Troubleshooting Guide
 
-This guide covers local environment setup, running Wall Tap in debug and release modes, building Android binaries, and troubleshooting common platform issues.
+Development environment setup, local execution, release builds, and troubleshooting steps for Wall Tap.
 
 ---
 
 ## 1. Prerequisites & Toolchain
 
-Ensure your development environment meets the following specifications:
+The development environment requires:
 
-- **Flutter SDK**: 3.12.2 or later (Dart 3.12.2+)
+- **Flutter SDK**: 3.12.2 or higher (Dart 3.12.2+)
 - **Java Development Kit (JDK)**: OpenJDK 17 or higher
 - **Android SDK Tools**:
   - `compileSdkVersion`: 34 (Android 14)
-  - `minSdkVersion`: 21 (Android 5.0 Lollipop)
+  - `minSdkVersion`: 21 (Android 5.0)
   - `targetSdkVersion`: 34
   - Android SDK Build-Tools 34.0.0+
-- **Recommended IDEs**:
+- **Recommended Tools**:
   - VS Code with Flutter and Dart extensions
-  - Android Studio with Kotlin plugin for native module work
+  - Android Studio with Kotlin plugin for Android native modules
 
 ---
 
-## 2. Getting Started
+## 2. Setup
 
-### 2.1 Clone & Dependency Installation
+### 2.1 Dependencies
 ```bash
 # Navigate to project directory
 cd wall_tap
 
-# Fetch Flutter dependencies
+# Install Flutter dependencies
 flutter pub get
 ```
 
@@ -36,14 +36,14 @@ flutter pub get
 ```bash
 flutter doctor -v
 ```
-Ensure there are no blocking issues with the Android toolchain or Flutter installation.
+Confirm the Flutter SDK and Android toolchain report no errors.
 
 ---
 
 ## 3. Running the Application
 
 ### 3.1 On Physical Android Device (Recommended)
-Because Wall Tap interacts with the physical Android system wallpaper and Home Screen AppWidgets, testing on a physical Android device provides the best validation of haptics, widget resizing, and Doze mode alarms.
+Testing on a physical Android device validates hardware features including real system wallpaper changes, home screen widget placement, touch haptics, and Doze mode alarms.
 
 1. Enable **Developer Options** and **USB Debugging** on your device.
 2. Connect your device via USB.
@@ -61,15 +61,15 @@ flutter run
 
 ---
 
-## 4. Developing & Debugging Native Android Code
+## 4. Native Android Development
 
-When making changes to Kotlin code under `android/app/src/main/kotlin/com/zavierdev/walltap/`:
+When editing Kotlin code in `android/app/src/main/kotlin/com/zavierdev/walltap/`:
 
-1. Open the `android/` subfolder in **Android Studio**.
-2. Allow Gradle to perform its initial project sync.
-3. Use Android Studio's **Logcat** window to filter logs:
+1. Open the `android/` subfolder in Android Studio.
+2. Allow Gradle to complete its initial project sync.
+3. Filter logs in Android Studio's **Logcat** window:
    - Filter query: `package:mine` or `tag:WallTap`
-4. Set breakpoints inside `MainActivity.kt`, `WallpaperHelper.kt`, `WidgetProvider.kt`, or `Scheduler.kt`.
+4. Set breakpoints inside `MainActivity.kt`, `WallpaperHelper.kt`, `WidgetProvider.kt`, `AlbumWidgetProvider.kt`, or `Scheduler.kt`.
 
 ---
 
@@ -79,36 +79,36 @@ When making changes to Kotlin code under `android/app/src/main/kotlin/com/zavier
 ```bash
 flutter build apk --release
 ```
-*Outputs to `build/app/outputs/flutter-apk/app-release.apk`.*
+Outputs to `build/app/outputs/flutter-apk/app-release.apk`.
 
 ### 5.2 Build Release App Bundle (AAB for Google Play)
 ```bash
 flutter build appbundle --release
 ```
-*Outputs to `build/app/outputs/bundle/release/app-release.aab`.*
+Outputs to `build/app/outputs/bundle/release/app-release.aab`.
 
 ---
 
-## 6. Common Issues & Troubleshooting
+## 6. Troubleshooting
 
-### 6.1 Wallpaper Doesn't Rotate in Background
-- **Cause**: Aggressive battery saver or OEM task killer killed the background process.
-- **Remedy**:
+### 6.1 Wallpaper Does Not Rotate in Background
+- **Cause**: Battery optimizations or OEM power managers suspended background tasks.
+- **Resolution**:
   1. Open the **Settings** tab in Wall Tap.
-  2. Tap **"Allow Unrestricted Background Execution"** under Battery Optimization.
+  2. Select **"Allow Unrestricted Background Execution"** under Battery Optimization.
   3. On Xiaomi/Redmi devices (MIUI/HyperOS): Enable **"Autostart"** and set Battery Saver to **"No restrictions"** in Android app settings.
 
 ### 6.2 Widget Not Updating or Blank
-- **Cause**: No images are enabled in the active playlist, or native permissions were revoked.
-- **Remedy**:
-  1. Verify the gallery contains at least one enabled image.
-  2. In the app, open the **Studio** tab and tap **"Shuffle Next"** once to force a sync to `FlutterSharedPreferences`.
-  3. Re-add the widget to the home screen.
+- **Cause**: No images are enabled in the active playlist, or permissions were revoked.
+- **Resolution**:
+  1. Confirm the library contains at least one enabled image.
+  2. In the app, open the **Studio** tab and tap **"Shuffle Next"** once to sync data to `FlutterSharedPreferences`.
+  3. Re-add the widget to the launcher.
 
 ### 6.3 Exact Alarm Exceptions on Android 12+ (API 31+)
 - **Symptom**: `SecurityException: Caller not allowed to schedule exact alarms`.
-- **Handling**: Wall Tap automatically catches this exception in `Scheduler.kt` and falls back to `alarmManager.setAndAllowWhileIdle()`. Users can also grant the **Alarms & Reminders** permission in device settings.
+- **Handling**: Wall Tap catches this exception in `Scheduler.kt` and falls back to `alarmManager.setAndAllowWhileIdle()`. Users can also grant the **Alarms & Reminders** permission in device settings.
 
 ### 6.4 SAF Folder Picker Returns Empty List
-- **Cause**: User selected an empty directory or a cloud drive (e.g. Google Drive) where direct file access is restricted.
-- **Remedy**: Ensure the folder contains supported local images (`.jpg`, `.jpeg`, `.png`, `.webp`, `.bmp`).
+- **Cause**: Selected folder is empty or located on a cloud drive (e.g. Google Drive) that restricts direct file access.
+- **Resolution**: Select a local directory containing supported image formats (`.jpg`, `.jpeg`, `.png`, `.webp`, `.bmp`).

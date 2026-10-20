@@ -1,35 +1,36 @@
 # 06 - Testing Strategy & Quality Assurance
 
-This document outlines the testing architecture, fake services pattern, test execution commands, and guidelines for adding new automated tests in Wall Tap.
+Automated testing patterns, test fakes, suite structure, and execution commands for Wall Tap.
 
 ---
 
 ## 1. Test Suite Structure
 
-The `test/` directory contains 10 test suites covering models, business logic controllers, and UI screens:
+The `test/` directory contains 11 test suites with 73 automated unit and widget tests:
 
 ```
 test/
-├── album_model_test.dart               # Serialization, deserialization, and copyWith for Album
-├── album_widget_config_test.dart       # Model tests for AlbumWidgetConfig (JSON & intervals)
-├── wallpaper_model_test.dart           # Model tests for WallpaperItem (resolution, size formats)
-├── wallpaper_controller_test.dart      # Business logic: shuffle, imports, albums, deletions, config
-├── slideshow_tab_test.dart             # UI widget tests for Studio tab (shuffle, scale, interval)
-├── playlist_tab_test.dart              # UI widget tests for Gallery tab (grids, multi-select)
-├── album_detail_screen_test.dart       # UI widget tests for individual Album management screen
-├── album_widgets_tab_test.dart         # UI widget tests for home screen widget manager tab
-├── settings_tab_test.dart              # UI widget tests for Settings, battery optimization & attribution
-└── wallpaper_preview_dialog_test.dart  # UI widget tests for zoom viewer and full-screen dialog
+├── album_detail_screen_test.dart       # Widget tests for album wallpaper management screen
+├── album_model_test.dart               # Serialization and immutability tests for Album model
+├── album_widget_config_test.dart       # Serialization and intervals for AlbumWidgetConfig
+├── album_widgets_tab_test.dart         # Widget tests for launcher widget manager tab
+├── playlist_tab_test.dart              # Widget tests for Library tab, grid layouts, and multi-select
+├── responsive_layout_test.dart         # Tests for screen width adaptations, column calculation, and tablet constraints
+├── settings_tab_test.dart              # Widget tests for Settings tab, battery optimization, and attribution
+├── slideshow_tab_test.dart             # Widget tests for Studio tab, interval selector, and scale modes
+├── wallpaper_controller_test.dart      # Business logic tests: shuffles, imports, albums, deletions, and config
+├── wallpaper_model_test.dart           # Model tests for WallpaperItem resolution and file formats
+└── wallpaper_preview_dialog_test.dart  # Widget tests for zoom viewer and full-screen preview dialog
 ```
 
 ---
 
-## 2. Test Architecture: Fakes vs Mocks
+## 2. Test Architecture: Fakes Pattern
 
-Rather than using dynamic reflection-based mocks that can become brittle, Wall Tap uses **test fakes** (`FakeStorageService` and `FakeWallpaperService`) extending the real classes.
+Rather than using reflection-based mock frameworks, Wall Tap uses in-memory test fakes (`FakeStorageService` and `FakeWallpaperService`) extending the real service classes.
 
-### 2.1 FakeStorageService
-In-memory storage fake that intercepts all disk and SharedPreferences calls:
+### 2.1 `FakeStorageService`
+In-memory storage fake that intercepts disk and SharedPreferences calls:
 
 ```dart
 class FakeStorageService extends StorageService {
@@ -59,12 +60,11 @@ class FakeStorageService extends StorageService {
   Future<void> saveConfig(SlideshowConfig config) async {
     storedConfig = config;
   }
-  // ...
 }
 ```
 
-### 2.2 FakeWallpaperService
-Intercepts `MethodChannel` invocations so tests can run on any host machine without Android engine binaries:
+### 2.2 `FakeWallpaperService`
+Intercepts `MethodChannel` calls so tests run on any development environment without Android native engine binaries:
 
 ```dart
 class FakeWallpaperService extends WallpaperService {
@@ -90,26 +90,44 @@ class FakeWallpaperService extends WallpaperService {
 
 ---
 
-## 3. Writing Unit & Controller Tests
+## 3. Unit & Controller Tests
 
 When testing `WallpaperController`:
 1. Instantiate `FakeStorageService` and `FakeWallpaperService`.
 2. Pass fakes into the `WallpaperController` constructor.
-3. Seed test state (e.g. `fakeStorage.storedItems = [...]`).
-4. Call `await controller.initialize()`.
-5. Execute controller methods and verify both internal state and fake side-effects.
+3. Seed test state (e.g. `storage.storedItems = [...]`).
+4. Run `await controller.initialize()`.
+5. Execute controller methods and verify internal state and side effects.
 
-Example:
 ```dart
 test('shuffleNext advances wallpaper and saves active id', () async {
   final storage = FakeStorageService();
   final wallpaperService = FakeWallpaperService();
   storage.storedItems = [
-    WallpaperItem(id: '1', path: '/path/1.jpg', fileName: '1.jpg', width: 1080, height: 2400, fileSize: 1024, dateAdded: DateTime.now()),
-    WallpaperItem(id: '2', path: '/path/2.jpg', fileName: '2.jpg', width: 1080, height: 2400, fileSize: 1024, dateAdded: DateTime.now()),
+    WallpaperItem(
+      id: '1',
+      path: '/path/1.jpg',
+      fileName: '1.jpg',
+      width: 1080,
+      height: 2400,
+      fileSize: 1024,
+      dateAdded: DateTime.now(),
+    ),
+    WallpaperItem(
+      id: '2',
+      path: '/path/2.jpg',
+      fileName: '2.jpg',
+      width: 1080,
+      height: 2400,
+      fileSize: 1024,
+      dateAdded: DateTime.now(),
+    ),
   ];
 
-  final controller = WallpaperController(storageService: storage, wallpaperService: wallpaperService);
+  final controller = WallpaperController(
+    storageService: storage,
+    wallpaperService: wallpaperService,
+  );
   await controller.initialize();
 
   final success = await controller.shuffleNext();
@@ -121,10 +139,10 @@ test('shuffleNext advances wallpaper and saves active id', () async {
 
 ---
 
-## 4. Writing Widget Tests
+## 4. Widget Tests
 
 When testing UI screens:
-1. Wrap the widget in a `MaterialApp` configured with Wall Tap's dark theme:
+1. Wrap the widget in a `MaterialApp` configured with dark theme:
    ```dart
    Widget buildTestableWidget(Widget child) {
      return MaterialApp(
@@ -135,15 +153,15 @@ When testing UI screens:
    }
    ```
 2. Inject a configured `WallpaperController`.
-3. Use `tester.pumpWidget()`, followed by `tester.pumpAndSettle()` to wait for animations and transitions to complete.
-4. Verify element presence using `find.text()`, `find.byIcon()`, or `find.byType()`.
+3. Call `tester.pumpWidget()`, followed by `tester.pumpAndSettle()` to complete animations.
+4. Verify elements using `find.text()`, `find.byIcon()`, or `find.byType()`.
 5. Test interactions using `await tester.tap(...)` and `await tester.pumpAndSettle()`.
 
 ---
 
 ## 5. Execution Commands
 
-### Run Complete Test Suite
+### Run Full Test Suite
 ```bash
 flutter test
 ```
@@ -153,14 +171,14 @@ flutter test
 flutter test test/wallpaper_controller_test.dart
 ```
 
-### Run with Coverage Generation
+### Run with Coverage
 ```bash
 flutter test --coverage
 ```
-*Outputs LCOV report to `coverage/lcov.info`.*
+Outputs LCOV report to `coverage/lcov.info`.
 
 ### Run Static Analysis
 ```bash
 dart analyze
 ```
-*Ensures compliance with `flutter_lints` rules in `analysis_options.yaml`.*
+Verifies rules in `analysis_options.yaml`.

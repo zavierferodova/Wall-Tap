@@ -1,79 +1,59 @@
 # Wall Tap
 
-<p align="center">
-  <b>A sleek, high-performance Android wallpaper manager and interactive home screen widget suite built with Flutter & Kotlin.</b>
-</p>
+An Android wallpaper manager and home screen widget application built with Flutter and Kotlin. Wall Tap schedules automated wallpaper changes, organizes wallpapers into albums, and provides interactive launcher widgets for cycling wallpapers and photos directly from the home screen.
 
 ---
 
-## Overview
+## Features
 
-**Wall Tap** turns your Android device into a dynamic gallery. Designed around an OLED-optimized dark aesthetic, Wall Tap lets you curate wallpaper collections, create custom albums, rotate home and lock screen wallpapers on scheduled intervals, and place interactive widgets on your Android launcher for instant shuffling.
-
-```
-┌─────────────────────────────────────────────────────────────┐
-│  STUDIO       GALLERY       WIDGETS       SETTINGS          │
-│                                                             │
-│  • Instant Wallpaper Shuffle                                │
-│  • Dual-Engine Architecture (Flutter UI + Kotlin Engine)    │
-│  • Home Screen Widgets (Shuffle & Album Frame)              │
-│  • Battery-Friendly Exact Alarms & Doze Mode Support        │
-│  • Tactile Haptics & Glassmorphic OLED Design               │
-└─────────────────────────────────────────────────────────────┘
-```
-
----
-
-## Key Features
-
-- **Studio Tab**: One-tap wallpaper shuffle with tactile haptics, live artwork preview, rotation interval slider (1 min to 24 hr / daily), target screen configuration (Home / Lock / Both), and scaling mode adjustments (Full / Crop / Fit).
-- **Gallery & Custom Albums**: Fast two-column wallpaper grid with resolution tags, batch multi-selection mode (batch include, exclude, and delete), and custom album organization.
+- **Studio**: Manual wallpaper rotation with tactile feedback, current wallpaper preview, automated interval scheduling (1m, 3m, 5m, 10m, 15m, 30m, 45m, 1h, 3h, 6h, 12h, 24h), target screen selection (Home, Lock, Both), and image scaling modes (Center Crop, Fit, Full).
+- **Library & Custom Albums**: Multi-column wallpaper grid with resolution tags, batch selection mode (batch include, exclude, delete), and custom album management.
 - **Home Screen Widgets**:
-  - **Wall Tap Shuffle**: Launcher widget with upcoming wallpaper thumbnail preview, smart Next/Shuffle button respecting random/ordered settings, and direct access to settings.
-  - **Album Display Widget**: Interactive home screen photo frame displaying active album photos with tap-to-reveal controls for advancing/shuffling photos according to album order settings.
-- **Interactive Full-Screen Preview**: Pan and pinch zoom up to 5x, double-tap 2.5x smart zoom, full resolution inspection, and one-tap "Set as Current Wallpaper".
-- **Background Execution Reliability**: AlarmManager exact alarms (`RTC_WAKEUP`), reboot recovery (`BOOT_COMPLETED`), and battery optimization exemption request.
+  - **Wall Tap Shuffle**: Launcher widget displaying a preview of the upcoming wallpaper with a one-tap shuffle button.
+  - **Album Display Widget**: Launcher photo frame displaying photos from a selected album with on-widget controls for manual advancing and automated background rotation.
+- **Full-Screen Preview**: Pan and pinch zoom from 1.0x to 5.0x, double-tap zoom to 2.5x, file metadata display, and one-tap wallpaper setting.
+- **Background Reliability**: Android `AlarmManager` exact wakeup alarms (`RTC_WAKEUP`), device reboot recovery (`BOOT_COMPLETED`), and battery optimization exemption requests.
 
 ---
 
-## Tech Stack & Architecture
+## Technical Stack & Architecture
 
-- **Flutter 3.12+ (Dart 3.12+)**: Pure Material 3 UI layer, `ChangeNotifier` state management, custom physics animations (`PressableScale`), and glassmorphism (`BackdropFilter`).
-- **Kotlin Native Android Engine**:
-  - `WallpaperManager` multi-screen flag integration (`FLAG_SYSTEM`, `FLAG_LOCK`).
-  - Sampled bitmap decoding (`inSampleSize`) and memory-safe scaling to prevent OOM errors with 4K/8K images.
-  - Native `AppWidgetProvider` implementations for interactive home screen widgets.
-  - Storage Access Framework (SAF) folder picker (`ACTION_OPEN_DOCUMENT_TREE`).
-  - `AlarmManager` exact scheduling and Doze mode handling.
-- **IPC Bridge**: Strongly-typed `MethodChannel` (`com.walltap.app/wallpaper`) and synchronized `SharedPreferences`.
+- **Flutter & Dart**: Material 3 presentation layer, `ChangeNotifier` state management, custom touch feedback (`PressableScale`), and dark theme tokens.
+- **Kotlin Android Native Layer**:
+  - `WallpaperManager` screen targeting (`FLAG_SYSTEM`, `FLAG_LOCK`).
+  - Sampled bitmap decoding (`inSampleSize`) to prevent out-of-memory errors on 4K and 8K wallpapers.
+  - Native `AppWidgetProvider` implementations for launcher widgets.
+  - Storage Access Framework folder picker (`ACTION_OPEN_DOCUMENT_TREE`).
+  - `AlarmManager` exact scheduling and Doze mode compatibility.
+- **Inter-Process Communication**: Typed `MethodChannel` (`com.walltap.app/wallpaper`) and synchronized `SharedPreferences` (`FlutterSharedPreferences`).
 
 ---
 
 ## Documentation Index
 
-Comprehensive guides for human developers, open-source contributors, and AI agents are organized in the [`docs/`](docs/) directory:
+Detailed architectural and technical guides are located in the [`docs/`](docs/) directory:
 
-| Document                                          | Title                                                                     | Description                                                                                                       |
-| :------------------------------------------------ | :------------------------------------------------------------------------ | :---------------------------------------------------------------------------------------------------------------- |
-| [**01**](docs/01-architecture.md)                 | [**System Architecture & Bridge**](docs/01-architecture.md)               | High-level architecture, component layers, `MethodChannel` API specification, and sequence diagrams.              |
-| [**02**](docs/02-android-native-integration.md)   | [**Android Native Integration**](docs/02-android-native-integration.md)   | Deep dive into Kotlin engine, `WallpaperHelper`, AppWidgets, exact alarms, SAF picker, and permissions.           |
-| [**03**](docs/03-state-management-and-storage.md) | [**State Management & Storage**](docs/03-state-management-and-storage.md) | `WallpaperController`, app lifecycle sync, exhaustive `SharedPreferences` key registry, and file storage.         |
-| [**04**](docs/04-features.md)                     | [**Application Features & User Flows**](docs/04-features.md)              | Detailed walkthrough of Studio, Gallery, Albums, Widgets, Settings, and interactive dialogs.                      |
-| [**05**](docs/05-ui-and-design-system.md)         | [**UI Architecture & Design System**](docs/05-ui-and-design-system.md)    | OLED dark color tokens, typography scale, glassmorphic navigation bar, and haptic physics.                        |
-| [**06**](docs/06-testing-guide.md)                | [**Testing Strategy & Quality Assurance**](docs/06-testing-guide.md)      | Test suite overview, test fakes (`FakeStorageService`, `FakeWallpaperService`), unit/widget tests, and commands.  |
-| [**07**](docs/07-developer-guide.md)              | [**Developer Setup & Build Guide**](docs/07-developer-guide.md)           | Environment prerequisites, running the app, debugging native code, building release APK/AAB, and troubleshooting. |
-| [**08**](docs/08-ai-agent-guidelines.md)          | [**AI Agent Development Guidelines**](docs/08-ai-agent-guidelines.md)     | Invariants, dual-engine sync rules, memory bounds, hot reload policies, and guardrails for AI coding agents.      |
+| Document | Title | Description |
+| :--- | :--- | :--- |
+| [**01**](docs/01-architecture.md) | [System Architecture & Bridge](docs/01-architecture.md) | Architecture layers, component responsibilities, `MethodChannel` specification, and sequence diagrams. |
+| [**02**](docs/02-android-native-integration.md) | [Android Native Integration](docs/02-android-native-integration.md) | Kotlin implementation, `WallpaperHelper`, AppWidgets, exact alarms, SAF picker, and permissions. |
+| [**03**](docs/03-state-management-and-storage.md) | [State Management & Storage](docs/03-state-management-and-storage.md) | `WallpaperController`, lifecycle synchronization, `SharedPreferences` key registry, and file storage. |
+| [**04**](docs/04-features.md) | [Application Features & User Flows](docs/04-features.md) | User workflows for Studio, Library, Albums, Widgets, Settings, and interactive dialogs. |
+| [**05**](docs/05-ui-and-design-system.md) | [UI Architecture & Design System](docs/05-ui-and-design-system.md) | Color tokens, typography scale, bottom navigation bar specifications, and touch feedback. |
+| [**06**](docs/06-testing-guide.md) | [Testing Strategy & Quality Assurance](docs/06-testing-guide.md) | Test suite breakdown (73 tests), test fakes pattern, unit/widget tests, and commands. |
+| [**07**](docs/07-developer-guide.md) | [Developer Setup & Build Guide](docs/07-developer-guide.md) | Environment setup, physical device debugging, release APK/AAB builds, and troubleshooting. |
+| [**08**](docs/08-ai-agent-guidelines.md) | [AI Agent Development Guidelines](docs/08-ai-agent-guidelines.md) | Architecture invariants, platform channel stability, memory bounds, and coding standards. |
 
 ---
 
-## Quickstart
+## Getting Started
 
 ### Prerequisites
 
 - Flutter SDK `^3.12.2`
 - Android SDK (API level 21 to 34, JDK 17)
 
-### Installation & Run
+### Installation & Execution
 
 ```bash
 # Clone repository
@@ -86,15 +66,15 @@ flutter pub get
 # Run test suite
 flutter test
 
-# Run application on connected Android device or emulator
+# Run application on a connected Android device or emulator
 flutter run
 ```
 
 ---
 
-## Quality Assurance
+## Automated Verification
 
-Wall Tap maintains automated tests covering model serialization, controller business logic, and UI screens:
+Wall Tap includes automated unit and widget tests covering models, controller logic, and user interface components:
 
 ```bash
 # Run all tests
@@ -106,6 +86,6 @@ dart analyze
 
 ---
 
-## Creator
+## Author
 
 Developed by **Zavier Ferodova Al Fitroh**

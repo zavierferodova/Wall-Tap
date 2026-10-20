@@ -1,20 +1,20 @@
 # 08 - AI Agent Development Guidelines & Guardrails
 
-This document defines critical rules, architecture invariants, memory constraints, and quality standards for AI coding agents developing, refactoring, or extending Wall Tap.
+Rules, architecture invariants, memory constraints, and quality standards for AI coding agents developing, refactoring, or extending Wall Tap.
 
 ---
 
-## 1. Proactive Flutter Hot Reload Rule
+## 1. Flutter Hot Reload Policy
 
-Whenever modifying any `.dart` file under `lib/`:
+When modifying `.dart` files under `lib/`:
 1. **When to Skip**:
-   - Files outside `lib/` (e.g., `test/**`, `docs/**`, `android/**`).
-   - Changes that only affect comments, documentation, or whitespace.
+   - Files outside `lib/` (e.g. `test/**`, `docs/**`, `android/**`).
+   - Edits limited to comments, documentation, or whitespace.
 2. **Discover & Connect**:
-   - Discover active running application instances using the `dtd` tool (or Dart MCP server).
-3. **Trigger Hot Reload / Hot Restart**:
-   - Execute `hot_reload` immediately after making changes to UI widgets or simple methods.
-   - Execute `hot_restart` if fundamental logic, state initialization (`initState`), global/static state, or `main()` was modified.
+   - Check for running application instances using the `dtd` tool or Dart MCP server.
+3. **Execute Hot Reload or Hot Restart**:
+   - Run `hot_reload` immediately after editing UI widgets or helper methods.
+   - Run `hot_restart` when changing core logic, `initState`, global state, or `main()`.
 4. **App Not Running**:
    - If no app is running, proceed without blocking code edits.
 
@@ -36,8 +36,8 @@ graph LR
 ```
 
 ### Invariant Rules
-- **Prefix Rule**: Kotlin SharedPreferences keys use the `"flutter."` prefix (e.g., `"flutter.walltap_current_index"`).
-- **Zero-Drift Policy**: Never rename or add a preference key in `StorageService.dart` without simultaneously updating:
+- **Prefix Rule**: Kotlin SharedPreferences keys use the `"flutter."` prefix (e.g. `"flutter.walltap_current_index"`).
+- **Zero-Drift Policy**: Never rename or add a preference key in `StorageService.dart` without updating:
   1. `android/app/src/main/kotlin/com/zavierdev/walltap/MainActivity.kt`
   2. `android/app/src/main/kotlin/com/zavierdev/walltap/WidgetProvider.kt`
   3. `android/app/src/main/kotlin/com/zavierdev/walltap/AlbumWidgetProvider.kt`
@@ -50,20 +50,20 @@ graph LR
 The `MethodChannel` name is **`com.walltap.app/wallpaper`**.
 
 - When adding a new platform method, declare it in `WallpaperService.dart`, handle it in `MainActivity.kt`'s `setMethodCallHandler`, update `docs/01-architecture.md`, and add a mock handler in `FakeWallpaperService` (`test/wallpaper_controller_test.dart`).
-- Never change method names or expected argument types without updating all call sites.
+- Never change method names or parameter signatures without updating all call sites.
 
 ---
 
 ## 4. Memory Safety & Bitmap Bounds
 
-Wallpapers frequently exceed 4K/8K resolution (e.g., 3840x2160 or 7680x4320). Unconstrained loading causes fatal `OutOfMemoryError` crashes on Android.
+Wallpapers frequently exceed 4K or 8K resolution (e.g. 3840x2160 or 7680x4320). Unconstrained decoding triggers fatal `OutOfMemoryError` crashes on Android.
 
 ### Rules for Image Handling
 1. **Dart UI Code**:
-   - Use `Image.file(..., cacheWidth: ..., cacheHeight: ...)` or standard thumbnail constraints when rendering gallery grids.
-   - For metadata extraction, use `StorageService.getImageDimensions` which uses `instantiateImageCodec` without allocating full raw pixel arrays.
+   - Use `Image.file(..., cacheWidth: ..., cacheHeight: ...)` or thumbnail constraints when rendering gallery grids.
+   - For metadata extraction, use `StorageService.getImageDimensions` which uses `instantiateImageCodec` without allocating full pixel arrays.
 2. **Kotlin Native Code**:
-   - **Never** call `BitmapFactory.decodeFile()` without setting `inJustDecodeBounds = true` first to compute `inSampleSize`.
+   - Never call `BitmapFactory.decodeFile()` without setting `inJustDecodeBounds = true` first to compute `inSampleSize`.
    - Use `Bitmap.Config.RGB_565` for widget thumbnails to halve memory usage compared to `ARGB_8888`.
    - Explicitly recycle temporary bitmaps (`scaledBitmap.recycle()`) once submitted to `WallpaperManager` or `RemoteViews`.
 
@@ -73,10 +73,10 @@ Wallpapers frequently exceed 4K/8K resolution (e.g., 3840x2160 or 7680x4320). Un
 
 1. **Unidirectional Data Flow**:
    - Views must never mutate `_items`, `_albums`, or `_config` directly.
-   - All state mutations must route through `WallpaperController` methods which handle persistence and call `notifyListeners()`.
+   - All state mutations must route through `WallpaperController` methods which handle persistence and invoke `notifyListeners()`.
 2. **App Lifecycle Observer**:
    - Do not remove or bypass the `WidgetsBindingObserver` in `MainScreen`.
-   - `controller.reloadFromStorage()` is essential for syncing background widget rotations into the active UI upon app resume.
+   - `controller.reloadFromStorage()` is required to sync background widget rotations into the active UI upon app resume.
 3. **Deletion Cascades**:
    - When deleting a wallpaper, always use `controller.deleteItem(id)` or `controller.deleteItems(ids)` to guarantee that physical files, album references, active wallpaper IDs, playlist caches, and home screen widgets are updated in a single atomic sequence.
 
@@ -89,19 +89,31 @@ Wallpapers frequently exceed 4K/8K resolution (e.g., 3840x2160 or 7680x4320). Un
    - Primary surface containers must use `#16181F` or `#161822`.
    - Primary brand accent must be `#FFFF3B30` (Crimson).
 2. **Tactile Micro-Interactions**:
-   - Wrap all interactive cards, buttons, and grid tiles in `PressableScale`.
+   - Wrap interactive cards, buttons, and grid tiles in `PressableScale`.
    - Trigger appropriate haptic feedback (`selectionClick` for toggles, `mediumImpact` for CTAs and mode switches).
 3. **Status Badge Rule**:
-   - `CURRENT` badge (Crimson): Only render when image matches active device wallpaper.
-   - `EXCLUDED` badge (Slate): Only render when item is disabled from rotation.
-   - Active items must remain **clean and badge-free**.
+   - `CURRENT` badge (Crimson): Render only when image matches active device wallpaper.
+   - `EXCLUDED` badge (Slate): Render only when item is disabled from rotation.
+   - Active items must remain unbadged and clean.
 4. **Bottom Nav Clearance**:
-   - All scrollable views must include a bottom padding of at least `100pt` to `120pt` to avoid occlusion by the floating glass bar.
+   - All scrollable views must include bottom padding of at least `100pt` to `120pt` to avoid occlusion by the floating navigation bar.
 
 ---
 
-## 7. Automated Test Discipline
+## 7. Automated Verification Discipline
 
-- **Run Tests Before Finishing**: Every AI agent turn that modifies business logic or UI must run `flutter test` to ensure all 60+ tests pass.
-- **Add Tests for New Features**: When adding controller methods or UI behaviors, write corresponding tests in `test/` using `FakeStorageService` and `FakeWallpaperService`.
+- **Run Tests Before Finishing**: Every change that touches logic or UI must pass all 73 tests via `flutter test`.
+- **Add Tests for New Features**: When adding controller methods or UI behaviors, add corresponding tests in `test/` using `FakeStorageService` and `FakeWallpaperService`.
 - **Static Analysis**: Verify `dart analyze` reports zero errors and zero warnings.
+
+<!-- antislop:start -->
+## antislop
+For UI, copy, people, mobile layout, or code comments work, load the antislop skill for the task:
+- Core filter, always on: `antislop`
+- UI / visual: `antislop-ui`
+- Copy & text: `antislop-copywriting`
+- People: `antislop-human`
+- Mobile / responsive: `antislop-layoutmobile`
+- Code comments: `antislop-code`
+Before starting, ask the user when antislop applies: during the work, or after it is done.
+<!-- antislop:end -->

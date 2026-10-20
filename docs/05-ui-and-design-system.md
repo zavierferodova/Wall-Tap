@@ -1,22 +1,22 @@
 # 05 - UI Architecture & Design System
 
-This document outlines the visual language, design system tokens, typography rules, component architecture, and tactile micro-interactions in Wall Tap. It is based on the application's primary design document (`DESIGN.md`).
+Visual design tokens, typography specifications, component architecture, and tactile interactions in Wall Tap.
 
 ---
 
-## 1. Aesthetic Philosophy
+## 1. Aesthetic Foundations
 
-Wall Tap treats **wallpapers as hero artwork**. The user interface acts as a refined, high-performance frame designed to showcase digital art and photography without visual clutter.
+Wall Tap uses a dark, minimal aesthetic to focus attention on wallpaper artwork.
 
 ### Core Principles
-1. **Dark-First, OLED Optimization**: Obsidian and charcoal surfaces (`#0D0E12`, `#16181F`) reduce battery draw on mobile OLED screens while maximizing perceived contrast and color punch of wallpaper imagery.
-2. **Content-First Simplicity**: Edge-to-edge media cards eliminate heavy frames. Active wallpapers remain completely clean and unbadged.
-3. **Glassmorphism & Layered Depth**: Translucent frosted glass overlays (`BackdropFilter` with Gaussian blur $\sigma = 16$) elevate navigation and controls above content layers.
-4. **Tactile Scale Physics & Haptics**: Every interactive card, button, and tab provides physical tactile feedback via scale compression (`PressableScale`) paired with native device haptics.
+1. **OLED Optimization**: Dark obsidian surfaces (`#0D0E12`, `#16181F`) conserve battery life on mobile OLED displays while providing high contrast against images.
+2. **Content-First Simplicity**: Edge-to-edge media cards eliminate heavy frames. Active wallpapers remain unbadged and clean.
+3. **Layered Depth with Frosted Overlays**: Semi-transparent frosted glass overlays (`BackdropFilter` with Gaussian blur $\sigma = 16$) position navigation and controls above content layers.
+4. **Tactile Touch Feedback**: Interactive cards, buttons, and tabs provide physical feedback through scale compression (`PressableScale`) paired with device haptics.
 
 ---
 
-## 2. Color System & Design Tokens
+## 2. Color System & Tokens
 
 ### 2.1 Color Palette Table
 
@@ -25,15 +25,15 @@ Wall Tap treats **wallpapers as hero artwork**. The user interface acts as a ref
 | **Scaffold Background** | `#0D0E12` | Root application canvas for all tabs and screens. |
 | **Surface Card** | `#16181F` | Primary container surface (wallpaper cards, action sheets). |
 | **Surface Secondary** | `#161822` | Modal sheets, dialog containers, settings cards. |
-| **Surface Elevated** | `#1B1D26` | Confirmation dialogs and elevated popups. |
+| **Surface Elevated** | `#1B1D26` | Confirmation dialogs and popups. |
 | **Surface Highest** | `#1F222B` | Hover states and interactive selection tiles. |
 | **Bottom Bar Glass** | `#161824` (80% / `0xCC`) | Floating navigation bar container with 16px background blur. |
 | **Border Subtle** | `#242834` | 1.0px structural dividers and card outlines. |
 | **Border Nav / Header** | `#2B3042` | Navigation bar perimeter stroke (1.2px). |
 | **Primary Crimson** | `#FFFF3B30` | Active tabs, primary CTAs, delete alerts, glowing pills. |
-| **Secondary Warm** | `#FFFF5E3A` | Warm gradient companion for primary accents. |
-| **Success / Include** | `#34C759` | Emerald Green: include actions, success toasts, battery good. |
-| **Warning / Alert** | `#FF9F0A` | Amber Orange: exclude actions, battery alerts, warnings. |
+| **Secondary Warm** | `#FFFF5E3A` | Warm companion accent for primary accents. |
+| **Success / Include** | `#34C759` | Emerald green: include actions, success toasts, battery healthy. |
+| **Warning / Alert** | `#FF9F0A` | Amber orange: exclude actions, battery alerts, warnings. |
 | **Destructive Carmine**| `#FF453A` | Destructive confirmation buttons and delete icons. |
 | **Text Primary** | `#FFFFFF` / `#F0F1F5` | High-contrast headings and primary labels. |
 | **Text Secondary** | `rgba(255, 255, 255, 0.70)`| Subheadings, card labels, metadata descriptors. |
@@ -57,73 +57,58 @@ Metadata / Spec       10.5pt / 1.0 Weight: 600 - 700         Tracking: 0.0px
 
 ---
 
-## 4. Key Component Architecture
+## 4. Component Specifications
 
-### 4.1 Floating Glassmorphic Bottom Navigation Bar
+### 4.1 Floating Glass Bottom Navigation Bar
 Implemented in `MainScreen` (`lib/views/main_screen.dart`):
 - **Container**: Suspended inside `SafeArea` with `EdgeInsets.fromLTRB(16, 0, 16, 16)`.
-- **Dimensions**: `64pt` height, `BorderRadius.circular(32)`.
+- **Dimensions**: `64pt` height, `BorderRadius.circular(32)`. Max width constrained to `540pt`.
 - **Material Backdrop**: `BackdropFilter` with `sigmaX: 16, sigmaY: 16` over `Color(0xCC161824)`.
 - **Border**: `Border.all(color: Color(0xFF2B3042), width: 1.2)`.
-- **Interactive State**: The selected tab animates smoothly into an expanded crimson pill (`#FFFF3B30`, `BorderRadius.circular(24)`) with drop shadow glow, revealing the label alongside the icon.
-
-```dart
-ClipRRect(
-  borderRadius: BorderRadius.circular(32),
-  child: BackdropFilter(
-    filter: ImageFilter.blur(sigmaX: 16, sigmaY: 16),
-    child: Container(
-      height: 64,
-      decoration: BoxDecoration(
-        color: const Color(0xCC161824),
-        borderRadius: BorderRadius.circular(32),
-        border: Border.all(color: const Color(0xFF2B3042), width: 1.2),
-      ),
-      // ...
-    ),
-  ),
-)
-```
+- **Tabs**: Studio, Library, Widgets, Settings.
+- **Active State**: Selected tab expands into a red pill (`#FFFF3B30`, `BorderRadius.circular(24)`), displaying the tab label alongside the icon.
 
 ### 4.2 Wallpaper Card Architecture
 - **Shape**: `BorderRadius.circular(16)`.
-- **Gradient Scrim**: Bottom 60pt linear gradient (`Colors.black.withAlpha(190)` to `transparent`) ensures text readability over light-colored imagery.
+- **Gradient Scrim**: Bottom 60pt linear gradient (`Colors.black.withAlpha(190)` to `transparent`) ensures text contrast over light imagery.
 - **Bottom-Left Pill**: Displays resolution (e.g. `1080x2400`) in a semi-transparent black pill (`Colors.black.withAlpha(160)`).
-- **Bottom-Right Toggle**: Circular button (`PressableScale`):
+- **Bottom-Right Toggle**: Circular button wrapped in `PressableScale`:
   - Active: Emerald green circle (`#34C759`) with checkmark.
   - Excluded: Slate charcoal circle with minus icon.
 - **Status Badges**:
-  - **`CURRENT`**: Top-left crimson badge (`#FFFF3B30`) shown **only** if the item matches the current device wallpaper.
-  - **`EXCLUDED`**: Top-left slate dark badge shown **only** if the wallpaper is excluded from rotation.
-  - **Active Items**: Clean and badge-free.
+  - `CURRENT`: Top-left crimson badge (`#FFFF3B30`) shown only when the item matches the active device wallpaper.
+  - `EXCLUDED`: Top-left slate dark badge shown only when the wallpaper is excluded from rotation.
+  - Active Items: Unbadged.
+
+### 4.3 Placed Widgets Grid & Controls
+- **Layout**: 2-column square grid layout displaying placed widget previews and configuration cards.
+- **Interval Indicators**: Displays active rotation schedule (e.g. 1m, 3m, 5m, 10m, 15m, 30m, 45m, 1h, 3h, 6h, 12h, 24h, or Manual).
+- **Buttons**: Solid, flat buttons without gradient overlays.
+- **Order Selection**: Crimson radio theme for shuffle and order selection.
+- **Scrollbar**: Displayed on the right edge of the screen.
 
 ---
 
 ## 5. Micro-Interactions, Motion & Haptics
 
-### 5.1 `PressableScale` Physics Widget
-All interactive cards, buttons, and tab tiles are wrapped in `PressableScale` (`lib/views/widgets/pressable_scale.dart`):
-- **Down Scale**: Compresses to `0.96` scale upon touch-down.
+### 5.1 `PressableScale`
+Interactive cards, buttons, and tab tiles are wrapped in `PressableScale` (`lib/views/widgets/pressable_scale.dart`):
+- **Scale Factor**: Compresses to `0.96` on touch-down.
 - **Duration**: `100ms` forward, `100ms` reverse.
 - **Curve**: `Curves.easeOutCubic`.
-- Provides an immediate, tactile response without sluggish spring lag.
 
 ### 5.2 Haptic Feedback Matrix
-Haptic feedback is triggered intentionally for specific user actions:
-
-| Action | Haptic Event | Purpose |
-| :--- | :--- | :--- |
-| **Tab Navigation Switch** | `HapticFeedback.selectionClick()` | Lightweight tick when changing tabs. |
-| **Toggle Active / Exclude** | `HapticFeedback.selectionClick()` | Tactile feedback for toggling status. |
-| **Enter Multi-Selection Mode** | `HapticFeedback.mediumImpact()` | Distinctive bump when initiating multi-select. |
-| **Select / Deselect Item** | `HapticFeedback.selectionClick()` | Crisp click when toggling item in selection list. |
-| **Primary CTA (Shuffle / Set)** | `HapticFeedback.mediumImpact()` | Solid impact confirming immediate wallpaper change. |
+- Tab Navigation Switch: `HapticFeedback.selectionClick()`
+- Toggle Active / Exclude: `HapticFeedback.selectionClick()`
+- Enter Multi-Selection Mode: `HapticFeedback.mediumImpact()`
+- Select / Deselect Item: `HapticFeedback.selectionClick()`
+- Primary Action (Shuffle / Set): `HapticFeedback.mediumImpact()`
 
 ---
 
 ## 6. Layout & Spacing Rules
 
-1. **8-Point Grid System**: All margins, padding, and spacing increments adhere to multiples of 8 (`8`, `16`, `24`, `32`, `40`, `48`) or micro-increments of 4 (`4`, `12`).
+1. **8-Point Grid**: Margins, padding, and spacing adhere to multiples of 8 (`8`, `16`, `24`, `32`, `40`, `48`) or micro-increments of 4 (`4`, `12`).
 2. **Edge Margins**: Standard horizontal padding across views is `16pt` to `18pt`.
-3. **Bottom Navigation Inset**: Scrollable views (`ListView`, `GridView`, `SingleChildScrollView`) include a bottom padding of `100pt` to `120pt` to prevent content from being covered by the floating navigation bar.
-4. **Minimum Touch Targets**: All interactive buttons meet the $44 \times 44\text{ pt}$ accessibility requirement or expand their hitbox via `HitTestBehavior.opaque`.
+3. **Bottom Navigation Clearance**: Scrollable views include bottom padding of `100pt` to `120pt` so the floating navigation bar does not cover content.
+4. **Minimum Touch Targets**: All interactive controls maintain a minimum touch target of 44x44 pt or expand their hitbox via `HitTestBehavior.opaque`.

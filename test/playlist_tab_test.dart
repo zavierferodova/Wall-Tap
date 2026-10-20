@@ -130,7 +130,6 @@ void main() {
     expect(find.text('Nature Vibe'), findsOneWidget);
     expect(find.text('Anime Collection'), findsOneWidget);
     expect(find.text('Minimalist Architecture'), findsOneWidget);
-    expect(find.text('3 albums'), findsOneWidget);
 
     // Search bar is visible
     expect(find.byType(TextField), findsOneWidget);
@@ -143,7 +142,6 @@ void main() {
     expect(find.text('Anime Collection'), findsOneWidget);
     expect(find.text('Nature Vibe'), findsNothing);
     expect(find.text('Minimalist Architecture'), findsNothing);
-    expect(find.text('1 of 3 albums found'), findsOneWidget);
 
     // Suffix clear button appears
     final clearIcon = find.byIcon(Icons.close_rounded);
@@ -157,7 +155,6 @@ void main() {
     expect(find.text('Nature Vibe'), findsOneWidget);
     expect(find.text('Anime Collection'), findsOneWidget);
     expect(find.text('Minimalist Architecture'), findsOneWidget);
-    expect(find.text('3 albums'), findsOneWidget);
   });
 
   testWidgets('Shows no results state when query does not match and allows clearing', (tester) async {
@@ -183,7 +180,6 @@ void main() {
     expect(find.text('Cyberpunk'), findsNothing);
     expect(find.text('No albums found'), findsOneWidget);
     expect(find.textContaining('No albums match "Futuristic"'), findsOneWidget);
-    expect(find.text('0 of 1 albums found'), findsOneWidget);
 
     // Tap "Clear Search" button in empty state
     await tester.tap(find.text('Clear Search'));

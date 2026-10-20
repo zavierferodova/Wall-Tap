@@ -1,12 +1,12 @@
 # 01 - System Architecture & Bridge
 
-Wall Tap is a high-performance wallpaper manager and home screen widget application for Android built with Flutter and Kotlin. This document outlines the high-level system architecture, component layers, inter-process communication (IPC) via `MethodChannel`, and data flow sequences.
+Technical architecture, component layers, platform channel contracts, and data synchronization between Flutter and Android native code in Wall Tap.
 
 ---
 
-## 1. High-Level Architecture
+## 1. System Architecture
 
-Wall Tap adopts a decoupled, multi-tier architecture that splits responsibilities cleanly between the Flutter cross-platform presentation and state layer, and the Android native execution engine.
+Wall Tap separates concerns between the Flutter cross-platform presentation layer and the Android native execution engine.
 
 ```mermaid
 graph TD
@@ -47,62 +47,62 @@ graph TD
 
 ---
 
-## 2. Flutter Architecture
+## 2. Flutter Layer Structure
 
-### 2.1 Model-View-Controller / Service Pattern
-- **Models (`lib/models/`)**: Immutable data carriers (`WallpaperItem`, `Album`, `SlideshowConfig`, `AlbumWidgetConfig`). Models support serialization via `toMap()`/`fromMap()` and `toJson()`/`fromJson()`, along with immutable updating through `copyWith()`.
-- **Views (`lib/views/`)**: Render the user interface and bind to state:
-  - `MainScreen`: Hosts the persistent glassmorphic bottom navigation bar, manages active tab index (`Studio`, `Gallery`, `Widgets`, `Settings`), and listens to app lifecycle events.
-  - `slideshow/slideshow_tab.dart`: Studio tab for quick shuffles, auto-interval setup, target screen configuration, and scale type adjustments.
-  - `playlist/playlist_tab.dart`: Gallery tab hosting all wallpapers, batch multi-selection mode, and custom albums.
-  - `playlist/album_detail_screen.dart`: Dedicated album screen for managing wallpapers within a specific collection.
-  - `album_widgets/album_widgets_tab.dart`: Widget management tab for monitoring and configuring placed Android home screen widgets.
-  - `settings/settings_tab.dart`: System settings, battery optimization status, and app information.
-  - `widgets/`: Reusable components such as `PressableScale`, `WallpaperPreviewDialog`, and `WidgetGuideDialog`.
-- **Controller (`lib/controllers/wallpaper_controller.dart`)**: Single source of truth extending `ChangeNotifier`. Manages collection state, active album filtering, image imports, deletion cascades, and settings updates.
+### 2.1 Model, View, Controller & Services
+- **Models (`lib/models/`)**: Immutable data models (`WallpaperItem`, `Album`, `SlideshowConfig`, `AlbumWidgetConfig`). Models serialize via `toMap()`/`fromMap()` and `toJson()`/`fromJson()`, and support non-destructive mutation via `copyWith()`.
+- **Views (`lib/views/`)**: Render application screens and observe controller updates:
+  - `MainScreen`: Hosts the floating navigation bar, tracks active tab index (`Studio`, `Library`, `Widgets`, `Settings`), and handles app lifecycle events.
+  - `slideshow/slideshow_tab.dart`: Studio tab for manual wallpaper shuffle, timer intervals, target screen settings, and image scale modes.
+  - `playlist/playlist_tab.dart`: Library tab managing all wallpapers, multi-selection batch actions, and custom albums.
+  - `playlist/album_detail_screen.dart`: Album detail view for managing wallpapers in a specific collection.
+  - `album_widgets/album_widgets_tab.dart`: Widget management tab for monitoring placed home screen widgets.
+  - `settings/settings_tab.dart`: Battery optimization status and application information.
+  - `widgets/`: Reusable components including `PressableScale`, `WallpaperPreviewDialog`, and `WidgetGuideDialog`.
+- **Controller (`lib/controllers/wallpaper_controller.dart`)**: Extends `ChangeNotifier` as the single source of truth for UI state. Manages active items, album filtering, image imports, deletion cascades, and settings updates.
 - **Services (`lib/services/`)**:
-  - `StorageService`: Manages local file saving in `app_flutter/wallpapers/`, image dimension parsing via `dart:ui`, and key-value persistence in `SharedPreferences`.
-  - `WallpaperService`: Encapsulates all `MethodChannel` invocations to native Kotlin.
+  - `StorageService`: Manages local image storage in `app_flutter/wallpapers/`, pixel dimension parsing via `dart:ui`, and key-value persistence in `SharedPreferences`.
+  - `WallpaperService`: Encapsulates `MethodChannel` invocations to native Kotlin handlers.
 
 ---
 
-## 3. Native Android Architecture
+## 3. Android Native Architecture
 
-### 3.1 Kotlin Engine Responsibilities
-The native Android layer handles platform operations that cannot be performed reliably by Flutter in the background:
-1. **Direct System Wallpaper Manipulation**: Uses `android.app.WallpaperManager` to apply bitmaps to `FLAG_SYSTEM` (Home screen), `FLAG_LOCK` (Lock screen), or both.
-2. **Memory-Safe Bitmap Decoding & Scaling**: Custom sampling (`inSampleSize`) downsamples high-resolution images to match device screen bounds before applying transformations (`crop`, `fit`, `full`).
-3. **Home Screen AppWidgets**: Supports interactive widgets (`WidgetProvider` and `AlbumWidgetProvider`) that update directly from background alarms or user clicks on the home screen without launching the Flutter engine.
-4. **Reliable Alarm Scheduling**: Utilizes `AlarmManager.setExactAndAllowWhileIdle()` via `Scheduler` and `AlbumWidgetScheduler` to execute wallpaper rotations even in low-power idle states (Doze mode).
+### 3.1 Kotlin Engine Components
+The Android layer handles operations that must run natively in the background:
+1. **Wallpaper Application**: Interacts directly with `android.app.WallpaperManager` to apply bitmaps to `FLAG_SYSTEM` (Home screen), `FLAG_LOCK` (Lock screen), or both.
+2. **Sampled Bitmap Decoding**: Uses `BitmapFactory.Options.inSampleSize` to scale high-resolution images to device display dimensions before applying transformations (`crop`, `fit`, `full`), preventing memory overflow.
+3. **AppWidgets**: Implements `WidgetProvider` and `AlbumWidgetProvider` to render interactive home screen widgets using `RemoteViews` without launching the Flutter engine.
+4. **Alarm Scheduling**: Uses `AlarmManager.setExactAndAllowWhileIdle()` to run wallpaper rotations on exact intervals, including during Android Doze mode.
 
 ---
 
-## 4. MethodChannel Contract
+## 4. Platform Channel Contract
 
-Communication between Flutter and Kotlin occurs over the platform channel:
+Flutter and Kotlin communicate through a dedicated `MethodChannel`:
 - **Channel Name**: `com.walltap.app/wallpaper`
 
-### 4.1 Method API Specification
+### 4.1 Method Specifications
 
 | Method Name | Arguments | Return Type | Description |
 | :--- | :--- | :--- | :--- |
-| `setWallpaper` | `filePath` (String), `targetScreen` (String: `'both'`, `'home'`, `'lock'`), `scaleType` (String: `'full'`, `'crop'`, `'fit'`) | `Boolean` | Decodes image, scales it, applies to specified screen(s), and updates home screen widgets. |
-| `updateWidget` | *None* | `Boolean` | Refreshes all active `WidgetProvider` home screen widgets with current playlist data. |
-| `getDisplayDimensions` | *None* | `Map<String, Int>` (`width`, `height`) | Returns actual screen resolution in physical pixels for aspect ratio calculations. |
-| `updateSchedule` | `intervalMinutes` (Int) | `Boolean` | Sets or cancels `AlarmManager` repeating alarm for automatic wallpaper rotation. |
-| `isBatteryOptimizationIgnored`| *None* | `Boolean` | Checks if Wall Tap is whitelisted from Android battery optimizations. |
-| `requestIgnoreBatteryOptimizations` | *None* | `Boolean` | Prompts user to grant battery optimization exemption (`ACTION_REQUEST_IGNORE_BATTERY_OPTIMIZATIONS`). |
-| `pickFolderAndGetImages` | *None* | `List<String>` | Opens Android Storage Access Framework (SAF) folder picker and returns list of cached image paths. |
-| `getAlbumWidgets` | *None* | `List<Map<String, Any>>` | Returns configuration and status metadata for all active `AlbumWidgetProvider` instances on the home screen. |
-| `updateAlbumWidget` | `widgetId` (Int), `albumId` (String), `albumName` (String), `intervalMinutes` (Int), `isRandom` (Boolean) | `Boolean` | Saves widget configuration to SharedPreferences, schedules its timer, and refreshes the widget. |
-| `shuffleAlbumWidget` | `widgetId` (Int) | `Boolean` | Manually advances the specified album widget to its next image. |
-| `updateAllAlbumWidgets` | *None* | `Boolean` | Re-renders all album widgets placed on the home screen. |
+| `setWallpaper` | `filePath` (String), `targetScreen` (String: `'both'`, `'home'`, `'lock'`), `scaleType` (String: `'full'`, `'crop'`, `'fit'`) | `Boolean` | Decodes image, scales it, applies to target screens, and refreshes launcher widgets. |
+| `updateWidget` | None | `Boolean` | Refreshes all active `WidgetProvider` launcher widgets with current playlist data. |
+| `getDisplayDimensions` | None | `Map<String, Int>` (`width`, `height`) | Returns physical display dimensions in pixels. |
+| `updateSchedule` | `intervalMinutes` (Int) | `Boolean` | Schedules or cancels `AlarmManager` wakeup alarms for wallpaper rotation. |
+| `isBatteryOptimizationIgnored` | None | `Boolean` | Checks whether Wall Tap is exempted from battery optimizations. |
+| `requestIgnoreBatteryOptimizations` | None | `Boolean` | Prompts user to grant battery optimization exemption (`ACTION_REQUEST_IGNORE_BATTERY_OPTIMIZATIONS`). |
+| `pickFolderAndGetImages` | None | `List<String>` | Opens Android Storage Access Framework folder picker and returns list of cached image paths. |
+| `getAlbumWidgets` | None | `List<Map<String, Any>>` | Returns configuration metadata for all active `AlbumWidgetProvider` instances on the launcher. |
+| `updateAlbumWidget` | `widgetId` (Int), `albumId` (String), `albumName` (String), `intervalMinutes` (Int), `isRandom` (Boolean) | `Boolean` | Saves widget configuration to SharedPreferences, schedules its timer, and refreshes display. |
+| `shuffleAlbumWidget` | `widgetId` (Int) | `Boolean` | Manually advances the specified album widget to its next photo. |
+| `updateAllAlbumWidgets` | None | `Boolean` | Re-renders all album widgets placed on the home screen. |
 
 ---
 
-## 5. Sequence Diagrams
+## 5. Sequence Flows
 
-### 5.1 Manual Wallpaper Shuffle / Set Flow
+### 5.1 Manual Wallpaper Shuffle Flow
 
 ```mermaid
 sequenceDiagram
@@ -118,7 +118,7 @@ sequenceDiagram
     participant Widget as WidgetProvider
 
     User->>UI: Tap "Shuffle Next" or "Set as Current"
-    UI->>Controller: shuffleNext() / setCurrentWallpaper(item)
+    UI->>Controller: shuffleNext() or setCurrentWallpaper(item)
     Controller->>WService: setWallpaper(path, targetScreen, scaleType)
     WService->>Channel: invokeMethod('setWallpaper', {...})
     Channel->>Native: onMethodCall('setWallpaper')
@@ -131,12 +131,12 @@ sequenceDiagram
     Native-->>Channel: result.success(true)
     Channel-->>WService: true
     WService-->>Controller: true
-    Controller->>Controller: saveCurrentWallpaperId() & saveConfig()
+    Controller->>Controller: saveCurrentWallpaperId() and saveConfig()
     Controller->>UI: notifyListeners()
-    UI-->>User: Visual feedback & Haptic confirmation
+    UI-->>User: Visual feedback and haptic confirmation
 ```
 
-### 5.2 Background Scheduled Rotation Flow
+### 5.2 Scheduled Background Rotation Flow
 
 ```mermaid
 sequenceDiagram
@@ -149,13 +149,13 @@ sequenceDiagram
     participant WM as Android WallpaperManager
 
     Alarm->>Receiver: onReceive(ACTION_ALARM_TICK)
-    Receiver->>Prefs: Check isSlideshowEnabled & intervalMinutes
+    Receiver->>Prefs: Check isSlideshowEnabled and intervalMinutes
     alt Auto-shuffle is enabled
         Receiver->>Widget: handleNextWallpaper(context)
         Widget->>Prefs: Read playlist paths, currentIndex, targetScreen, scaleType
         Widget->>Helper: setDeviceWallpaper(context, nextPath, target, scale)
         Helper->>WM: Apply bitmap to system/lock screen
-        Widget->>Prefs: Update currentIndex & pre-calculate nextIndex
+        Widget->>Prefs: Update currentIndex and pre-calculate nextIndex
         Widget->>Widget: updateAllWidgets(context)
         Receiver->>Alarm: Schedule next alarm tick (intervalMinutes)
     else Disabled or Interval <= 0
@@ -165,8 +165,8 @@ sequenceDiagram
 
 ---
 
-## 6. Shared State & Inter-Process Synchronization
+## 6. Shared State Synchronization
 
-Because Android widgets and background alarms execute in independent Android processes or broadcast contexts without an active Flutter runtime, state is synchronized via `SharedPreferences`:
-- Native Kotlin reads and writes to SharedPreferences using filename `"FlutterSharedPreferences"` and keys prefixed with `"flutter."` (e.g., `flutter.walltap_current_index`).
-- When the user returns to the Flutter application, `MainScreen`'s `WidgetsBindingObserver` detects `AppLifecycleState.resumed` and triggers `controller.reloadFromStorage()`. This ensures any wallpaper shifts or widget changes performed outside the app are reflected in the UI immediately.
+Android widgets and background alarms run independently of the Flutter process. State synchronization occurs via `SharedPreferences`:
+- Kotlin reads and writes to XML preferences file `"FlutterSharedPreferences"` using keys prefixed with `"flutter."` (e.g. `flutter.walltap_current_index`).
+- When the user returns to the app, `MainScreen`'s `WidgetsBindingObserver` detects `AppLifecycleState.resumed` and calls `controller.reloadFromStorage()`, updating the Flutter UI to reflect any changes made by background routines.

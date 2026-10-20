@@ -112,7 +112,7 @@ void main() {
     );
 
     expect(find.text('Album Widgets'), findsOneWidget);
-    expect(find.text('Home Screen Photo Frames'), findsOneWidget);
+    expect(find.text('Home Screen Photo Frames'), findsNothing);
     expect(find.text('How to Add an Album Widget'), findsOneWidget);
     expect(find.text('Check Placed Widgets'), findsOneWidget);
 

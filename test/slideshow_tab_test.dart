@@ -345,8 +345,9 @@ void main() {
     // Verify indicator is displayed when custom option is selected
     expect(find.byKey(const Key('segment_interval_custom')), findsOneWidget);
     expect(find.text('3m'), findsOneWidget);
-    expect(find.textContaining('Custom interval active: 3 minutes'), findsOneWidget);
-    expect(find.textContaining('More options (3m)'), findsOneWidget);
+    expect(find.textContaining('Custom interval active'), findsNothing);
+    expect(find.text('More options'), findsOneWidget);
+    expect(find.textContaining('More options ('), findsNothing);
 
     // Tapping standard preset removes custom indicator
     await tester.tap(find.text('5m'));

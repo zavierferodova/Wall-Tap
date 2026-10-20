@@ -310,32 +310,15 @@ class _AlbumWidgetsTabState extends State<AlbumWidgetsTab> with WidgetsBindingOb
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                const Text(
-                  'Album Widgets',
-                  style: TextStyle(
-                    color: Colors.white,
-                    fontSize: 24,
-                    fontWeight: FontWeight.w800,
-                    letterSpacing: -0.5,
-                  ),
-                ),
-                Text(
-                  albumWidgets.isNotEmpty
-                      ? '${albumWidgets.length} active widget${albumWidgets.length == 1 ? '' : 's'} placed'
-                      : 'Home Screen Photo Frames',
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                  style: const TextStyle(
-                    color: Colors.white70,
-                    fontSize: 12.5,
-                    fontWeight: FontWeight.w500,
-                  ),
-                ),
-              ],
+          const Expanded(
+            child: Text(
+              'Album Widgets',
+              style: TextStyle(
+                color: Colors.white,
+                fontSize: 24,
+                fontWeight: FontWeight.w800,
+                letterSpacing: -0.5,
+              ),
             ),
           ),
           const SizedBox(width: 8),
