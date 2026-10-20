@@ -83,7 +83,7 @@ class _AlbumWidgetsTabState extends State<AlbumWidgetsTab> with WidgetsBindingOb
     final current = widgetConfig.intervalMinutes;
     final options = [
       (0, 'Manual (Tap only)'),
-      (1, 'Every 1 minute (Fast test)'),
+      (1, 'Every 1 minute'),
       (3, 'Every 3 minutes'),
       (5, 'Every 5 minutes'),
       (10, 'Every 10 minutes'),
@@ -114,6 +114,17 @@ class _AlbumWidgetsTabState extends State<AlbumWidgetsTab> with WidgetsBindingOb
                   mainAxisSize: MainAxisSize.min,
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
+                    Center(
+                      child: Container(
+                        width: 36,
+                        height: 4,
+                        margin: const EdgeInsets.only(bottom: 12),
+                        decoration: BoxDecoration(
+                          color: Colors.white24,
+                          borderRadius: BorderRadius.circular(2),
+                        ),
+                      ),
+                    ),
                     Padding(
                       padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
                       child: Text(
@@ -136,7 +147,11 @@ class _AlbumWidgetsTabState extends State<AlbumWidgetsTab> with WidgetsBindingOb
                         ),
                         trailing: current == opt.$1 ? const Icon(Icons.check, color: Color(0xFFFF3B30)) : null,
                         onTap: () {
-                          widget.controller.updateAlbumWidgetConfig(widgetConfig.copyWith(intervalMinutes: opt.$1));
+                          final latest = widget.controller.albumWidgets.firstWhere(
+                            (w) => w.widgetId == widgetConfig.widgetId,
+                            orElse: () => widgetConfig,
+                          );
+                          widget.controller.updateAlbumWidgetConfig(latest.copyWith(intervalMinutes: opt.$1));
                           Navigator.pop(ctx);
                         },
                       ),
@@ -172,6 +187,17 @@ class _AlbumWidgetsTabState extends State<AlbumWidgetsTab> with WidgetsBindingOb
                   mainAxisSize: MainAxisSize.min,
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
+                    Center(
+                      child: Container(
+                        width: 36,
+                        height: 4,
+                        margin: const EdgeInsets.only(bottom: 12),
+                        decoration: BoxDecoration(
+                          color: Colors.white24,
+                          borderRadius: BorderRadius.circular(2),
+                        ),
+                      ),
+                    ),
                     Padding(
                       padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
                       child: Text(
@@ -203,7 +229,11 @@ class _AlbumWidgetsTabState extends State<AlbumWidgetsTab> with WidgetsBindingOb
                           ? const Icon(Icons.check, color: Color(0xFFFF3B30))
                           : null,
                       onTap: () {
-                        widget.controller.updateAlbumWidgetConfig(widgetConfig.copyWith(
+                        final latest = widget.controller.albumWidgets.firstWhere(
+                          (w) => w.widgetId == widgetConfig.widgetId,
+                          orElse: () => widgetConfig,
+                        );
+                        widget.controller.updateAlbumWidgetConfig(latest.copyWith(
                           albumId: 'all_photos',
                           albumName: 'All Photos',
                         ));
@@ -227,7 +257,11 @@ class _AlbumWidgetsTabState extends State<AlbumWidgetsTab> with WidgetsBindingOb
                             ? const Icon(Icons.check, color: Color(0xFFFF3B30))
                             : null,
                         onTap: () {
-                          widget.controller.updateAlbumWidgetConfig(widgetConfig.copyWith(
+                          final latest = widget.controller.albumWidgets.firstWhere(
+                            (w) => w.widgetId == widgetConfig.widgetId,
+                            orElse: () => widgetConfig,
+                          );
+                          widget.controller.updateAlbumWidgetConfig(latest.copyWith(
                             albumId: album.id,
                             albumName: album.name,
                           ));
@@ -268,6 +302,91 @@ class _AlbumWidgetsTabState extends State<AlbumWidgetsTab> with WidgetsBindingOb
     return items[safeIndex];
   }
 
+  Widget _buildHeader(List<AlbumWidgetConfig> albumWidgets) {
+    return KeyedSubtree(
+      key: const Key('widgets_header'),
+      child: Padding(
+        padding: const EdgeInsets.fromLTRB(20, 12, 16, 6),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const Text(
+                  'Album Widgets',
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontSize: 24,
+                    fontWeight: FontWeight.w800,
+                    letterSpacing: -0.5,
+                  ),
+                ),
+                Text(
+                  albumWidgets.isNotEmpty
+                      ? '${albumWidgets.length} active widget${albumWidgets.length == 1 ? '' : 's'} placed'
+                      : 'Home Screen Photo Frames',
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: const TextStyle(
+                    color: Colors.white70,
+                    fontSize: 12.5,
+                    fontWeight: FontWeight.w500,
+                  ),
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(width: 8),
+          if (albumWidgets.isNotEmpty)
+            PressableScale(
+              onTap: _handleSyncAll,
+              child: Container(
+                constraints: const BoxConstraints(minHeight: 44),
+                padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+                decoration: BoxDecoration(
+                  color: const Color(0xFFFF3B30),
+                  borderRadius: BorderRadius.circular(12),
+                  boxShadow: [
+                    BoxShadow(
+                      color: const Color(0xFFFF3B30).withAlpha(80),
+                      blurRadius: 8,
+                      offset: const Offset(0, 2),
+                    ),
+                  ],
+                ),
+                alignment: Alignment.center,
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    if (_isSyncing)
+                      const SizedBox(
+                        width: 14,
+                        height: 14,
+                        child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white),
+                      )
+                    else
+                      const Icon(Icons.sync_rounded, color: Colors.white, size: 16),
+                    const SizedBox(width: 6),
+                    const Text(
+                      'Sync All',
+                      style: TextStyle(
+                        color: Colors.white,
+                        fontSize: 12,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+        ],
+      ),
+    ),
+  );
+}
+
   @override
   Widget build(BuildContext context) {
     return ListenableBuilder(
@@ -276,210 +395,47 @@ class _AlbumWidgetsTabState extends State<AlbumWidgetsTab> with WidgetsBindingOb
         final albumWidgets = widget.controller.albumWidgets;
 
         return Scaffold(
-      backgroundColor: const Color(0xFF0D0E12),
-      body: RefreshIndicator(
-        color: const Color(0xFFFF3B30),
-        backgroundColor: const Color(0xFF161824),
-        onRefresh: _handleRefresh,
-        child: CustomScrollView(
-          physics: const AlwaysScrollableScrollPhysics(parent: BouncingScrollPhysics()),
-          slivers: [
-            // Sleek Glassmorphic App Bar
-            SliverAppBar(
-              backgroundColor: const Color(0xFF0D0E12),
-              pinned: true,
-              expandedHeight: 110,
-              flexibleSpace: FlexibleSpaceBar(
-                titlePadding: const EdgeInsets.only(left: 20, bottom: 16),
-                title: const Text(
-                  'Album Widgets',
-                  style: TextStyle(
-                    color: Colors.white,
-                    fontSize: 22,
-                    fontWeight: FontWeight.w800,
-                    letterSpacing: -0.5,
-                  ),
-                ),
-              ),
-              actions: [
-                if (albumWidgets.isNotEmpty)
-                  Padding(
-                    padding: const EdgeInsets.only(right: 16),
-                    child: PressableScale(
-                      onTap: _handleSyncAll,
-                      child: Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-                        decoration: BoxDecoration(
-                          color: const Color(0xFF1E2436),
-                          borderRadius: BorderRadius.circular(12),
-                          border: Border.all(color: const Color(0xFF2E3850)),
-                        ),
-                        child: Row(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            if (_isSyncing)
-                              const SizedBox(
-                                width: 14,
-                                height: 14,
-                                child: CircularProgressIndicator(strokeWidth: 2, color: Color(0xFF38BDF8)),
+          backgroundColor: const Color(0xFF0D0E12),
+          body: SafeArea(
+            bottom: false,
+            child: Column(
+              children: [
+                _buildHeader(albumWidgets),
+                Expanded(
+                  child: RefreshIndicator(
+                    color: const Color(0xFFFF3B30),
+                    backgroundColor: const Color(0xFF161824),
+                    onRefresh: _handleRefresh,
+                    child: Center(
+                      child: ConstrainedBox(
+                        constraints: const BoxConstraints(maxWidth: 850),
+                        child: albumWidgets.isEmpty
+                            ? SingleChildScrollView(
+                                physics: const AlwaysScrollableScrollPhysics(parent: BouncingScrollPhysics()),
+                                padding: const EdgeInsets.fromLTRB(20, 12, 20, 150),
+                                child: _buildOnboardingCard(context),
                               )
-                            else
-                              const Icon(Icons.sync_rounded, color: Color(0xFF38BDF8), size: 16),
-                            const SizedBox(width: 6),
-                            const Text(
-                              'Sync All',
-                              style: TextStyle(
-                                color: Color(0xFF38BDF8),
-                                fontSize: 12,
-                                fontWeight: FontWeight.bold,
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ),
-                  ),
-              ],
-            ),
-
-          // Main Content
-          SliverToBoxAdapter(
-            child: Center(
-              child: ConstrainedBox(
-                constraints: const BoxConstraints(maxWidth: 850),
-                child: Padding(
-                  padding: const EdgeInsets.fromLTRB(20, 8, 20, 150),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      // Subtitle & Status Card
-                      Container(
-                        width: double.infinity,
-                        padding: const EdgeInsets.all(16),
-                        decoration: BoxDecoration(
-                          gradient: const LinearGradient(
-                            colors: [Color(0xFF161A28), Color(0xFF12141E)],
-                            begin: Alignment.topLeft,
-                            end: Alignment.bottomRight,
-                          ),
-                          borderRadius: BorderRadius.circular(20),
-                          border: Border.all(color: const Color(0xFF23283E)),
-                          boxShadow: [
-                            BoxShadow(
-                              color: Colors.black.withAlpha(80),
-                              blurRadius: 16,
-                              offset: const Offset(0, 6),
-                            ),
-                          ],
-                        ),
-                        child: Row(
-                          children: [
-                            Container(
-                              width: 44,
-                              height: 44,
-                              decoration: BoxDecoration(
-                                color: const Color(0xFF38BDF8).withAlpha(35),
-                                borderRadius: BorderRadius.circular(14),
-                                border: Border.all(color: const Color(0xFF38BDF8).withAlpha(80)),
-                              ),
-                              child: const Icon(
-                                Icons.dashboard_customize_rounded,
-                                color: Color(0xFF38BDF8),
-                                size: 22,
-                              ),
-                            ),
-                            const SizedBox(width: 14),
-                            Expanded(
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  const Text(
-                                    'Desktop Photo Frames',
-                                    style: TextStyle(
-                                      color: Colors.white,
-                                      fontSize: 15,
-                                      fontWeight: FontWeight.w700,
-                                    ),
-                                  ),
-                                  const SizedBox(height: 2),
-                                  Text(
-                                    albumWidgets.isNotEmpty
-                                        ? '${albumWidgets.length} active widget${albumWidgets.length > 1 ? 's' : ''} placed on home screen'
-                                        : 'Rotate album photos on your home screen without changing wallpaper',
-                                    style: const TextStyle(
-                                      color: Colors.white60,
-                                      fontSize: 12.5,
-                                      height: 1.25,
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-
-                      const SizedBox(height: 24),
-
-                      // Section Header
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          Text(
-                            albumWidgets.isNotEmpty ? 'Placed Widgets' : 'Get Started',
-                            style: const TextStyle(
-                              color: Colors.white,
-                              fontSize: 17,
-                              fontWeight: FontWeight.w800,
-                              letterSpacing: -0.3,
-                            ),
-                          ),
-                        ],
-                      ),
-
-                      const SizedBox(height: 12),
-
-                      if (albumWidgets.isEmpty) ...[
-                        _buildOnboardingCard(context),
-                      ] else ...[
-                        LayoutBuilder(
-                          builder: (context, constraints) {
-                            if (constraints.maxWidth >= 600) {
-                              return GridView.builder(
-                                shrinkWrap: true,
-                                physics: const NeverScrollableScrollPhysics(),
+                            : GridView.builder(
+                                physics: const AlwaysScrollableScrollPhysics(parent: BouncingScrollPhysics()),
+                                padding: const EdgeInsets.fromLTRB(16, 8, 16, 150),
                                 gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
                                   crossAxisCount: 2,
-                                  crossAxisSpacing: 16,
-                                  mainAxisSpacing: 16,
-                                  mainAxisExtent: 350,
+                                  crossAxisSpacing: 14,
+                                  mainAxisSpacing: 14,
+                                  childAspectRatio: 1.0,
                                 ),
                                 itemCount: albumWidgets.length,
                                 itemBuilder: (context, index) =>
                                     _buildAlbumWidgetCard(context, albumWidgets[index]),
-                              );
-                            }
-                            return Column(
-                              children: [
-                                for (int i = 0; i < albumWidgets.length; i++) ...[
-                                  if (i > 0) const SizedBox(height: 16),
-                                  _buildAlbumWidgetCard(context, albumWidgets[i]),
-                                ],
-                              ],
-                            );
-                          },
-                        ),
-                      ],
-                    ],
+                              ),
+                      ),
+                    ),
                   ),
                 ),
-              ),
+              ],
             ),
           ),
-        ],
-      ),
-    ),
-  );
+        );
       },
     );
   }
@@ -526,7 +482,7 @@ class _AlbumWidgetsTabState extends State<AlbumWidgetsTab> with WidgetsBindingOb
           const SizedBox(height: 12),
           const _StepRow(
             step: '3',
-            title: 'Assign album & enjoy',
+            title: 'Assign album to start rotation',
             description: 'Select which album you want this widget to rotate, and adjust its size freely!',
           ),
           const SizedBox(height: 20),
@@ -534,6 +490,7 @@ class _AlbumWidgetsTabState extends State<AlbumWidgetsTab> with WidgetsBindingOb
             onTap: _handleRefresh,
             child: Container(
               width: double.infinity,
+              constraints: const BoxConstraints(minHeight: 48),
               padding: const EdgeInsets.symmetric(vertical: 12),
               decoration: BoxDecoration(
                 gradient: const LinearGradient(
@@ -541,6 +498,13 @@ class _AlbumWidgetsTabState extends State<AlbumWidgetsTab> with WidgetsBindingOb
                 ),
                 borderRadius: BorderRadius.circular(14),
                 border: Border.all(color: const Color(0xFF2C3246)),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withAlpha(80),
+                    blurRadius: 6,
+                    offset: const Offset(0, 2),
+                  ),
+                ],
               ),
               alignment: Alignment.center,
               child: Row(
@@ -550,15 +514,15 @@ class _AlbumWidgetsTabState extends State<AlbumWidgetsTab> with WidgetsBindingOb
                     const SizedBox(
                       width: 16,
                       height: 16,
-                      child: CircularProgressIndicator(strokeWidth: 2, color: Color(0xFF38BDF8)),
+                      child: CircularProgressIndicator(strokeWidth: 2, color: Color(0xFFFF3B30)),
                     )
                   else
-                    const Icon(Icons.refresh_rounded, color: Color(0xFF38BDF8), size: 18),
+                    const Icon(Icons.refresh_rounded, color: Color(0xFFFF3B30), size: 18),
                   const SizedBox(width: 8),
                   const Text(
                     'Check Placed Widgets',
                     style: TextStyle(
-                      color: Color(0xFF38BDF8),
+                      color: Color(0xFFFF3B30),
                       fontSize: 13.5,
                       fontWeight: FontWeight.w700,
                     ),
@@ -577,368 +541,619 @@ class _AlbumWidgetsTabState extends State<AlbumWidgetsTab> with WidgetsBindingOb
     final albumItems = widget.controller.getAlbumItems(widgetConfig.albumId);
     final totalCount = widgetConfig.totalImages > 0 ? widgetConfig.totalImages : albumItems.length;
 
-    return Container(
-      decoration: BoxDecoration(
-        color: const Color(0xFF161822),
-        borderRadius: BorderRadius.circular(22),
-        border: Border.all(color: const Color(0xFF242838)),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withAlpha(90),
-            blurRadius: 16,
-            offset: const Offset(0, 6),
-          ),
-        ],
-      ),
-      padding: const EdgeInsets.all(16),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          // Header: Widget ID & Shuffle Now button
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Expanded(
-                child: Row(
-                  children: [
-                    Container(
-                      width: 32,
-                      height: 32,
-                      decoration: BoxDecoration(
-                        color: const Color(0xFF38BDF8).withAlpha(30),
-                        borderRadius: BorderRadius.circular(10),
-                      ),
-                      child: const Icon(
-                        Icons.photo_size_select_actual_rounded,
-                        color: Color(0xFF38BDF8),
-                        size: 17,
+    return PressableScale(
+      key: Key('album_widget_grid_card_${widgetConfig.widgetId}'),
+      onTap: () => _showWidgetConfigSheet(context, widgetConfig.widgetId),
+      child: Container(
+        decoration: BoxDecoration(
+          color: const Color(0xFF161822),
+          borderRadius: BorderRadius.circular(18),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withAlpha(90),
+              blurRadius: 14,
+              offset: const Offset(0, 4),
+            ),
+          ],
+        ),
+        clipBehavior: Clip.antiAlias,
+        child: Stack(
+          fit: StackFit.expand,
+          children: [
+            // Square photo display with AnimatedSwitcher
+            AnimatedSwitcher(
+              duration: const Duration(milliseconds: 350),
+              layoutBuilder: (currentChild, previousChildren) {
+                return Stack(
+                  fit: StackFit.expand,
+                  children: <Widget>[
+                    ...previousChildren,
+                    ?currentChild,
+                  ],
+                );
+              },
+              transitionBuilder: (child, animation) {
+                return FadeTransition(
+                  opacity: animation,
+                  child: ScaleTransition(
+                    scale: Tween<double>(begin: 0.97, end: 1.0).animate(
+                      CurvedAnimation(
+                        parent: animation,
+                        curve: Curves.easeOutCubic,
                       ),
                     ),
-                    const SizedBox(width: 10),
-                    Expanded(
+                    child: child,
+                  ),
+                );
+              },
+              child: currentItem != null && File(currentItem.path).existsSync()
+                  ? Image.file(
+                      key: ValueKey<String>('widget_${widgetConfig.widgetId}_${currentItem.id}'),
+                      File(currentItem.path),
+                      fit: BoxFit.cover,
+                      width: double.infinity,
+                      height: double.infinity,
+                    )
+                  : Container(
+                      key: ValueKey<String>('widget_${widgetConfig.widgetId}_empty'),
+                      color: const Color(0xFF0E1017),
+                      alignment: Alignment.center,
                       child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
+                        mainAxisSize: MainAxisSize.min,
                         children: [
-                          Text(
-                            'Widget #${widgetConfig.widgetId}',
-                            style: const TextStyle(
-                              color: Colors.white,
-                              fontSize: 14.5,
-                              fontWeight: FontWeight.bold,
-                            ),
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
+                          Icon(
+                            Icons.photo_library_outlined,
+                            size: 28,
+                            color: Colors.white.withAlpha(80),
                           ),
+                          const SizedBox(height: 6),
                           Text(
-                            '$totalCount photo${totalCount == 1 ? '' : 's'} in queue',
-                            style: const TextStyle(color: Colors.white54, fontSize: 11.5),
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
+                            totalCount == 0 ? 'Album has no photos' : 'Photo unavailable',
+                            style: TextStyle(
+                              color: Colors.white.withAlpha(120),
+                              fontSize: 11,
+                            ),
+                            textAlign: TextAlign.center,
                           ),
                         ],
                       ),
                     ),
-                  ],
+            ),
+
+            // Bottom gradient overlay for contrast and legibility
+            Positioned(
+              left: 0,
+              right: 0,
+              bottom: 0,
+              height: 76,
+              child: Container(
+                decoration: BoxDecoration(
+                  gradient: LinearGradient(
+                    begin: Alignment.bottomCenter,
+                    end: Alignment.topCenter,
+                    colors: [
+                      Colors.black.withAlpha(220),
+                      Colors.black.withAlpha(140),
+                      Colors.transparent,
+                    ],
+                    stops: const [0.0, 0.65, 1.0],
+                  ),
                 ),
               ),
-              const SizedBox(width: 8),
-              PressableScale(
-                onTap: () => widget.controller.shuffleAlbumWidget(widgetConfig.widgetId),
-                child: Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
-                  decoration: BoxDecoration(
-                    color: const Color(0xFF1E2436),
-                    borderRadius: BorderRadius.circular(10),
-                    border: Border.all(color: const Color(0xFF2E3850)),
-                  ),
-                  child: const Row(
-                    mainAxisSize: MainAxisSize.min,
+            ),
+
+            // Widget badge as title on bottom of image
+            Positioned(
+              left: 10,
+              right: 10,
+              bottom: 10,
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Row(
                     children: [
-                      Icon(Icons.shuffle_rounded, color: Color(0xFF38BDF8), size: 14),
-                      SizedBox(width: 5),
-                      Text(
-                        'Shuffle Now',
-                        style: TextStyle(
-                          color: Color(0xFF38BDF8),
-                          fontSize: 11.5,
-                          fontWeight: FontWeight.bold,
+                      Expanded(
+                        child: Text(
+                          'Widget #${widgetConfig.widgetId}',
+                          style: const TextStyle(
+                            color: Colors.white,
+                            fontSize: 13.5,
+                            fontWeight: FontWeight.bold,
+                            letterSpacing: -0.2,
+                          ),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
                         ),
                       ),
-                    ],
-                  ),
-                ),
-              ),
-            ],
-          ),
-
-          const SizedBox(height: 14),
-
-          // Live Photo Preview Card
-          Container(
-            width: double.infinity,
-            height: 120,
-            decoration: BoxDecoration(
-              color: const Color(0xFF0E1017),
-              borderRadius: BorderRadius.circular(14),
-              border: Border.all(color: const Color(0xFF1E2232)),
-            ),
-            clipBehavior: Clip.antiAlias,
-            child: Stack(
-              fit: StackFit.expand,
-              children: [
-                AnimatedSwitcher(
-                  duration: const Duration(milliseconds: 350),
-                  layoutBuilder: (currentChild, previousChildren) {
-                    return Stack(
-                      fit: StackFit.expand,
-                      children: <Widget>[
-                        ...previousChildren,
-                        ?currentChild,
-                      ],
-                    );
-                  },
-                  transitionBuilder: (child, animation) {
-                    return FadeTransition(
-                      opacity: animation,
-                      child: ScaleTransition(
-                        scale: Tween<double>(begin: 0.97, end: 1.0).animate(
-                          CurvedAnimation(
-                            parent: animation,
-                            curve: Curves.easeOutCubic,
+                      if (totalCount > 0)
+                        Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 2),
+                          decoration: BoxDecoration(
+                            color: Colors.black.withAlpha(140),
+                            borderRadius: BorderRadius.circular(5),
+                          ),
+                          child: Text(
+                            '${((widgetConfig.currentIndex) % totalCount) + 1}/$totalCount',
+                            style: const TextStyle(
+                              color: Colors.white70,
+                              fontSize: 9.5,
+                              fontWeight: FontWeight.w600,
+                            ),
                           ),
                         ),
-                        child: child,
-                      ),
-                    );
-                  },
-                  child: currentItem != null && File(currentItem.path).existsSync()
-                      ? Image.file(
-                          key: ValueKey<String>('widget_${widgetConfig.widgetId}_${currentItem.id}'),
-                          File(currentItem.path),
-                          fit: BoxFit.cover,
-                          width: double.infinity,
-                          height: double.infinity,
-                        )
-                      : Container(
-                          key: ValueKey<String>('widget_${widgetConfig.widgetId}_empty'),
-                          color: const Color(0xFF0E1017),
-                          alignment: Alignment.center,
-                          child: Column(
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              Icon(
-                                Icons.photo_library_outlined,
-                                size: 32,
-                                color: Colors.white.withAlpha(80),
+                    ],
+                  ),
+                  const SizedBox(height: 2),
+                  Text(
+                    widgetConfig.albumName.isNotEmpty ? widgetConfig.albumName : 'All Photos',
+                    style: const TextStyle(
+                      color: Colors.white70,
+                      fontSize: 11,
+                      fontWeight: FontWeight.w500,
+                    ),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  void _showWidgetConfigSheet(BuildContext context, int widgetId) {
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: const Color(0xFF161822),
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+      ),
+      builder: (sheetCtx) {
+        return ListenableBuilder(
+          listenable: widget.controller,
+          builder: (context, _) {
+            final configIndex = widget.controller.albumWidgets.indexWhere((w) => w.widgetId == widgetId);
+            if (configIndex == -1) {
+              return const SizedBox.shrink();
+            }
+            final currentConfig = widget.controller.albumWidgets[configIndex];
+            final currentItem = _getCurrentItemForWidget(currentConfig);
+            final albumItems = widget.controller.getAlbumItems(currentConfig.albumId);
+            final totalCount = currentConfig.totalImages > 0 ? currentConfig.totalImages : albumItems.length;
+
+            return SafeArea(
+              child: Center(
+                heightFactor: 1.0,
+                child: ConstrainedBox(
+                  constraints: const BoxConstraints(maxWidth: 540),
+                  child: SingleChildScrollView(
+                    padding: const EdgeInsets.fromLTRB(20, 8, 20, 24),
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        // Drag handle
+                        Center(
+                          child: Container(
+                            width: 36,
+                            height: 4,
+                            margin: const EdgeInsets.only(top: 4, bottom: 16),
+                            decoration: BoxDecoration(
+                              color: Colors.white24,
+                              borderRadius: BorderRadius.circular(2),
+                            ),
+                          ),
+                        ),
+
+                        // Header Row
+                        Row(
+                          children: [
+                            Container(
+                              width: 38,
+                              height: 38,
+                              decoration: BoxDecoration(
+                                color: const Color(0xFFFF3B30).withAlpha(35),
+                                borderRadius: BorderRadius.circular(10),
+                                border: Border.all(color: const Color(0xFFFF3B30).withAlpha(80)),
                               ),
-                              const SizedBox(height: 6),
-                              Text(
-                                totalCount == 0 ? 'Album has no photos' : 'Photo unavailable',
-                                style: TextStyle(
-                                  color: Colors.white.withAlpha(120),
-                                  fontSize: 12,
+                              child: const Icon(
+                                Icons.photo_size_select_actual_rounded,
+                                color: Color(0xFFFF3B30),
+                                size: 20,
+                              ),
+                            ),
+                            const SizedBox(width: 12),
+                            Expanded(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    'Widget #${currentConfig.widgetId}',
+                                    style: const TextStyle(
+                                      color: Colors.white,
+                                      fontSize: 18,
+                                      fontWeight: FontWeight.bold,
+                                      letterSpacing: -0.3,
+                                    ),
+                                  ),
+                                  const SizedBox(height: 2),
+                                  const Text(
+                                    'Configure Shuffle & Display',
+                                    style: TextStyle(
+                                      color: Colors.white60,
+                                      fontSize: 12,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                            IconButton(
+                              onPressed: () => Navigator.pop(sheetCtx),
+                              icon: const Icon(Icons.close_rounded, color: Colors.white70),
+                              splashRadius: 20,
+                            ),
+                          ],
+                        ),
+
+                        const SizedBox(height: 18),
+
+                        // Mini Preview & Info Card
+                        Container(
+                          padding: const EdgeInsets.all(10),
+                          decoration: BoxDecoration(
+                            color: const Color(0xFF10121A),
+                            borderRadius: BorderRadius.circular(14),
+                            border: Border.all(color: const Color(0xFF1E2232)),
+                          ),
+                          child: Row(
+                            children: [
+                              ClipRRect(
+                                borderRadius: BorderRadius.circular(10),
+                                child: Container(
+                                  width: 60,
+                                  height: 60,
+                                  color: const Color(0xFF0E1017),
+                                  child: currentItem != null && File(currentItem.path).existsSync()
+                                      ? Image.file(
+                                          File(currentItem.path),
+                                          fit: BoxFit.cover,
+                                        )
+                                      : const Icon(
+                                          Icons.photo_library_outlined,
+                                          color: Colors.white24,
+                                          size: 28,
+                                        ),
+                                ),
+                              ),
+                              const SizedBox(width: 12),
+                              Expanded(
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Text(
+                                      currentConfig.albumName.isNotEmpty ? currentConfig.albumName : 'All Photos',
+                                      style: const TextStyle(
+                                        color: Colors.white,
+                                        fontSize: 14,
+                                        fontWeight: FontWeight.bold,
+                                      ),
+                                      maxLines: 1,
+                                      overflow: TextOverflow.ellipsis,
+                                    ),
+                                    const SizedBox(height: 3),
+                                    Text(
+                                      totalCount > 0
+                                          ? 'Photo ${((currentConfig.currentIndex) % totalCount) + 1} of $totalCount'
+                                          : 'No photos in album',
+                                      style: const TextStyle(
+                                        color: Colors.white60,
+                                        fontSize: 12,
+                                      ),
+                                    ),
+                                    const SizedBox(height: 2),
+                                    Text(
+                                      '${currentConfig.intervalLabel} • ${currentConfig.isRandom ? 'Random' : 'Ordered'}',
+                                      style: const TextStyle(
+                                        color: Color(0xFFFF3B30),
+                                        fontSize: 11.5,
+                                        fontWeight: FontWeight.w600,
+                                      ),
+                                    ),
+                                  ],
                                 ),
                               ),
                             ],
                           ),
                         ),
-                ),
 
-                // Dark gradient overlay at bottom
-                Positioned(
-                  left: 0,
-                  right: 0,
-                  bottom: 0,
-                  height: 48,
-                  child: Container(
-                    decoration: BoxDecoration(
-                      gradient: LinearGradient(
-                        begin: Alignment.bottomCenter,
-                        end: Alignment.topCenter,
-                        colors: [
-                          Colors.black.withAlpha(200),
-                          Colors.transparent,
-                        ],
-                      ),
-                    ),
-                  ),
-                ),
+                        const SizedBox(height: 16),
 
-                // Photo index
-                if (totalCount > 0)
-                  Positioned(
-                    left: 10,
-                    bottom: 8,
-                    child: Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 3),
-                      decoration: BoxDecoration(
-                        color: Colors.black.withAlpha(120),
-                        borderRadius: BorderRadius.circular(6),
-                      ),
-                      child: Text(
-                        '${((widgetConfig.currentIndex) % totalCount) + 1} / $totalCount',
-                        style: const TextStyle(
-                          color: Colors.white70,
-                          fontSize: 11,
-                          fontWeight: FontWeight.w600,
-                        ),
-                      ),
-                    ),
-                  ),
-              ],
-            ),
-          ),
-
-          const SizedBox(height: 14),
-
-          // 1. Album Selector Tile
-          InkWell(
-            onTap: () => _showAlbumPicker(context, widgetConfig),
-            borderRadius: BorderRadius.circular(12),
-            child: Container(
-              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
-              decoration: BoxDecoration(
-                color: const Color(0xFF10121A),
-                borderRadius: BorderRadius.circular(12),
-                border: Border.all(color: const Color(0xFF1E2232)),
-              ),
-              child: Row(
-                children: [
-                  const Icon(Icons.photo_library_rounded, color: Colors.white54, size: 18),
-                  const SizedBox(width: 10),
-                  const Text('Album', style: TextStyle(color: Colors.white70, fontSize: 13)),
-                  const SizedBox(width: 8),
-                  Expanded(
-                    child: Text(
-                      widgetConfig.albumName.isNotEmpty ? widgetConfig.albumName : 'All Photos',
-                      textAlign: TextAlign.end,
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                      style: const TextStyle(
-                        color: Colors.white,
-                        fontSize: 13,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                  ),
-                  const SizedBox(width: 4),
-                  const Icon(Icons.chevron_right_rounded, color: Colors.white38, size: 18),
-                ],
-              ),
-            ),
-          ),
-
-          const SizedBox(height: 10),
-
-          // 2. Order Mode & Interval Controls
-          Row(
-            children: [
-              // Order Mode Pills
-              Expanded(
-                child: Container(
-                  padding: const EdgeInsets.all(4),
-                  decoration: BoxDecoration(
-                    color: const Color(0xFF10121A),
-                    borderRadius: BorderRadius.circular(12),
-                    border: Border.all(color: const Color(0xFF1E2232)),
-                  ),
-                  child: Row(
-                    children: [
-                      Expanded(
-                        child: PressableScale(
+                        // Shuffle Now Button
+                        PressableScale(
                           onTap: () {
-                            if (widgetConfig.isRandom) {
-                              widget.controller.updateAlbumWidgetConfig(widgetConfig.copyWith(isRandom: false));
-                            }
+                            widget.controller.shuffleAlbumWidget(currentConfig.widgetId);
                           },
                           child: Container(
-                            padding: const EdgeInsets.symmetric(vertical: 7),
+                            width: double.infinity,
+                            height: 46,
                             decoration: BoxDecoration(
-                              color: !widgetConfig.isRandom ? const Color(0xFFFF3B30) : Colors.transparent,
-                              borderRadius: BorderRadius.circular(9),
+                              color: const Color(0xFFFF3B30),
+                              borderRadius: BorderRadius.circular(12),
+                              boxShadow: [
+                                BoxShadow(
+                                  color: const Color(0xFFFF3B30).withAlpha(80),
+                                  blurRadius: 8,
+                                  offset: const Offset(0, 3),
+                                ),
+                              ],
                             ),
                             alignment: Alignment.center,
-                            child: Text(
-                              'Ordered',
-                              style: TextStyle(
-                                color: !widgetConfig.isRandom ? Colors.white : Colors.white60,
-                                fontSize: 12,
-                                fontWeight: FontWeight.bold,
-                              ),
+                            child: const Row(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                Icon(Icons.shuffle_rounded, color: Colors.white, size: 18),
+                                SizedBox(width: 8),
+                                Text(
+                                  'Shuffle Now',
+                                  style: TextStyle(
+                                    color: Colors.white,
+                                    fontSize: 14,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
+                              ],
                             ),
                           ),
                         ),
-                      ),
-                      const SizedBox(width: 4),
-                      Expanded(
-                        child: PressableScale(
-                          onTap: () {
-                            if (!widgetConfig.isRandom) {
-                              widget.controller.updateAlbumWidgetConfig(widgetConfig.copyWith(isRandom: true));
-                            }
-                          },
+
+                        const SizedBox(height: 20),
+
+                        const Text(
+                          'SHUFFLE CONFIGURATION',
+                          style: TextStyle(
+                            color: Colors.white54,
+                            fontSize: 11,
+                            fontWeight: FontWeight.w700,
+                            letterSpacing: 0.8,
+                          ),
+                        ),
+                        const SizedBox(height: 10),
+
+                        // Album Selector Tile
+                        InkWell(
+                          onTap: () => _showAlbumPicker(context, currentConfig),
+                          borderRadius: BorderRadius.circular(12),
                           child: Container(
-                            padding: const EdgeInsets.symmetric(vertical: 7),
+                            padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
                             decoration: BoxDecoration(
-                              color: widgetConfig.isRandom ? const Color(0xFFFF3B30) : Colors.transparent,
-                              borderRadius: BorderRadius.circular(9),
+                              color: const Color(0xFF10121A),
+                              borderRadius: BorderRadius.circular(12),
+                              border: Border.all(color: const Color(0xFF1E2232)),
                             ),
-                            alignment: Alignment.center,
-                            child: Text(
-                              'Random',
-                              style: TextStyle(
-                                color: widgetConfig.isRandom ? Colors.white : Colors.white60,
-                                fontSize: 12,
-                                fontWeight: FontWeight.bold,
+                            child: Row(
+                              children: [
+                                Container(
+                                  width: 32,
+                                  height: 32,
+                                  decoration: BoxDecoration(
+                                    color: Colors.white.withAlpha(15),
+                                    borderRadius: BorderRadius.circular(8),
+                                  ),
+                                  child: const Icon(Icons.photo_library_rounded, color: Colors.white70, size: 16),
+                                ),
+                                const SizedBox(width: 12),
+                                Expanded(
+                                  child: Column(
+                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    children: [
+                                      const Text(
+                                        'Photo Album',
+                                        style: TextStyle(
+                                          color: Colors.white54,
+                                          fontSize: 11,
+                                          fontWeight: FontWeight.w500,
+                                        ),
+                                      ),
+                                      const SizedBox(height: 2),
+                                      Text(
+                                        currentConfig.albumName.isNotEmpty ? currentConfig.albumName : 'All Photos',
+                                        style: const TextStyle(
+                                          color: Colors.white,
+                                          fontSize: 13.5,
+                                          fontWeight: FontWeight.w600,
+                                        ),
+                                        maxLines: 1,
+                                        overflow: TextOverflow.ellipsis,
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                                const Icon(Icons.chevron_right_rounded, color: Colors.white38, size: 20),
+                              ],
+                            ),
+                          ),
+                        ),
+
+                        const SizedBox(height: 10),
+
+                        // Order Mode (Ordered / Random)
+                        Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+                          decoration: BoxDecoration(
+                            color: const Color(0xFF10121A),
+                            borderRadius: BorderRadius.circular(12),
+                            border: Border.all(color: const Color(0xFF1E2232)),
+                          ),
+                          child: Row(
+                            children: [
+                              Container(
+                                width: 32,
+                                height: 32,
+                                decoration: BoxDecoration(
+                                  color: Colors.white.withAlpha(15),
+                                  borderRadius: BorderRadius.circular(8),
+                                ),
+                                child: const Icon(Icons.alt_route_rounded, color: Colors.white70, size: 16),
                               ),
+                              const SizedBox(width: 12),
+                              const Expanded(
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Text(
+                                      'Order Mode',
+                                      style: TextStyle(
+                                        color: Colors.white54,
+                                        fontSize: 11,
+                                        fontWeight: FontWeight.w500,
+                                      ),
+                                    ),
+                                    SizedBox(height: 2),
+                                    Text(
+                                      'Playback Sequence',
+                                      style: TextStyle(
+                                        color: Colors.white,
+                                        fontSize: 13.5,
+                                        fontWeight: FontWeight.w600,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                              Container(
+                                height: 34,
+                                padding: const EdgeInsets.all(2.5),
+                                decoration: BoxDecoration(
+                                  color: const Color(0xFF161824),
+                                  borderRadius: BorderRadius.circular(9),
+                                  border: Border.all(color: const Color(0xFF242838)),
+                                ),
+                                child: Row(
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    PressableScale(
+                                      onTap: () {
+                                        if (currentConfig.isRandom) {
+                                          widget.controller.updateAlbumWidgetConfig(currentConfig.copyWith(isRandom: false));
+                                        }
+                                      },
+                                      child: Container(
+                                        padding: const EdgeInsets.symmetric(horizontal: 10),
+                                        decoration: BoxDecoration(
+                                          color: !currentConfig.isRandom ? const Color(0xFFFF3B30) : Colors.transparent,
+                                          borderRadius: BorderRadius.circular(7),
+                                        ),
+                                        alignment: Alignment.center,
+                                        child: Text(
+                                          'Ordered',
+                                          style: TextStyle(
+                                            color: !currentConfig.isRandom ? Colors.white : Colors.white60,
+                                            fontSize: 11.5,
+                                            fontWeight: FontWeight.bold,
+                                          ),
+                                        ),
+                                      ),
+                                    ),
+                                    const SizedBox(width: 2),
+                                    PressableScale(
+                                      onTap: () {
+                                        if (!currentConfig.isRandom) {
+                                          widget.controller.updateAlbumWidgetConfig(currentConfig.copyWith(isRandom: true));
+                                        }
+                                      },
+                                      child: Container(
+                                        padding: const EdgeInsets.symmetric(horizontal: 10),
+                                        decoration: BoxDecoration(
+                                          color: currentConfig.isRandom ? const Color(0xFFFF3B30) : Colors.transparent,
+                                          borderRadius: BorderRadius.circular(7),
+                                        ),
+                                        alignment: Alignment.center,
+                                        child: Text(
+                                          'Random',
+                                          style: TextStyle(
+                                            color: currentConfig.isRandom ? Colors.white : Colors.white60,
+                                            fontSize: 11.5,
+                                            fontWeight: FontWeight.bold,
+                                          ),
+                                        ),
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+
+                        const SizedBox(height: 10),
+
+                        // Interval Selector Tile
+                        InkWell(
+                          onTap: () => _showIntervalPicker(context, currentConfig),
+                          borderRadius: BorderRadius.circular(12),
+                          child: Container(
+                            padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+                            decoration: BoxDecoration(
+                              color: const Color(0xFF10121A),
+                              borderRadius: BorderRadius.circular(12),
+                              border: Border.all(color: const Color(0xFF1E2232)),
+                            ),
+                            child: Row(
+                              children: [
+                                Container(
+                                  width: 32,
+                                  height: 32,
+                                  decoration: BoxDecoration(
+                                    color: Colors.white.withAlpha(15),
+                                    borderRadius: BorderRadius.circular(8),
+                                  ),
+                                  child: const Icon(Icons.timer_outlined, color: Colors.white70, size: 16),
+                                ),
+                                const SizedBox(width: 12),
+                                Expanded(
+                                  child: Column(
+                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    children: [
+                                      const Text(
+                                        'Shuffle Interval',
+                                        style: TextStyle(
+                                          color: Colors.white54,
+                                          fontSize: 11,
+                                          fontWeight: FontWeight.w500,
+                                        ),
+                                      ),
+                                      const SizedBox(height: 2),
+                                      Text(
+                                        currentConfig.intervalLabel,
+                                        style: const TextStyle(
+                                          color: Colors.white,
+                                          fontSize: 13.5,
+                                          fontWeight: FontWeight.w600,
+                                        ),
+                                        maxLines: 1,
+                                        overflow: TextOverflow.ellipsis,
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                                const Icon(Icons.chevron_right_rounded, color: Colors.white38, size: 20),
+                              ],
                             ),
                           ),
                         ),
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-
-              const SizedBox(width: 10),
-
-              // Interval Selector Button
-              Expanded(
-                child: InkWell(
-                  onTap: () => _showIntervalPicker(context, widgetConfig),
-                  borderRadius: BorderRadius.circular(12),
-                  child: Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
-                    decoration: BoxDecoration(
-                      color: const Color(0xFF10121A),
-                      borderRadius: BorderRadius.circular(12),
-                      border: Border.all(color: const Color(0xFF1E2232)),
-                    ),
-                    child: Row(
-                      children: [
-                        const Icon(Icons.timer_outlined, color: Colors.white54, size: 18),
-                        const SizedBox(width: 8),
-                        Expanded(
-                          child: Text(
-                            widgetConfig.intervalLabel,
-                            style: const TextStyle(
-                              color: Colors.white,
-                              fontSize: 12.5,
-                              fontWeight: FontWeight.w600,
-                            ),
-                            overflow: TextOverflow.ellipsis,
-                          ),
-                        ),
-                        const Icon(Icons.chevron_right_rounded, color: Colors.white38, size: 16),
                       ],
                     ),
                   ),
                 ),
               ),
-            ],
-          ),
-        ],
-      ),
+            );
+          },
+        );
+      },
     );
   }
 }
@@ -994,7 +1209,7 @@ class _StepRow extends StatelessWidget {
               Text(
                 description,
                 style: const TextStyle(
-                  color: Colors.white54,
+                  color: Colors.white70,
                   fontSize: 12,
                   height: 1.25,
                 ),

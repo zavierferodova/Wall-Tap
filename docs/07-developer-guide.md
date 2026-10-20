@@ -95,9 +95,8 @@ flutter build appbundle --release
 - **Cause**: Aggressive battery saver or OEM task killer killed the background process.
 - **Remedy**:
   1. Open the **Settings** tab in Wall Tap.
-  2. Tap **"Request Exemption"** under Battery Optimization.
-  3. Turn on the **"Persistent Status Notification"** toggle.
-  4. On Xiaomi/Redmi devices (MIUI/HyperOS): Enable **"Autostart"** and set Battery Saver to **"No restrictions"** in Android app settings.
+  2. Tap **"Allow Unrestricted Background Execution"** under Battery Optimization.
+  3. On Xiaomi/Redmi devices (MIUI/HyperOS): Enable **"Autostart"** and set Battery Saver to **"No restrictions"** in Android app settings.
 
 ### 6.2 Widget Not Updating or Blank
 - **Cause**: No images are enabled in the active playlist, or native permissions were revoked.

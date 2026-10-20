@@ -32,7 +32,7 @@
   - **Wall Tap Shuffle**: Launcher widget with upcoming wallpaper thumbnail preview, smart Next/Shuffle button respecting random/ordered settings, and direct access to settings.
   - **Album Display Widget**: Interactive home screen photo frame displaying active album photos with tap-to-reveal controls for advancing/shuffling photos according to album order settings.
 - **Interactive Full-Screen Preview**: Pan and pinch zoom up to 5x, double-tap 2.5x smart zoom, full resolution inspection, and one-tap "Set as Current Wallpaper".
-- **Background Execution Reliability**: AlarmManager exact alarms (`RTC_WAKEUP`), reboot recovery (`BOOT_COMPLETED`), battery optimization exemption request, and persistent status notification.
+- **Background Execution Reliability**: AlarmManager exact alarms (`RTC_WAKEUP`), reboot recovery (`BOOT_COMPLETED`), and battery optimization exemption request.
 
 ---
 

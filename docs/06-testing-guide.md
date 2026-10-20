@@ -18,7 +18,7 @@ test/
 ├── playlist_tab_test.dart              # UI widget tests for Gallery tab (grids, multi-select)
 ├── album_detail_screen_test.dart       # UI widget tests for individual Album management screen
 ├── album_widgets_tab_test.dart         # UI widget tests for home screen widget manager tab
-├── settings_tab_test.dart              # UI widget tests for Settings & persistent notification toggle
+├── settings_tab_test.dart              # UI widget tests for Settings, battery optimization & attribution
 └── wallpaper_preview_dialog_test.dart  # UI widget tests for zoom viewer and full-screen dialog
 ```
 
@@ -72,7 +72,6 @@ class FakeWallpaperService extends WallpaperService {
   String? lastSetWallpaperPath;
   String? lastTargetScreen;
   String? lastScaleType;
-  bool persistentNotificationState = false;
 
   @override
   Future<bool> setWallpaper({
@@ -84,12 +83,6 @@ class FakeWallpaperService extends WallpaperService {
     lastSetWallpaperPath = filePath;
     lastTargetScreen = targetScreen;
     lastScaleType = scaleType;
-    return true;
-  }
-
-  @override
-  Future<bool> setPersistentNotification(bool show) async {
-    persistentNotificationState = show;
     return true;
   }
 }

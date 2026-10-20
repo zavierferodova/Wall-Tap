@@ -66,9 +66,6 @@ class MockWallpaperService extends WallpaperService {
   List<AlbumWidgetConfig> widgets = [];
 
   @override
-  Future<bool> setPersistentNotification(bool enable) async => true;
-
-  @override
   Future<bool> setWallpaper({required String filePath, String targetScreen = 'both', String scaleType = 'full'}) async => true;
   @override
   Future<bool> updateWidget() async => true;

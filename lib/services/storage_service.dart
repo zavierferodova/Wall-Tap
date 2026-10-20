@@ -21,7 +21,6 @@ class StorageService {
   static const String _keyAlbums = 'walltap_albums';
   static const String _keyActiveAlbumId = 'walltap_active_album_id';
   static const String _keyNextIndex = 'walltap_next_index';
-  static const String _keyShowPersistentNotification = 'walltap_show_persistent_notification';
   static const String _keyCurrentWallpaperId = 'walltap_current_wallpaper_id';
 
   Directory? _wallpaperDir;
@@ -223,10 +222,6 @@ class StorageService {
       if (savedScale != null && savedScale != config.scaleType) {
         config = config.copyWith(scaleType: savedScale);
       }
-      final savedPersistentNotification = prefs.getBool(_keyShowPersistentNotification);
-      if (savedPersistentNotification != null && savedPersistentNotification != config.showPersistentNotification) {
-        config = config.copyWith(showPersistentNotification: savedPersistentNotification);
-      }
       return config;
     } catch (e) {
       debugPrint('Error loading config: $e');
@@ -246,7 +241,6 @@ class StorageService {
       await prefs.setBool(_keyIsRandom, config.isRandom);
       await prefs.setBool(_keySlideshowEnabled, config.isSlideshowEnabled);
       await prefs.setInt(_keyIntervalMinutes, config.intervalMinutes);
-      await prefs.setBool(_keyShowPersistentNotification, config.showPersistentNotification);
     } catch (e) {
       debugPrint('Error saving config: $e');
     }

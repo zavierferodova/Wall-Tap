@@ -19,11 +19,6 @@ class BootReceiver : BroadcastReceiver() {
             // Reschedule and update Album Display Widgets
             AlbumWidgetScheduler.rescheduleAll(context)
             AlbumWidgetProvider.updateAllWidgets(context)
-
-            // Restore persistent notification if enabled
-            if (NotificationHelper.isNotificationEnabled(context)) {
-                NotificationHelper.showNotification(context)
-            }
         }
     }
 }

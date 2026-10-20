@@ -28,7 +28,6 @@ graph TD
         WidgetProvider["WidgetProvider<br/>(Shuffle Widget RemoteViews)"]
         AlbumWidgetProvider["AlbumWidgetProvider<br/>(Album Widget RemoteViews)"]
         Schedulers["Schedulers & Receivers<br/>(AlarmManager, Exact Alarms, Boot)"]
-        NotificationHelper["NotificationHelper<br/>(Foreground Status Notification)"]
     end
 
     UI --> Controller
@@ -58,7 +57,7 @@ graph TD
   - `playlist/playlist_tab.dart`: Gallery tab hosting all wallpapers, batch multi-selection mode, and custom albums.
   - `playlist/album_detail_screen.dart`: Dedicated album screen for managing wallpapers within a specific collection.
   - `album_widgets/album_widgets_tab.dart`: Widget management tab for monitoring and configuring placed Android home screen widgets.
-  - `settings/settings_tab.dart`: System settings, persistent notifications, battery optimization status, and storage breakdowns.
+  - `settings/settings_tab.dart`: System settings, battery optimization status, and app information.
   - `widgets/`: Reusable components such as `PressableScale`, `WallpaperPreviewDialog`, and `WidgetGuideDialog`.
 - **Controller (`lib/controllers/wallpaper_controller.dart`)**: Single source of truth extending `ChangeNotifier`. Manages collection state, active album filtering, image imports, deletion cascades, and settings updates.
 - **Services (`lib/services/`)**:
@@ -75,7 +74,6 @@ The native Android layer handles platform operations that cannot be performed re
 2. **Memory-Safe Bitmap Decoding & Scaling**: Custom sampling (`inSampleSize`) downsamples high-resolution images to match device screen bounds before applying transformations (`crop`, `fit`, `full`).
 3. **Home Screen AppWidgets**: Supports interactive widgets (`WidgetProvider` and `AlbumWidgetProvider`) that update directly from background alarms or user clicks on the home screen without launching the Flutter engine.
 4. **Reliable Alarm Scheduling**: Utilizes `AlarmManager.setExactAndAllowWhileIdle()` via `Scheduler` and `AlbumWidgetScheduler` to execute wallpaper rotations even in low-power idle states (Doze mode).
-5. **Foreground Service Notification**: Provides an ongoing, low-priority status notification (`NotificationHelper`) to prevent the operating system from terminating background rotation processes.
 
 ---
 
@@ -99,9 +97,6 @@ Communication between Flutter and Kotlin occurs over the platform channel:
 | `updateAlbumWidget` | `widgetId` (Int), `albumId` (String), `albumName` (String), `intervalMinutes` (Int), `isRandom` (Boolean) | `Boolean` | Saves widget configuration to SharedPreferences, schedules its timer, and refreshes the widget. |
 | `shuffleAlbumWidget` | `widgetId` (Int) | `Boolean` | Manually advances the specified album widget to its next image. |
 | `updateAllAlbumWidgets` | *None* | `Boolean` | Re-renders all album widgets placed on the home screen. |
-| `showPersistentNotification` | *None* | `Boolean` | Creates notification channel and posts persistent foreground status notification. |
-| `hidePersistentNotification` | *None* | `Boolean` | Cancels the persistent foreground status notification. |
-| `isPersistentNotificationEnabled` | *None* | `Boolean` | Queries whether the persistent notification is enabled in preferences. |
 
 ---
 

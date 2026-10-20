@@ -100,13 +100,6 @@ class FakeWallpaperService extends WallpaperService {
   int? lastScheduledInterval;
   bool batteryOptimizationIgnored = false;
   List<String> mockFolderImages = [];
-  bool? lastPersistentNotificationSet;
-
-  @override
-  Future<bool> setPersistentNotification(bool show) async {
-    lastPersistentNotificationSet = show;
-    return true;
-  }
 
   @override
   Future<bool> setWallpaper({
@@ -683,31 +676,6 @@ void main() {
       await controller.updateScaleType('fit');
       expect(controller.config.scaleType, 'fit');
       expect(fakeWallpaperService.lastScaleType, 'fit');
-    });
-
-    test('togglePersistentNotification updates config, saves storage, and invokes wallpaperService', () async {
-      await controller.initialize();
-      expect(controller.config.showPersistentNotification, false);
-
-      final res = await controller.togglePersistentNotification(true);
-      expect(res, true);
-      expect(controller.config.showPersistentNotification, true);
-      expect(fakeStorage.storedConfig.showPersistentNotification, true);
-      expect(fakeWallpaperService.lastPersistentNotificationSet, true);
-
-      final res2 = await controller.togglePersistentNotification(false);
-      expect(res2, true);
-      expect(controller.config.showPersistentNotification, false);
-      expect(fakeStorage.storedConfig.showPersistentNotification, false);
-      expect(fakeWallpaperService.lastPersistentNotificationSet, false);
-    });
-
-    test('initialize restores persistent notification if enabled in config', () async {
-      fakeStorage.storedConfig = const SlideshowConfig(showPersistentNotification: true);
-      await controller.initialize();
-
-      expect(controller.config.showPersistentNotification, true);
-      expect(fakeWallpaperService.lastPersistentNotificationSet, true);
     });
 
     test('setCurrentWallpaper sets current wallpaper, persists ID and updates currentWallpaper', () async {

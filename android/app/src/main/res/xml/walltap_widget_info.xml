@@ -6,6 +6,8 @@
     android:targetCellHeight="3"
     android:updatePeriodMillis="0"
     android:initialLayout="@layout/walltap_widget"
+    android:previewLayout="@layout/walltap_widget_preview"
+    android:previewImage="@drawable/walltap_widget_preview_img"
     android:resizeMode="horizontal|vertical"
     android:widgetCategory="home_screen">
 </appwidget-provider>

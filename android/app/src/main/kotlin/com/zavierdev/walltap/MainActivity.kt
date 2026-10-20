@@ -44,8 +44,6 @@ class MainActivity : FlutterActivity() {
     private val mainHandler = Handler(Looper.getMainLooper())
     private val REQUEST_CODE_PICK_FOLDER = 9921
     private var pendingFolderResult: MethodChannel.Result? = null
-    private val REQUEST_CODE_NOTIFICATION_PERMISSION = 9922
-    private var pendingNotificationResult: MethodChannel.Result? = null
 
     override fun getRenderMode(): RenderMode = RenderMode.texture
 
@@ -237,48 +235,15 @@ class MainActivity : FlutterActivity() {
                     AlbumWidgetProvider.updateAllWidgets(applicationContext)
                     result.success(true)
                 }
-                "showPersistentNotification" -> {
-                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-                        if (checkSelfPermission(android.Manifest.permission.POST_NOTIFICATIONS) != android.content.pm.PackageManager.PERMISSION_GRANTED) {
-                            pendingNotificationResult = result
-                            requestPermissions(arrayOf(android.Manifest.permission.POST_NOTIFICATIONS), REQUEST_CODE_NOTIFICATION_PERMISSION)
-                            return@setMethodCallHandler
-                        }
-                    }
-                    val success = NotificationHelper.showNotification(applicationContext)
-                    result.success(success)
-                }
-                "hidePersistentNotification" -> {
-                    NotificationHelper.hideNotification(applicationContext)
-                    result.success(true)
-                }
-                "isPersistentNotificationEnabled" -> {
-                    result.success(NotificationHelper.isNotificationEnabled(applicationContext))
-                }
                 else -> {
                     result.notImplemented()
                 }
             }
         }
-
-        NotificationHelper.createNotificationChannel(applicationContext)
-        if (NotificationHelper.isNotificationEnabled(applicationContext)) {
-            NotificationHelper.showNotification(applicationContext)
-        }
     }
 
     override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<out String>, grantResults: IntArray) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults)
-        if (requestCode == REQUEST_CODE_NOTIFICATION_PERMISSION) {
-            val granted = grantResults.isNotEmpty() && grantResults[0] == android.content.pm.PackageManager.PERMISSION_GRANTED
-            if (granted) {
-                val success = NotificationHelper.showNotification(applicationContext)
-                pendingNotificationResult?.success(success)
-            } else {
-                pendingNotificationResult?.success(false)
-            }
-            pendingNotificationResult = null
-        }
     }
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {

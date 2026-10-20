@@ -87,7 +87,7 @@ class _AlbumDetailScreenState extends State<AlbumDetailScreen> {
           style: const TextStyle(color: Colors.white),
           decoration: InputDecoration(
             hintText: 'Album name',
-            hintStyle: const TextStyle(color: Colors.white38),
+            hintStyle: const TextStyle(color: Colors.white60),
             filled: true,
             fillColor: const Color(0xFF1F2232),
             border: OutlineInputBorder(
@@ -400,15 +400,22 @@ class _AlbumDetailScreenState extends State<AlbumDetailScreen> {
                                     );
                                   },
                             child: Container(
+                              constraints: const BoxConstraints(minHeight: 48),
                               padding: const EdgeInsets.symmetric(vertical: 14),
                               decoration: BoxDecoration(
-                                gradient: selectedCandidateIds.isEmpty
-                                    ? null
-                                    : const LinearGradient(
-                                        colors: [Color(0xFFFF3B30), Color(0xFFFF5E3A)],
-                                      ),
-                                color: selectedCandidateIds.isEmpty ? const Color(0xFF222634) : null,
+                                color: selectedCandidateIds.isEmpty
+                                    ? const Color(0xFF222634)
+                                    : const Color(0xFFFF3B30),
                                 borderRadius: BorderRadius.circular(16),
+                                boxShadow: selectedCandidateIds.isEmpty
+                                    ? null
+                                    : [
+                                        BoxShadow(
+                                          color: Colors.black.withAlpha(80),
+                                          blurRadius: 8,
+                                          offset: const Offset(0, 3),
+                                        ),
+                                      ],
                               ),
                               alignment: Alignment.center,
                               child: Text(
@@ -648,7 +655,7 @@ class _AlbumDetailScreenState extends State<AlbumDetailScreen> {
                     color: Color(0xFF242938),
                     shape: BoxShape.circle,
                   ),
-                  child: const Icon(Icons.playlist_remove_rounded, color: Color(0xFFFF5E3A), size: 22),
+                  child: const Icon(Icons.playlist_remove_rounded, color: Color(0xFFFF3B30), size: 22),
                 ),
                 title: const Text('Remove from Album', style: TextStyle(color: Colors.white, fontWeight: FontWeight.w600)),
                 subtitle: const Text('Remove from this album only, keep in gallery', style: TextStyle(color: Colors.white54, fontSize: 12)),
@@ -776,7 +783,7 @@ class _AlbumDetailScreenState extends State<AlbumDetailScreen> {
                                   crossAxisCount: cols,
                                   crossAxisSpacing: 14,
                                   mainAxisSpacing: 14,
-                                  childAspectRatio: 0.58,
+                                  childAspectRatio: 0.70,
                                 ),
                                 itemCount: items.length,
                                 itemBuilder: (context, index) {
@@ -816,12 +823,21 @@ class _AlbumDetailScreenState extends State<AlbumDetailScreen> {
                 PressableScale(
                   onTap: () => Navigator.pop(context),
                   child: Container(
+                    constraints: const BoxConstraints(minWidth: 44, minHeight: 44),
                     padding: const EdgeInsets.all(10),
                     decoration: BoxDecoration(
                       color: const Color(0xFF1B1D26),
                       borderRadius: BorderRadius.circular(14),
                       border: Border.all(color: const Color(0xFF2C3040)),
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.black.withAlpha(80),
+                          blurRadius: 6,
+                          offset: const Offset(0, 2),
+                        ),
+                      ],
                     ),
+                    alignment: Alignment.center,
                     child: const Icon(Icons.arrow_back_rounded, color: Colors.white, size: 20),
                   ),
                 ),
@@ -845,7 +861,7 @@ class _AlbumDetailScreenState extends State<AlbumDetailScreen> {
                           ),
                         ),
                         const SizedBox(width: 6),
-                        const Icon(Icons.edit_rounded, color: Colors.white38, size: 16),
+                        const Icon(Icons.edit_rounded, color: Colors.white60, size: 16),
                       ],
                     ),
                   ),
@@ -855,12 +871,21 @@ class _AlbumDetailScreenState extends State<AlbumDetailScreen> {
                   PressableScale(
                     onTap: () => _enterSelectionMode(),
                     child: Container(
+                      constraints: const BoxConstraints(minWidth: 44, minHeight: 44),
                       padding: const EdgeInsets.all(10),
                       decoration: BoxDecoration(
                         color: const Color(0xFF1B1D26),
                         borderRadius: BorderRadius.circular(14),
                         border: Border.all(color: const Color(0xFF2C3040)),
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.black.withAlpha(80),
+                            blurRadius: 6,
+                            offset: const Offset(0, 2),
+                          ),
+                        ],
                       ),
+                      alignment: Alignment.center,
                       child: const Icon(Icons.checklist_rounded, color: Colors.white70, size: 20),
                     ),
                   ),
@@ -869,13 +894,20 @@ class _AlbumDetailScreenState extends State<AlbumDetailScreen> {
                 PressableScale(
                   onTap: () => _showAddOptions(context),
                   child: Container(
+                    constraints: const BoxConstraints(minHeight: 44),
                     padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
                     decoration: BoxDecoration(
-                      gradient: const LinearGradient(
-                        colors: [Color(0xFFFF3B30), Color(0xFFFF5E3A)],
-                      ),
+                      color: const Color(0xFFFF3B30),
                       borderRadius: BorderRadius.circular(14),
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.black.withAlpha(90),
+                          blurRadius: 6,
+                          offset: const Offset(0, 2),
+                        ),
+                      ],
                     ),
+                    alignment: Alignment.center,
                     child: const Row(
                       mainAxisSize: MainAxisSize.min,
                       children: [
@@ -901,7 +933,7 @@ class _AlbumDetailScreenState extends State<AlbumDetailScreen> {
                 Expanded(
                   child: Text(
                     '$itemCount wallpaper${itemCount == 1 ? '' : 's'} • $activeCount active',
-                    style: const TextStyle(color: Colors.white54, fontSize: 13, fontWeight: FontWeight.w500),
+                    style: const TextStyle(color: Colors.white70, fontSize: 13, fontWeight: FontWeight.w500),
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                   ),
@@ -918,14 +950,23 @@ class _AlbumDetailScreenState extends State<AlbumDetailScreen> {
                   },
                   child: AnimatedContainer(
                     duration: const Duration(milliseconds: 200),
-                    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                    constraints: const BoxConstraints(minHeight: 44),
+                    padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
                     decoration: BoxDecoration(
                       color: isActiveShuffle ? const Color(0xFFFF3B30).withAlpha(40) : const Color(0xFF1B1D26),
                       borderRadius: BorderRadius.circular(12),
                       border: Border.all(
                         color: isActiveShuffle ? const Color(0xFFFF3B30) : const Color(0xFF2C3040),
                       ),
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.black.withAlpha(80),
+                          blurRadius: 6,
+                          offset: const Offset(0, 2),
+                        ),
+                      ],
                     ),
+                    alignment: Alignment.center,
                     child: Row(
                       mainAxisSize: MainAxisSize.min,
                       children: [
@@ -987,11 +1028,13 @@ class _AlbumDetailScreenState extends State<AlbumDetailScreen> {
                   PressableScale(
                     onTap: _exitSelectionMode,
                     child: Container(
+                      constraints: const BoxConstraints(minWidth: 44, minHeight: 44),
                       padding: const EdgeInsets.all(6),
                       decoration: BoxDecoration(
                         color: Colors.white.withAlpha(20),
                         shape: BoxShape.circle,
                       ),
+                      alignment: Alignment.center,
                       child: const Icon(Icons.close_rounded, color: Colors.white, size: 18),
                     ),
                   ),
@@ -1013,12 +1056,14 @@ class _AlbumDetailScreenState extends State<AlbumDetailScreen> {
                       HapticFeedback.selectionClick();
                       _toggleSelectAll(items);
                     },
-                    child: Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 6),
+                    child: Container(
+                      constraints: const BoxConstraints(minHeight: 44),
+                      alignment: Alignment.center,
+                      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
                       child: Text(
                         allSelected ? 'Deselect All' : 'Select All',
                         style: const TextStyle(
-                          color: Color(0xFFFF5E3A),
+                          color: Color(0xFFFF3B30),
                           fontSize: 13.5,
                           fontWeight: FontWeight.w600,
                         ),
@@ -1034,6 +1079,7 @@ class _AlbumDetailScreenState extends State<AlbumDetailScreen> {
                     child: PressableScale(
                       onTap: count == 0 ? null : () => _handleBatchIncludeExclude(items),
                       child: Container(
+                        constraints: const BoxConstraints(minHeight: 44),
                         padding: const EdgeInsets.symmetric(vertical: 9, horizontal: 8),
                         decoration: BoxDecoration(
                           color: count == 0
@@ -1050,6 +1096,7 @@ class _AlbumDetailScreenState extends State<AlbumDetailScreen> {
                                     : const Color(0xFFFF9F0A).withAlpha(140)),
                           ),
                         ),
+                        alignment: Alignment.center,
                         child: FittedBox(
                           fit: BoxFit.scaleDown,
                           child: Row(
@@ -1084,6 +1131,7 @@ class _AlbumDetailScreenState extends State<AlbumDetailScreen> {
                     child: PressableScale(
                       onTap: count == 0 ? null : () => _showBatchDeleteSheet(),
                       child: Container(
+                        constraints: const BoxConstraints(minHeight: 44),
                         padding: const EdgeInsets.symmetric(vertical: 9, horizontal: 8),
                         decoration: BoxDecoration(
                           color: count == 0
@@ -1098,13 +1146,14 @@ class _AlbumDetailScreenState extends State<AlbumDetailScreen> {
                           boxShadow: count > 0
                               ? [
                                   BoxShadow(
-                                    color: const Color(0xFFFF3B30).withAlpha(100),
-                                    blurRadius: 8,
+                                    color: Colors.black.withAlpha(90),
+                                    blurRadius: 6,
                                     offset: const Offset(0, 2),
                                   ),
                                 ]
                               : null,
                         ),
+                        alignment: Alignment.center,
                         child: FittedBox(
                           fit: BoxFit.scaleDown,
                           child: Row(
@@ -1159,7 +1208,7 @@ class _AlbumDetailScreenState extends State<AlbumDetailScreen> {
               child: const Icon(
                 Icons.photo_library_outlined,
                 size: 38,
-                color: Colors.white38,
+                color: Colors.white54,
               ),
             ),
             const SizedBox(height: 20),
@@ -1175,26 +1224,26 @@ class _AlbumDetailScreenState extends State<AlbumDetailScreen> {
             const Text(
               'Add wallpapers from your gallery or import new photos to start curating this album.',
               textAlign: TextAlign.center,
-              style: TextStyle(color: Colors.white54, fontSize: 13, height: 1.4),
+              style: TextStyle(color: Colors.white70, fontSize: 13, height: 1.4),
             ),
             const SizedBox(height: 24),
             PressableScale(
               onTap: () => _showAddOptions(context),
               child: Container(
+                constraints: const BoxConstraints(minHeight: 44),
                 padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 14),
                 decoration: BoxDecoration(
-                  gradient: const LinearGradient(
-                    colors: [Color(0xFFFF3B30), Color(0xFFFF5E3A)],
-                  ),
+                  color: const Color(0xFFFF3B30),
                   borderRadius: BorderRadius.circular(16),
                   boxShadow: [
                     BoxShadow(
-                      color: const Color(0xFFFF3B30).withAlpha(90),
-                      blurRadius: 16,
-                      offset: const Offset(0, 4),
+                      color: Colors.black.withAlpha(90),
+                      blurRadius: 10,
+                      offset: const Offset(0, 3),
                     ),
                   ],
                 ),
+                alignment: Alignment.center,
                 child: const Row(
                   mainAxisSize: MainAxisSize.min,
                   children: [
@@ -1258,30 +1307,11 @@ class _AlbumDetailScreenState extends State<AlbumDetailScreen> {
             width: (isSelected || isCurrent || isNext) ? 2.5 : 1.0,
           ),
           boxShadow: [
-            if (isSelected)
-              BoxShadow(
-                color: const Color(0xFFFF3B30).withAlpha(90),
-                blurRadius: 16,
-                offset: const Offset(0, 4),
-              )
-            else if (isCurrent)
-              BoxShadow(
-                color: const Color(0xFFFF3B30).withAlpha(80),
-                blurRadius: 14,
-                offset: const Offset(0, 4),
-              )
-            else if (isNext)
-              BoxShadow(
-                color: const Color(0xFF007AFF).withAlpha(80),
-                blurRadius: 14,
-                offset: const Offset(0, 4),
-              )
-            else
-              BoxShadow(
-                color: Colors.black.withAlpha(80),
-                blurRadius: 8,
-                offset: const Offset(0, 3),
-              ),
+            BoxShadow(
+              color: Colors.black.withAlpha(isSelected ? 120 : 80),
+              blurRadius: 8,
+              offset: const Offset(0, 3),
+            ),
           ],
         ),
         child: ClipRRect(
@@ -1344,8 +1374,9 @@ class _AlbumDetailScreenState extends State<AlbumDetailScreen> {
                             borderRadius: BorderRadius.circular(7),
                             boxShadow: [
                               BoxShadow(
-                                color: const Color(0xFFFF3B30).withAlpha(120),
-                                blurRadius: 6,
+                                color: Colors.black.withAlpha(80),
+                                blurRadius: 4,
+                                offset: const Offset(0, 1),
                               ),
                             ],
                           ),
@@ -1369,8 +1400,9 @@ class _AlbumDetailScreenState extends State<AlbumDetailScreen> {
                             borderRadius: BorderRadius.circular(7),
                             boxShadow: [
                               BoxShadow(
-                                color: const Color(0xFF007AFF).withAlpha(120),
-                                blurRadius: 6,
+                                color: Colors.black.withAlpha(80),
+                                blurRadius: 4,
+                                offset: const Offset(0, 1),
                               ),
                             ],
                           ),
@@ -1461,49 +1493,59 @@ class _AlbumDetailScreenState extends State<AlbumDetailScreen> {
                 left: 8,
                 bottom: 8,
                 child: Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                  padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 3),
                   decoration: BoxDecoration(
-                    color: Colors.black54,
+                    color: Colors.black.withAlpha(160),
                     borderRadius: BorderRadius.circular(8),
+                    border: Border.all(color: Colors.white.withAlpha(25)),
                   ),
                   child: Text(
                     item.resolutionText,
-                    style: const TextStyle(color: Colors.white70, fontSize: 10.5, fontWeight: FontWeight.w600),
+                    style: const TextStyle(
+                      color: Colors.white,
+                      fontSize: 10.5,
+                      fontWeight: FontWeight.w700,
+                    ),
                   ),
                 ),
               ),
 
               if (!_isSelectionMode)
                 Positioned(
-                  bottom: 8,
-                  right: 8,
+                  bottom: 2,
+                  right: 2,
                   child: PressableScale(
                     onTap: () {
                       HapticFeedback.selectionClick();
                       widget.controller.toggleItemEnabled(item.id);
                     },
-                    child: Container(
-                      padding: const EdgeInsets.all(4),
-                      decoration: BoxDecoration(
-                        shape: BoxShape.circle,
-                        color: item.isEnabled ? const Color(0xFF34C759) : Colors.black.withAlpha(170),
-                        border: Border.all(
-                          color: item.isEnabled ? const Color(0xFF34C759) : Colors.white30,
-                          width: 1.2,
-                        ),
-                        boxShadow: [
-                          BoxShadow(
-                            color: item.isEnabled
-                                ? const Color(0xFF34C759).withAlpha(90)
-                                : Colors.black45,
-                            blurRadius: 6,
+                    child: SizedBox(
+                      width: 44,
+                      height: 44,
+                      child: Center(
+                        child: Container(
+                          padding: const EdgeInsets.all(5),
+                          decoration: BoxDecoration(
+                            shape: BoxShape.circle,
+                            color: item.isEnabled ? const Color(0xFF34C759) : Colors.black.withAlpha(170),
+                            border: Border.all(
+                              color: item.isEnabled ? const Color(0xFF34C759) : Colors.white30,
+                              width: 1.2,
+                            ),
+                            boxShadow: [
+                              BoxShadow(
+                                color: Colors.black.withAlpha(90),
+                                blurRadius: 4,
+                                offset: const Offset(0, 1),
+                              ),
+                            ],
                           ),
-                        ],
-                      ),
-                      child: Icon(
-                        item.isEnabled ? Icons.check : Icons.remove_circle_outline_rounded,
-                        color: Colors.white,
-                        size: 14,
+                          child: Icon(
+                            item.isEnabled ? Icons.check : Icons.remove_circle_outline_rounded,
+                            color: Colors.white,
+                            size: 14,
+                          ),
+                        ),
                       ),
                     ),
                   ),

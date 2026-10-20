@@ -236,12 +236,21 @@ class _WallpaperPreviewDialogState extends State<WallpaperPreviewDialog>
                               PressableScale(
                                 onTap: () => Navigator.of(context).pop(),
                                 child: Container(
-                                  padding: const EdgeInsets.all(8),
+                                  constraints: const BoxConstraints(minWidth: 44, minHeight: 44),
+                                  padding: const EdgeInsets.all(10),
                                   decoration: BoxDecoration(
                                     color: const Color(0xFF161822).withAlpha(220),
                                     shape: BoxShape.circle,
                                     border: Border.all(color: Colors.white.withAlpha(35)),
+                                    boxShadow: [
+                                      BoxShadow(
+                                        color: Colors.black.withAlpha(80),
+                                        blurRadius: 6,
+                                        offset: const Offset(0, 2),
+                                      ),
+                                    ],
                                   ),
+                                  alignment: Alignment.center,
                                   child: const Icon(
                                     Icons.close_rounded,
                                     color: Colors.white,
@@ -384,7 +393,7 @@ class _WallpaperPreviewDialogState extends State<WallpaperPreviewDialog>
                                             style: TextStyle(
                                               color: currentItem.isEnabled
                                                   ? const Color(0xFF34C759)
-                                                  : Colors.white38,
+                                                  : Colors.white60,
                                               fontSize: 12.5,
                                               fontWeight: FontWeight.w500,
                                             ),
@@ -405,9 +414,10 @@ class _WallpaperPreviewDialogState extends State<WallpaperPreviewDialog>
                                   },
                                   child: AnimatedContainer(
                                     duration: const Duration(milliseconds: 180),
+                                    constraints: const BoxConstraints(minHeight: 44),
                                     padding: const EdgeInsets.symmetric(
                                       horizontal: 14,
-                                      vertical: 9,
+                                      vertical: 10,
                                     ),
                                     decoration: BoxDecoration(
                                       color: currentItem.isEnabled
@@ -421,6 +431,7 @@ class _WallpaperPreviewDialogState extends State<WallpaperPreviewDialog>
                                         width: 1.2,
                                       ),
                                     ),
+                                    alignment: Alignment.center,
                                     child: Row(
                                       mainAxisSize: MainAxisSize.min,
                                       children: [
@@ -455,12 +466,21 @@ class _WallpaperPreviewDialogState extends State<WallpaperPreviewDialog>
                                 PressableScale(
                                   onTap: () => _confirmDelete(currentItem),
                                   child: Container(
-                                    padding: const EdgeInsets.all(9),
+                                    constraints: const BoxConstraints(minWidth: 44, minHeight: 44),
+                                    padding: const EdgeInsets.all(10),
                                     decoration: BoxDecoration(
                                       color: const Color(0xFF2E1B1E),
                                       borderRadius: BorderRadius.circular(14),
                                       border: Border.all(color: const Color(0xFF4E2429)),
+                                      boxShadow: [
+                                        BoxShadow(
+                                          color: Colors.black.withAlpha(80),
+                                          blurRadius: 4,
+                                          offset: const Offset(0, 1),
+                                        ),
+                                      ],
                                     ),
+                                    alignment: Alignment.center,
                                     child: const Icon(
                                       Icons.delete_outline_rounded,
                                       color: Color(0xFFFF453A),
@@ -498,22 +518,15 @@ class _WallpaperPreviewDialogState extends State<WallpaperPreviewDialog>
                                 width: double.infinity,
                                 height: 50,
                                 decoration: BoxDecoration(
-                                  gradient: LinearGradient(
-                                    colors: isCurrentDeviceWallpaper
-                                        ? const [Color(0xFF2E6E3E), Color(0xFF34C759)]
-                                        : const [Color(0xFFFF3B30), Color(0xFFFF5E3A)],
-                                    begin: Alignment.centerLeft,
-                                    end: Alignment.centerRight,
-                                  ),
+                                  color: isCurrentDeviceWallpaper
+                                      ? const Color(0xFF248A3D)
+                                      : const Color(0xFFFF3B30),
                                   borderRadius: BorderRadius.circular(16),
                                   boxShadow: [
                                     BoxShadow(
-                                      color: (isCurrentDeviceWallpaper
-                                              ? const Color(0xFF34C759)
-                                              : const Color(0xFFFF3B30))
-                                          .withAlpha(80),
-                                      blurRadius: 14,
-                                      offset: const Offset(0, 4),
+                                      color: Colors.black.withAlpha(90),
+                                      blurRadius: 10,
+                                      offset: const Offset(0, 3),
                                     ),
                                   ],
                                 ),

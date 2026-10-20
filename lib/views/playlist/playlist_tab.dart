@@ -247,7 +247,7 @@ class _PlaylistTabState extends State<PlaylistTab> {
                         padding: const EdgeInsets.symmetric(vertical: 14),
                         decoration: BoxDecoration(
                           gradient: const LinearGradient(
-                            colors: [Color(0xFFFF3B30), Color(0xFFFF5E3A)],
+                            colors: [Color(0xFFFF3B30), Color(0xFFFF453A)],
                           ),
                           borderRadius: BorderRadius.circular(16),
                           boxShadow: [
@@ -565,6 +565,7 @@ class _PlaylistTabState extends State<PlaylistTab> {
       child: AnimatedContainer(
         duration: const Duration(milliseconds: 200),
         curve: Curves.easeOutCubic,
+        constraints: const BoxConstraints(minHeight: 44),
         padding: const EdgeInsets.symmetric(vertical: 9),
         decoration: BoxDecoration(
           color: isSelected ? const Color(0xFFFF3B30) : Colors.transparent,
@@ -572,8 +573,8 @@ class _PlaylistTabState extends State<PlaylistTab> {
           boxShadow: isSelected
               ? [
                   BoxShadow(
-                    color: const Color(0xFFFF3B30).withAlpha(80),
-                    blurRadius: 10,
+                    color: Colors.black.withAlpha(100),
+                    blurRadius: 8,
                     offset: const Offset(0, 2),
                   ),
                 ]
@@ -645,6 +646,8 @@ class _PlaylistTabState extends State<PlaylistTab> {
                   PressableScale(
                     onTap: () => _enterSelectionMode(),
                     child: Container(
+                      constraints: const BoxConstraints(minWidth: 44, minHeight: 44),
+                      alignment: Alignment.center,
                       padding: const EdgeInsets.all(10),
                       decoration: BoxDecoration(
                         color: const Color(0xFF1B1D26),
@@ -660,6 +663,8 @@ class _PlaylistTabState extends State<PlaylistTab> {
                   PressableScale(
                     onTap: () => _showSortDialog(context),
                     child: Container(
+                      constraints: const BoxConstraints(minWidth: 44, minHeight: 44),
+                      alignment: Alignment.center,
                       padding: const EdgeInsets.all(10),
                       decoration: BoxDecoration(
                         color: const Color(0xFF1B1D26),
@@ -673,12 +678,19 @@ class _PlaylistTabState extends State<PlaylistTab> {
                   PressableScale(
                     onTap: () => _pickImages(context),
                     child: Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+                      constraints: const BoxConstraints(minHeight: 44),
+                      alignment: Alignment.center,
+                      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
                       decoration: BoxDecoration(
-                        gradient: const LinearGradient(
-                          colors: [Color(0xFFFF3B30), Color(0xFFFF5E3A)],
-                        ),
+                        color: const Color(0xFFFF3B30),
                         borderRadius: BorderRadius.circular(14),
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.black.withAlpha(100),
+                            blurRadius: 8,
+                            offset: const Offset(0, 2),
+                          ),
+                        ],
                       ),
                       child: const Row(
                         mainAxisSize: MainAxisSize.min,
@@ -708,6 +720,8 @@ class _PlaylistTabState extends State<PlaylistTab> {
                         }
                       },
                       child: Container(
+                        constraints: const BoxConstraints(minWidth: 44, minHeight: 44),
+                        alignment: Alignment.center,
                         padding: const EdgeInsets.all(10),
                         decoration: BoxDecoration(
                           color: _albumSearchFocusNode.hasFocus || _albumSearchQuery.isNotEmpty
@@ -734,12 +748,19 @@ class _PlaylistTabState extends State<PlaylistTab> {
                   PressableScale(
                     onTap: () => _showCreateAlbumDialog(context),
                     child: Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+                      constraints: const BoxConstraints(minHeight: 44),
+                      alignment: Alignment.center,
+                      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
                       decoration: BoxDecoration(
-                        gradient: const LinearGradient(
-                          colors: [Color(0xFFFF3B30), Color(0xFFFF5E3A)],
-                        ),
+                        color: const Color(0xFFFF3B30),
                         borderRadius: BorderRadius.circular(14),
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.black.withAlpha(100),
+                            blurRadius: 8,
+                            offset: const Offset(0, 2),
+                          ),
+                        ],
                       ),
                       child: const Row(
                         mainAxisSize: MainAxisSize.min,
@@ -798,15 +819,19 @@ class _PlaylistTabState extends State<PlaylistTab> {
                   PressableScale(
                     onTap: _exitSelectionMode,
                     child: Container(
-                      padding: const EdgeInsets.all(6),
-                      decoration: BoxDecoration(
-                        color: Colors.white.withAlpha(20),
-                        shape: BoxShape.circle,
+                      constraints: const BoxConstraints(minWidth: 44, minHeight: 44),
+                      alignment: Alignment.center,
+                      child: Container(
+                        padding: const EdgeInsets.all(7),
+                        decoration: BoxDecoration(
+                          color: Colors.white.withAlpha(20),
+                          shape: BoxShape.circle,
+                        ),
+                        child: const Icon(Icons.close_rounded, color: Colors.white, size: 18),
                       ),
-                      child: const Icon(Icons.close_rounded, color: Colors.white, size: 18),
                     ),
                   ),
-                  const SizedBox(width: 10),
+                  const SizedBox(width: 6),
                   Expanded(
                     child: Text(
                       '$count selected',
@@ -821,12 +846,14 @@ class _PlaylistTabState extends State<PlaylistTab> {
                   ),
                   PressableScale(
                     onTap: _toggleSelectAll,
-                    child: Padding(
+                    child: Container(
+                      constraints: const BoxConstraints(minHeight: 44),
+                      alignment: Alignment.centerRight,
                       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 6),
                       child: Text(
                         _selectedIds.length == items.length ? 'Deselect All' : 'Select All',
                         style: const TextStyle(
-                          color: Color(0xFFFF5E3A),
+                          color: Color(0xFFFF3B30),
                           fontSize: 13.5,
                           fontWeight: FontWeight.w600,
                         ),
@@ -842,6 +869,8 @@ class _PlaylistTabState extends State<PlaylistTab> {
                     child: PressableScale(
                       onTap: count == 0 ? null : () => _handleBatchIncludeExclude(items),
                       child: Container(
+                        constraints: const BoxConstraints(minHeight: 44),
+                        alignment: Alignment.center,
                         padding: const EdgeInsets.symmetric(vertical: 9, horizontal: 8),
                         decoration: BoxDecoration(
                           color: count == 0
@@ -892,6 +921,8 @@ class _PlaylistTabState extends State<PlaylistTab> {
                     child: PressableScale(
                       onTap: _selectedIds.isEmpty ? null : _confirmBatchDelete,
                       child: Container(
+                        constraints: const BoxConstraints(minHeight: 44),
+                        alignment: Alignment.center,
                         padding: const EdgeInsets.symmetric(vertical: 9, horizontal: 8),
                         decoration: BoxDecoration(
                           color: _selectedIds.isEmpty
@@ -907,7 +938,7 @@ class _PlaylistTabState extends State<PlaylistTab> {
                               ? null
                               : [
                                   BoxShadow(
-                                    color: const Color(0xFFFF3B30).withAlpha(100),
+                                    color: Colors.black.withAlpha(100),
                                     blurRadius: 8,
                                     offset: const Offset(0, 2),
                                   ),
@@ -980,24 +1011,23 @@ class _PlaylistTabState extends State<PlaylistTab> {
             ),
             const SizedBox(height: 8),
             const Text(
-              'Import photos from your device to start rotating stunning wallpapers.',
+              'Import photos from your device to start rotating wallpapers.',
               textAlign: TextAlign.center,
-              style: TextStyle(color: Colors.white54, fontSize: 13, height: 1.4),
+              style: TextStyle(color: Colors.white70, fontSize: 13, height: 1.4),
             ),
             const SizedBox(height: 24),
             PressableScale(
               onTap: () => _pickImages(context),
               child: Container(
+                constraints: const BoxConstraints(minHeight: 48),
                 padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 14),
                 decoration: BoxDecoration(
-                  gradient: const LinearGradient(
-                    colors: [Color(0xFFFF3B30), Color(0xFFFF5E3A)],
-                  ),
+                  color: const Color(0xFFFF3B30),
                   borderRadius: BorderRadius.circular(16),
                   boxShadow: [
                     BoxShadow(
-                      color: const Color(0xFFFF3B30).withAlpha(80),
-                      blurRadius: 14,
+                      color: Colors.black.withAlpha(120),
+                      blurRadius: 12,
                       offset: const Offset(0, 4),
                     ),
                   ],
@@ -1058,22 +1088,21 @@ class _PlaylistTabState extends State<PlaylistTab> {
             const Text(
               'Create albums like Nature, Anime, or Minimal to curate specific wallpaper rotations.',
               textAlign: TextAlign.center,
-              style: TextStyle(color: Colors.white54, fontSize: 13, height: 1.4),
+              style: TextStyle(color: Colors.white70, fontSize: 13, height: 1.4),
             ),
             const SizedBox(height: 24),
             PressableScale(
               onTap: () => _showCreateAlbumDialog(context),
               child: Container(
+                constraints: const BoxConstraints(minHeight: 48),
                 padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 14),
                 decoration: BoxDecoration(
-                  gradient: const LinearGradient(
-                    colors: [Color(0xFFFF3B30), Color(0xFFFF5E3A)],
-                  ),
+                  color: const Color(0xFFFF3B30),
                   borderRadius: BorderRadius.circular(16),
                   boxShadow: [
                     BoxShadow(
-                      color: const Color(0xFFFF3B30).withAlpha(80),
-                      blurRadius: 14,
+                      color: Colors.black.withAlpha(120),
+                      blurRadius: 12,
                       offset: const Offset(0, 4),
                     ),
                   ],
@@ -1119,15 +1148,6 @@ class _PlaylistTabState extends State<PlaylistTab> {
                   : (hasQuery ? const Color(0xFFFF3B30).withAlpha(120) : const Color(0xFF262B3A)),
               width: isFocused ? 1.4 : 1.0,
             ),
-            boxShadow: isFocused
-                ? [
-                    BoxShadow(
-                      color: const Color(0xFFFF3B30).withAlpha(40),
-                      blurRadius: 10,
-                      offset: const Offset(0, 2),
-                    ),
-                  ]
-                : null,
           ),
           child: TextField(
             controller: _albumSearchController,
@@ -1340,9 +1360,9 @@ class _PlaylistTabState extends State<PlaylistTab> {
           ),
           boxShadow: [
             BoxShadow(
-              color: isActive ? const Color(0xFFFF3B30).withAlpha(80) : Colors.black.withAlpha(80),
-              blurRadius: isActive ? 14 : 8,
-              offset: const Offset(0, 4),
+              color: Colors.black.withAlpha(90),
+              blurRadius: 10,
+              offset: const Offset(0, 3),
             ),
           ],
         ),
@@ -1390,12 +1410,6 @@ class _PlaylistTabState extends State<PlaylistTab> {
                     decoration: BoxDecoration(
                       color: const Color(0xFFFF3B30),
                       borderRadius: BorderRadius.circular(8),
-                      boxShadow: [
-                        BoxShadow(
-                          color: const Color(0xFFFF3B30).withAlpha(120),
-                          blurRadius: 8,
-                        ),
-                      ],
                     ),
                     child: const Row(
                       mainAxisSize: MainAxisSize.min,
@@ -1417,16 +1431,21 @@ class _PlaylistTabState extends State<PlaylistTab> {
                 ),
 
               Positioned(
-                top: 8,
-                right: 8,
+                top: 4,
+                right: 4,
                 child: PopupMenuButton<String>(
+                  padding: EdgeInsets.zero,
                   icon: Container(
-                    padding: const EdgeInsets.all(4),
-                    decoration: const BoxDecoration(
-                      color: Colors.black45,
-                      shape: BoxShape.circle,
+                    constraints: const BoxConstraints(minWidth: 44, minHeight: 44),
+                    alignment: Alignment.center,
+                    child: Container(
+                      padding: const EdgeInsets.all(6),
+                      decoration: const BoxDecoration(
+                        color: Colors.black54,
+                        shape: BoxShape.circle,
+                      ),
+                      child: const Icon(Icons.more_vert_rounded, color: Colors.white, size: 16),
                     ),
-                    child: const Icon(Icons.more_vert_rounded, color: Colors.white, size: 16),
                   ),
                   color: const Color(0xFF1B1D28),
                   shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
@@ -1485,7 +1504,7 @@ class _PlaylistTabState extends State<PlaylistTab> {
                                   ? '${album.count} wallpapers • Excluded'
                                   : '${album.count} wallpapers • $activeCount active',
                       style: TextStyle(
-                        color: isAlbumAllExcluded ? Colors.white38 : Colors.white60,
+                        color: isAlbumAllExcluded ? Colors.white60 : Colors.white70,
                         fontSize: 11.5,
                         fontWeight: FontWeight.w500,
                       ),
@@ -1618,30 +1637,11 @@ class _PlaylistTabState extends State<PlaylistTab> {
             width: (isSelected || isCurrent || isNext) ? 2.5 : 1.0,
           ),
           boxShadow: [
-            if (isSelected)
-              BoxShadow(
-                color: const Color(0xFFFF3B30).withAlpha(120),
-                blurRadius: 16,
-                offset: const Offset(0, 4),
-              )
-            else if (isCurrent)
-              BoxShadow(
-                color: const Color(0xFFFF3B30).withAlpha(80),
-                blurRadius: 14,
-                offset: const Offset(0, 4),
-              )
-            else if (isNext)
-              BoxShadow(
-                color: const Color(0xFF007AFF).withAlpha(80),
-                blurRadius: 14,
-                offset: const Offset(0, 4),
-              )
-            else
-              BoxShadow(
-                color: Colors.black.withAlpha(80),
-                blurRadius: 8,
-                offset: const Offset(0, 3),
-              ),
+            BoxShadow(
+              color: Colors.black.withAlpha(isSelected ? 120 : 80),
+              blurRadius: 8,
+              offset: const Offset(0, 3),
+            ),
           ],
         ),
         child: ClipRRect(
@@ -1706,8 +1706,9 @@ class _PlaylistTabState extends State<PlaylistTab> {
                             borderRadius: BorderRadius.circular(7),
                             boxShadow: [
                               BoxShadow(
-                                color: const Color(0xFFFF3B30).withAlpha(120),
-                                blurRadius: 6,
+                                color: Colors.black.withAlpha(80),
+                                blurRadius: 4,
+                                offset: const Offset(0, 1),
                               ),
                             ],
                           ),
@@ -1731,8 +1732,9 @@ class _PlaylistTabState extends State<PlaylistTab> {
                             borderRadius: BorderRadius.circular(7),
                             boxShadow: [
                               BoxShadow(
-                                color: const Color(0xFF007AFF).withAlpha(120),
-                                blurRadius: 6,
+                                color: Colors.black.withAlpha(80),
+                                blurRadius: 4,
+                                offset: const Offset(0, 1),
                               ),
                             ],
                           ),
@@ -1842,35 +1844,40 @@ class _PlaylistTabState extends State<PlaylistTab> {
 
               if (!_isSelectionMode)
                 Positioned(
-                  bottom: 8,
-                  right: 8,
+                  bottom: 2,
+                  right: 2,
                   child: PressableScale(
                     onTap: () {
                       HapticFeedback.selectionClick();
                       widget.controller.toggleItemEnabled(item.id);
                     },
-                    child: Container(
-                      padding: const EdgeInsets.all(4),
-                      decoration: BoxDecoration(
-                        shape: BoxShape.circle,
-                        color: item.isEnabled ? const Color(0xFF34C759) : Colors.black.withAlpha(170),
-                        border: Border.all(
-                          color: item.isEnabled ? const Color(0xFF34C759) : Colors.white30,
-                          width: 1.2,
-                        ),
-                        boxShadow: [
-                          BoxShadow(
-                            color: item.isEnabled
-                                ? const Color(0xFF34C759).withAlpha(90)
-                                : Colors.black45,
-                            blurRadius: 6,
+                    child: SizedBox(
+                      width: 44,
+                      height: 44,
+                      child: Center(
+                        child: Container(
+                          padding: const EdgeInsets.all(5),
+                          decoration: BoxDecoration(
+                            shape: BoxShape.circle,
+                            color: item.isEnabled ? const Color(0xFF34C759) : Colors.black.withAlpha(170),
+                            border: Border.all(
+                              color: item.isEnabled ? const Color(0xFF34C759) : Colors.white30,
+                              width: 1.2,
+                            ),
+                            boxShadow: [
+                              BoxShadow(
+                                color: Colors.black.withAlpha(90),
+                                blurRadius: 4,
+                                offset: const Offset(0, 1),
+                              ),
+                            ],
                           ),
-                        ],
-                      ),
-                      child: Icon(
-                        item.isEnabled ? Icons.check : Icons.remove_circle_outline_rounded,
-                        color: Colors.white,
-                        size: 14,
+                          child: Icon(
+                            item.isEnabled ? Icons.check : Icons.remove_circle_outline_rounded,
+                            color: Colors.white,
+                            size: 14,
+                          ),
+                        ),
                       ),
                     ),
                   ),

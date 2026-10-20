@@ -17,10 +17,12 @@ import android.widget.FrameLayout
 import android.widget.ImageView
 import android.widget.LinearLayout
 import android.widget.RadioButton
+import android.graphics.Typeface
 import android.widget.RadioGroup
 import android.widget.Spinner
 import android.widget.TextView
 import android.widget.Toast
+import androidx.core.content.ContextCompat
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import org.json.JSONArray
@@ -37,8 +39,7 @@ class AlbumWidgetConfigureActivity : Activity() {
     private lateinit var radioOrdered: RadioButton
     private lateinit var radioRandom: RadioButton
     private lateinit var btnShuffleNow: Button
-    private lateinit var btnSave: Button
-    private lateinit var btnOpenApp: TextView
+    private lateinit var btnOpenApp: Button
 
     // Preview UI elements
     private lateinit var previewCardContainer: FrameLayout
@@ -48,7 +49,6 @@ class AlbumWidgetConfigureActivity : Activity() {
     private lateinit var previewInfoOverlay: LinearLayout
     private lateinit var tvPreviewAlbumTitle: TextView
     private lateinit var tvPreviewBadge: TextView
-    private lateinit var tvPreviewCounter: TextView
 
     private val albumOptions = mutableListOf<Pair<String, String>>()
     private val intervalOptions = listOf(
@@ -71,6 +71,8 @@ class AlbumWidgetConfigureActivity : Activity() {
     private var currentAlbumPaths = listOf<String>()
     private var currentAlbumName = "All Photos"
     private var isUserSelectingAlbum = false
+    private var isUserSelectingInterval = false
+    private var isRestored = false
 
     private val widgetUpdateReceiver = object : BroadcastReceiver() {
         override fun onReceive(context: Context?, intent: Intent?) {
@@ -111,14 +113,13 @@ class AlbumWidgetConfigureActivity : Activity() {
                 WindowInsetsCompat.Type.systemBars() or WindowInsetsCompat.Type.displayCutout()
             )
             val density = resources.displayMetrics.density
-            val padX = (20 * density).toInt()
             val padTop = (16 * density).toInt()
             val padBottom = (16 * density).toInt()
 
             v.setPadding(
-                padX + insets.left,
+                insets.left,
                 insets.top + padTop,
-                padX + insets.right,
+                insets.right,
                 insets.bottom + padBottom
             )
             windowInsets
@@ -130,8 +131,12 @@ class AlbumWidgetConfigureActivity : Activity() {
         radioGroupOrder = findViewById(R.id.radio_group_order)
         radioOrdered = findViewById(R.id.radio_ordered)
         radioRandom = findViewById(R.id.radio_random)
+        val radioTint = ContextCompat.getColorStateList(this, R.color.radio_button_tint)
+        if (radioTint != null) {
+            radioRandom.buttonTintList = radioTint
+            radioOrdered.buttonTintList = radioTint
+        }
         btnShuffleNow = findViewById(R.id.btn_shuffle_now)
-        btnSave = findViewById(R.id.btn_save_widget)
         btnOpenApp = findViewById(R.id.btn_open_app)
 
         // Preview views
@@ -142,7 +147,6 @@ class AlbumWidgetConfigureActivity : Activity() {
         previewInfoOverlay = findViewById(R.id.preview_info_overlay)
         tvPreviewAlbumTitle = findViewById(R.id.tv_preview_album_title)
         tvPreviewBadge = findViewById(R.id.tv_preview_badge)
-        tvPreviewCounter = findViewById(R.id.tv_preview_counter)
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
             previewCardContainer.clipToOutline = true
@@ -153,7 +157,14 @@ class AlbumWidgetConfigureActivity : Activity() {
         restoreCurrentConfiguration()
         setupAlbumSpinnerListener()
 
+        radioGroupOrder.setOnCheckedChangeListener { _, _ ->
+            if (isRestored) {
+                autoSaveSettings()
+            }
+        }
+
         btnClose.setOnClickListener {
+            autoSaveSettings()
             finish()
         }
 
@@ -167,15 +178,12 @@ class AlbumWidgetConfigureActivity : Activity() {
         }
 
         btnOpenApp.setOnClickListener {
+            autoSaveSettings()
             val appIntent = Intent(this, MainActivity::class.java).apply {
                 flags = Intent.FLAG_ACTIVITY_NEW_TASK
             }
             startActivity(appIntent)
             finish()
-        }
-
-        btnSave.setOnClickListener {
-            saveWidgetConfiguration()
         }
     }
 
@@ -192,10 +200,36 @@ class AlbumWidgetConfigureActivity : Activity() {
 
     override fun onPause() {
         super.onPause()
+        autoSaveSettings()
         try {
             unregisterReceiver(widgetUpdateReceiver)
         } catch (e: Exception) {
             // Ignore if not registered
+        }
+    }
+
+    private fun createSpinnerAdapter(items: List<String>, getSelectedPosition: () -> Int): ArrayAdapter<String> {
+        return object : ArrayAdapter<String>(this, R.layout.widget_spinner_item, items) {
+            override fun getDropDownView(position: Int, convertView: View?, parent: ViewGroup): View {
+                val view = convertView ?: layoutInflater.inflate(R.layout.widget_spinner_dropdown_item, parent, false)
+                val isSelected = position == getSelectedPosition()
+                val textView = view.findViewById<TextView>(R.id.spinner_item_text)
+                val checkView = view.findViewById<ImageView>(R.id.spinner_item_check)
+
+                textView?.text = getItem(position)
+                if (isSelected) {
+                    textView?.setTextColor(0xFFFF3B30.toInt())
+                    textView?.setTypeface(null, Typeface.BOLD)
+                    checkView?.visibility = View.VISIBLE
+                    view.setBackgroundResource(R.drawable.spinner_item_selected_bg)
+                } else {
+                    textView?.setTextColor(0xFFF1F5F9.toInt())
+                    textView?.setTypeface(null, Typeface.NORMAL)
+                    checkView?.visibility = View.GONE
+                    view.setBackgroundResource(R.drawable.spinner_item_normal_bg)
+                }
+                return view
+            }
         }
     }
 
@@ -223,32 +257,19 @@ class AlbumWidgetConfigureActivity : Activity() {
         }
 
         val albumNames = albumOptions.map { it.second }
-        val adapter = object : ArrayAdapter<String>(this, R.layout.widget_spinner_item, albumNames) {
-            override fun getDropDownView(position: Int, convertView: View?, parent: ViewGroup): View {
-                val view = super.getDropDownView(position, convertView, parent)
-                if (view is TextView) {
-                    view.setTextColor(0xFFFFFFFF.toInt())
-                    view.setBackgroundColor(0xFF1E2130.toInt())
-                }
-                return view
-            }
-        }
-        spinnerAlbum.adapter = adapter
+        spinnerAlbum.adapter = createSpinnerAdapter(albumNames) { spinnerAlbum.selectedItemPosition }
     }
 
     private fun setupIntervalSpinner() {
         val intervalLabels = intervalOptions.map { it.second }
-        val adapter = object : ArrayAdapter<String>(this, R.layout.widget_spinner_item, intervalLabels) {
-            override fun getDropDownView(position: Int, convertView: View?, parent: ViewGroup): View {
-                val view = super.getDropDownView(position, convertView, parent)
-                if (view is TextView) {
-                    view.setTextColor(0xFFFFFFFF.toInt())
-                    view.setBackgroundColor(0xFF1E2130.toInt())
-                }
-                return view
+        spinnerInterval.adapter = createSpinnerAdapter(intervalLabels) { spinnerInterval.selectedItemPosition }
+        spinnerInterval.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
+            override fun onItemSelected(parent: AdapterView<*>?, view: View?, position: Int, id: Long) {
+                if (!isUserSelectingInterval || !isRestored) return
+                autoSaveSettings()
             }
+            override fun onNothingSelected(parent: AdapterView<*>?) {}
         }
-        spinnerInterval.adapter = adapter
     }
 
     private fun setupAlbumSpinnerListener() {
@@ -267,6 +288,9 @@ class AlbumWidgetConfigureActivity : Activity() {
                     } else {
                         updatePreviewForAlbum(selectedAlbumId, preferredIndex = 0)
                     }
+                    if (isRestored) {
+                        autoSaveSettings()
+                    }
                 }
             }
 
@@ -284,7 +308,6 @@ class AlbumWidgetConfigureActivity : Activity() {
         val lastPath = prefs.getString("flutter.album_widget_${appWidgetId}_last_path", null)
 
         if (isExisting) {
-            btnSave.text = "Save Settings"
             btnShuffleNow.visibility = View.VISIBLE
 
             var selectedIndex = 0
@@ -313,7 +336,6 @@ class AlbumWidgetConfigureActivity : Activity() {
             val targetAlbumId = savedAlbumId ?: albumOptions[selectedIndex].first
             updatePreviewForAlbum(targetAlbumId, preferredPath = lastPath, preferredIndex = savedIndex, animate = false)
         } else {
-            btnSave.text = "Apply & Add Widget"
             btnShuffleNow.visibility = View.VISIBLE
             radioRandom.isChecked = true
             val defaultIndex = intervalOptions.indexOfFirst { it.first == 0 }.coerceAtLeast(0)
@@ -323,9 +345,13 @@ class AlbumWidgetConfigureActivity : Activity() {
             updatePreviewForAlbum(defaultAlbumId, preferredIndex = 0, animate = false)
         }
 
-        // Allow subsequent user selections to trigger preview updates
+        autoSaveSettings()
+
+        // Allow subsequent user selections to trigger preview updates and auto-save
         spinnerAlbum.post {
             isUserSelectingAlbum = true
+            isUserSelectingInterval = true
+            isRestored = true
         }
     }
 
@@ -401,7 +427,6 @@ class AlbumWidgetConfigureActivity : Activity() {
 
             tvPreviewAlbumTitle.text = albumName
             tvPreviewBadge.text = "${index + 1}/$total"
-            tvPreviewCounter.text = "Photo ${index + 1} of $total"
             btnShuffleNow.isEnabled = total > 1
         } else {
             showEmptyPreview(albumName)
@@ -414,7 +439,6 @@ class AlbumWidgetConfigureActivity : Activity() {
         previewEmptyContainer.visibility = View.VISIBLE
 
         tvPreviewEmptyText.text = "No photos in $albumName"
-        tvPreviewCounter.text = "0 photos"
         btnShuffleNow.isEnabled = false
     }
 
@@ -471,9 +495,10 @@ class AlbumWidgetConfigureActivity : Activity() {
         Toast.makeText(this, "Shuffled to photo ${currentPhotoIndex + 1} of ${currentAlbumPaths.size}", Toast.LENGTH_SHORT).show()
     }
 
-    private fun saveWidgetConfiguration() {
+    private fun autoSaveSettings() {
+        if (albumOptions.isEmpty()) return
         val selectedAlbumIndex = spinnerAlbum.selectedItemPosition.coerceIn(0, albumOptions.size - 1)
-        val selectedAlbum = albumOptions[selectedAlbumIndex]
+        val selectedAlbum = albumOptions.getOrNull(selectedAlbumIndex) ?: return
         val albumId = selectedAlbum.first
         val rawName = selectedAlbum.second.substringBeforeLast(" (")
         val albumName = if (albumId == "all_photos") "All Photos" else rawName
@@ -484,13 +509,18 @@ class AlbumWidgetConfigureActivity : Activity() {
         val intervalMinutes = intervalOptions[selectedIntervalIndex].first
 
         val prefs = getSharedPreferences("FlutterSharedPreferences", Context.MODE_PRIVATE)
-        prefs.edit()
+        val editor = prefs.edit()
             .putString("flutter.album_widget_${appWidgetId}_album_id", albumId)
             .putString("flutter.album_widget_${appWidgetId}_album_name", albumName)
             .putLong("flutter.album_widget_${appWidgetId}_interval_minutes", intervalMinutes.toLong())
             .putBoolean("flutter.album_widget_${appWidgetId}_is_random", isRandom)
             .putLong("flutter.album_widget_${appWidgetId}_current_index", currentPhotoIndex.toLong())
-            .apply()
+
+        val currentPath = currentAlbumPaths.getOrNull(currentPhotoIndex)
+        if (currentPath != null) {
+            editor.putString("flutter.album_widget_${appWidgetId}_last_path", currentPath)
+        }
+        editor.apply()
 
         // Render widget immediately on home screen
         val appWidgetManager = AppWidgetManager.getInstance(this)
@@ -503,6 +533,11 @@ class AlbumWidgetConfigureActivity : Activity() {
             putExtra(AppWidgetManager.EXTRA_APPWIDGET_ID, appWidgetId)
         }
         setResult(RESULT_OK, resultValue)
-        finish()
+    }
+
+    @Suppress("DEPRECATION")
+    override fun onBackPressed() {
+        autoSaveSettings()
+        super.onBackPressed()
     }
 }

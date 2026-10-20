@@ -1,12 +1,10 @@
 import 'dart:io';
-import 'package:image_picker/image_picker.dart';
 import 'package:flutter/material.dart';
 import '../../controllers/wallpaper_controller.dart';
 import '../../models/slideshow_config.dart';
 import '../../models/wallpaper_item.dart';
 import '../widgets/pressable_scale.dart';
 import '../widgets/wallpaper_preview_dialog.dart';
-import '../widgets/widget_guide_dialog.dart';
 
 class SlideshowTab extends StatefulWidget {
   final WallpaperController controller;
@@ -35,63 +33,6 @@ class _SlideshowTabState extends State<SlideshowTab> with SingleTickerProviderSt
   void dispose() {
     _rotationController.dispose();
     super.dispose();
-  }
-
-  Future<void> _pickImages(BuildContext context) async {
-    try {
-      final picker = ImagePicker();
-      final images = await picker.pickMultiImage();
-      if (images.isNotEmpty) {
-        final paths = images.map((e) => e.path).toList();
-        final count = await widget.controller.importImages(paths);
-        if (context.mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text('Added $count wallpaper${count == 1 ? '' : 's'} to collection'),
-              backgroundColor: const Color(0xFF34C759),
-              duration: const Duration(seconds: 2),
-            ),
-          );
-        }
-      }
-    } catch (e) {
-      if (context.mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Failed to pick images: $e'), backgroundColor: Colors.red),
-        );
-      }
-    }
-  }
-
-  Future<void> _pickFolder(BuildContext context) async {
-    try {
-      final count = await widget.controller.pickAndImportFolder();
-      if (context.mounted) {
-        if (count > 0) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text('Imported $count wallpaper${count == 1 ? '' : 's'} from folder'),
-              backgroundColor: const Color(0xFF34C759),
-              duration: const Duration(seconds: 2),
-            ),
-          );
-        } else {
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(
-              content: Text('No images found in selected folder'),
-              backgroundColor: Colors.orange,
-              duration: Duration(seconds: 2),
-            ),
-          );
-        }
-      }
-    } catch (e) {
-      if (context.mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Failed to pick folder: $e'), backgroundColor: Colors.red),
-        );
-      }
-    }
   }
 
   Future<void> _handleShuffle() async {
@@ -152,6 +93,17 @@ class _SlideshowTabState extends State<SlideshowTab> with SingleTickerProviderSt
               mainAxisSize: MainAxisSize.min,
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
+                Center(
+                  child: Container(
+                    width: 36,
+                    height: 4,
+                    margin: const EdgeInsets.only(bottom: 12),
+                    decoration: BoxDecoration(
+                      color: Colors.white24,
+                      borderRadius: BorderRadius.circular(2),
+                    ),
+                  ),
+                ),
                 const Padding(
                   padding: EdgeInsets.symmetric(horizontal: 20, vertical: 8),
                   child: Text(
@@ -220,6 +172,17 @@ class _SlideshowTabState extends State<SlideshowTab> with SingleTickerProviderSt
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
+              Center(
+                child: Container(
+                  width: 36,
+                  height: 4,
+                  margin: const EdgeInsets.only(bottom: 12),
+                  decoration: BoxDecoration(
+                    color: Colors.white24,
+                    borderRadius: BorderRadius.circular(2),
+                  ),
+                ),
+              ),
               const Padding(
                 padding: EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                 child: Text(
@@ -283,7 +246,7 @@ class _SlideshowTabState extends State<SlideshowTab> with SingleTickerProviderSt
                           ),
                           child: Icon(
                             Icons.folder_special_rounded,
-                            color: isSelected ? const Color(0xFFFF3B30) : const Color(0xFFFF5E3A),
+                            color: isSelected ? const Color(0xFFFF3B30) : const Color(0xFFFF3B30),
                             size: 22,
                           ),
                         ),
@@ -327,7 +290,6 @@ class _SlideshowTabState extends State<SlideshowTab> with SingleTickerProviderSt
       builder: (context, _) {
         final controller = widget.controller;
         final config = controller.config;
-        final items = controller.activeItems;
         final currentItem = controller.currentWallpaper;
 
         return Scaffold(
@@ -364,36 +326,28 @@ class _SlideshowTabState extends State<SlideshowTab> with SingleTickerProviderSt
                                 child: Column(
                                   crossAxisAlignment: CrossAxisAlignment.stretch,
                                   children: [
-                                    // Hero Device Mockup with Screen Device Aspect Ratio
-                                    _buildHeroMockup(
+                                    // Hero Row: Lock Mockup, Home Mockup, Shuffle Button
+                                    _buildHeroRow(
                                       context,
                                       controller,
                                       config,
                                       currentItem,
                                       availableWidth: contentMaxWidth,
                                     ),
-                                    const SizedBox(height: 14),
+                                    const SizedBox(height: 18),
 
-                                    // Active Source Selector Chip
-                                    _buildSourceSelectorChip(controller),
+                                    // Source Selector Card ("Source Cars v")
+                                    _buildSourceSelectorCard(controller),
                                     const SizedBox(height: 16),
 
-                                    // Large Tactile "Shuffle Wallpaper" Button
-                                    _buildShuffleButton(),
-                                    const SizedBox(height: 20),
+                                    // Unified Configuration Card: APPLY TO, FIT, AUTO-SHUFFLE EVERY
+                                    _buildConfigurationCard(context, controller, config),
 
-                                    // Wallpaper Configuration Card
-                                    _buildWallpaperConfigurationCard(context, controller, config),
-                                    const SizedBox(height: 24),
-
-                                    // Quick Add Photos & Folder Action Cards
-                                    _buildQuickAddRow(context),
-
-                                    if (items.isNotEmpty) ...[
-                                      const SizedBox(height: 26),
-                                      _buildRotationQueueHeader(items),
+                                    if (controller.activeItems.isNotEmpty) ...[
+                                      const SizedBox(height: 24),
+                                      _buildRotationQueueHeader(),
                                       const SizedBox(height: 12),
-                                      _buildRotationQueueCarousel(items, currentItem, controller),
+                                      _buildRotationQueueCarousel(controller.activeItems, currentItem, controller),
                                     ],
                                   ],
                                 ),
@@ -413,7 +367,7 @@ class _SlideshowTabState extends State<SlideshowTab> with SingleTickerProviderSt
     );
   }
 
-  Widget _buildHeroMockup(
+  Widget _buildHeroRow(
     BuildContext context,
     WallpaperController controller,
     SlideshowConfig config,
@@ -432,241 +386,67 @@ class _SlideshowTabState extends State<SlideshowTab> with SingleTickerProviderSt
     final double mockupWidth;
 
     if (isLandscape) {
-      final maxAllowedWidth = (availableWidth * 0.90).clamp(160.0, 460.0);
-      final naturalHeight = (screenHeight * 0.32).clamp(180.0, 240.0);
-      if (naturalHeight * deviceAspectRatio <= maxAllowedWidth) {
+      final naturalHeight = (screenHeight * 0.22).clamp(120.0, 160.0);
+      final maxW = (availableWidth - 110) / 2;
+      if (naturalHeight * deviceAspectRatio <= maxW) {
         mockupHeight = naturalHeight;
         mockupWidth = mockupHeight * deviceAspectRatio;
       } else {
-        mockupWidth = maxAllowedWidth;
+        mockupWidth = maxW;
         mockupHeight = mockupWidth / deviceAspectRatio;
       }
     } else {
-      final maxAllowedWidth = (availableWidth * 0.88).clamp(160.0, 360.0);
-      final naturalHeight = (screenHeight * 0.36).clamp(280.0, 370.0);
-      if (naturalHeight * deviceAspectRatio <= maxAllowedWidth) {
+      final naturalHeight = (screenHeight * 0.26).clamp(180.0, 220.0);
+      final maxW = (availableWidth - 110) / 2;
+      if (naturalHeight * deviceAspectRatio <= maxW) {
         mockupHeight = naturalHeight;
         mockupWidth = mockupHeight * deviceAspectRatio;
       } else {
-        mockupWidth = maxAllowedWidth;
+        mockupWidth = maxW;
         mockupHeight = mockupWidth / deviceAspectRatio;
       }
     }
 
-    final cornerRadius = (mockupWidth * 0.16).clamp(20.0, 34.0);
+    final cornerRadius = (mockupWidth * 0.18).clamp(16.0, 22.0);
 
     return Center(
       child: GestureDetector(
         onHorizontalDragEnd: (details) {
-          if (details.primaryVelocity != null && (details.primaryVelocity! < -200 || details.primaryVelocity! > 200)) {
+          if (details.primaryVelocity != null &&
+              (details.primaryVelocity! < -200 || details.primaryVelocity! > 200)) {
             widget.controller.shuffleNext();
           }
         },
-        child: Container(
-          key: const Key('hero_device_mockup'),
-          width: mockupWidth,
-          height: mockupHeight,
-        decoration: BoxDecoration(
-          color: const Color(0xFF161820),
-          borderRadius: BorderRadius.circular(cornerRadius),
-          border: Border.all(color: const Color(0xFF2D3244), width: 3),
-          boxShadow: [
-            BoxShadow(
-              color: const Color(0xFFFF3B30).withAlpha(45),
-              blurRadius: 36,
-              spreadRadius: -10,
-              offset: const Offset(0, 16),
-            ),
-            BoxShadow(
-              color: Colors.black.withAlpha(160),
-              blurRadius: 24,
-              offset: const Offset(0, 12),
-            ),
-          ],
-        ),
-        child: ClipRRect(
-          borderRadius: BorderRadius.circular(cornerRadius - 3),
-          child: Stack(
-            fit: StackFit.expand,
-            children: [
-              // Active Wallpaper Image with Animated Cross-Fade
-              AnimatedSwitcher(
-                duration: const Duration(milliseconds: 350),
-                layoutBuilder: (currentChild, previousChildren) {
-                  return Stack(
-                    fit: StackFit.expand,
-                    children: <Widget>[
-                      ...previousChildren,
-                      ?currentChild,
-                    ],
-                  );
-                },
-                transitionBuilder: (child, animation) {
-                  final isCurrent = currentItem != null && (child.key == ValueKey<String>('${currentItem.id}_${config.scaleType}'));
-                  if (isCurrent) {
-                    return FadeTransition(
-                      opacity: animation,
-                      child: ScaleTransition(
-                        scale: Tween<double>(begin: 0.98, end: 1.0).animate(
-                          CurvedAnimation(
-                            parent: animation,
-                            curve: Curves.easeOutCubic,
-                          ),
-                        ),
-                        child: child,
-                      ),
-                    );
-                  } else {
-                    return child;
-                  }
-                },
-                child: currentItem != null && File(currentItem.path).existsSync()
-                    ? Image.file(
-                        key: ValueKey<String>('${currentItem.id}_${config.scaleType}'),
-                        File(currentItem.path),
-                        fit: _getBoxFit(config.scaleType),
-                        width: double.infinity,
-                        height: double.infinity,
-                      )
-                    : Container(
-                        key: const ValueKey('empty_state'),
-                        color: const Color(0xFF151720),
-                        child: Column(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            Icon(
-                              Icons.add_photo_alternate_outlined,
-                              size: 48,
-                              color: Colors.white.withAlpha(90),
-                            ),
-                            const SizedBox(height: 12),
-                            Text(
-                              'Add Wallpaper',
-                              style: TextStyle(
-                                color: Colors.white.withAlpha(150),
-                                fontSize: 13,
-                                fontWeight: FontWeight.w600,
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-              ),
-
-              // Camera punch-hole notch
-              Align(
-                alignment: Alignment.topCenter,
-                child: Container(
-                  key: Key(isLandscape ? 'hero_landscape_camera' : 'hero_portrait_notch'),
-                  margin: const EdgeInsets.only(top: 8),
-                  width: isLandscape ? 10 : (mockupWidth * 0.22).clamp(24.0, 48.0),
-                  height: isLandscape ? 10 : 10,
-                  decoration: BoxDecoration(
-                    color: Colors.black,
-                    shape: isLandscape ? BoxShape.circle : BoxShape.rectangle,
-                    borderRadius: isLandscape ? null : BorderRadius.circular(8),
-                  ),
-                ),
-              ),
-
-              // Floating active badge at bottom of phone mockup
-              Positioned(
-                bottom: 12,
-                left: 12,
-                right: 12,
-                child: Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
-                  decoration: BoxDecoration(
-                    color: Colors.black.withAlpha(180),
-                    borderRadius: BorderRadius.circular(14),
-                    border: Border.all(color: Colors.white.withAlpha(30)),
-                  ),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Container(
-                        width: 7,
-                        height: 7,
-                        decoration: BoxDecoration(
-                          color: config.isSlideshowEnabled
-                              ? const Color(0xFF34C759)
-                              : Colors.white38,
-                          shape: BoxShape.circle,
-                        ),
-                      ),
-                      const SizedBox(width: 6),
-                      Flexible(
-                        child: Text(
-                          currentItem != null ? config.targetScreenLabel : 'No Wallpapers',
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                          style: const TextStyle(
-                            color: Colors.white,
-                            fontSize: 11.5,
-                            fontWeight: FontWeight.w600,
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-            ],
-          ),
-        ),
-      ),
-    ),
-  );
-}
-
-  Widget _buildSourceSelectorChip(WallpaperController controller) {
-    return Center(
-      child: PressableScale(
-        onTap: _showSourceSelectorSheet,
-        child: Container(
-          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
-          decoration: BoxDecoration(
-            color: const Color(0xFF1B1D26),
-            borderRadius: BorderRadius.circular(20),
-            border: Border.all(
-              color: controller.activeAlbum != null
-                  ? const Color(0xFFFF3B30).withAlpha(140)
-                  : const Color(0xFF2C3040),
-            ),
-          ),
+        child: FittedBox(
+          fit: BoxFit.scaleDown,
           child: Row(
             mainAxisSize: MainAxisSize.min,
+            mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              Icon(
-                controller.activeAlbum != null
-                    ? Icons.folder_special_rounded
-                    : Icons.photo_library_rounded,
-                size: 16,
-                color: controller.activeAlbum != null
-                    ? const Color(0xFFFF3B30)
-                    : Colors.white70,
+              // 1. Lock Screen Mockup
+              _buildLockMockup(
+                mockupWidth,
+                mockupHeight,
+                cornerRadius,
+                isLandscape,
+                currentItem,
+                config,
               ),
-              const SizedBox(width: 8),
-              Flexible(
-                child: Text(
-                  'Source: ${controller.activeAlbum != null ? controller.activeAlbum!.name : "All Wallpapers"}',
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                  style: TextStyle(
-                    color: controller.activeAlbum != null
-                        ? Colors.white
-                        : Colors.white70,
-                    fontSize: 12.5,
-                    fontWeight: FontWeight.w600,
-                  ),
-                ),
+              const SizedBox(width: 10),
+
+              // 2. Home Screen Mockup
+              _buildHomeMockup(
+                mockupWidth,
+                mockupHeight,
+                cornerRadius,
+                isLandscape,
+                currentItem,
+                config,
               ),
-              const SizedBox(width: 4),
-              const Icon(
-                Icons.keyboard_arrow_down_rounded,
-                size: 18,
-                color: Colors.white54,
-              ),
+              const SizedBox(width: 18),
+
+              // 3. Circular Shuffle Button
+              _buildCircularShuffleButton(),
             ],
           ),
         ),
@@ -674,42 +454,122 @@ class _SlideshowTabState extends State<SlideshowTab> with SingleTickerProviderSt
     );
   }
 
-  Widget _buildShuffleButton() {
-    return PressableScale(
-      onTap: _handleShuffle,
-      child: Container(
-        width: double.infinity,
-        height: 58,
-        decoration: BoxDecoration(
-          gradient: const LinearGradient(
-            colors: [Color(0xFFFF3B30), Color(0xFFFF5E3A)],
-            begin: Alignment.centerLeft,
-            end: Alignment.centerRight,
+  Widget _buildLockMockup(
+    double width,
+    double height,
+    double cornerRadius,
+    bool isLandscape,
+    WallpaperItem? currentItem,
+    SlideshowConfig config,
+  ) {
+    return Container(
+      key: const Key('hero_device_mockup'),
+      width: width,
+      height: height,
+      decoration: BoxDecoration(
+        color: const Color(0xFF161820),
+        borderRadius: BorderRadius.circular(cornerRadius),
+        border: Border.all(color: const Color(0xFF262A38), width: 2.2),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withAlpha(140),
+            blurRadius: 18,
+            offset: const Offset(0, 8),
           ),
-          borderRadius: BorderRadius.circular(18),
-          boxShadow: [
-            BoxShadow(
-              color: const Color(0xFFFF3B30).withAlpha(90),
-              blurRadius: 18,
-              offset: const Offset(0, 6),
-            ),
-          ],
-        ),
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.center,
+        ],
+      ),
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(cornerRadius - 2.2),
+        child: Stack(
+          fit: StackFit.expand,
           children: [
-            RotationTransition(
-              turns: _rotationController,
-              child: const Icon(Icons.shuffle_rounded, color: Colors.white, size: 24),
+            // Active Wallpaper Image or Gradient
+            _buildMockupWallpaper(currentItem, config),
+
+            // Subtle dark overlay gradient for readability
+            Container(
+              decoration: BoxDecoration(
+                gradient: LinearGradient(
+                  begin: Alignment.topCenter,
+                  end: Alignment.bottomCenter,
+                  colors: [
+                    Colors.black.withAlpha(60),
+                    Colors.transparent,
+                    Colors.black.withAlpha(100),
+                  ],
+                  stops: const [0.0, 0.4, 1.0],
+                ),
+              ),
             ),
-            const SizedBox(width: 10),
-            const Text(
-              'Shuffle Wallpaper',
-              style: TextStyle(
-                color: Colors.white,
-                fontSize: 17,
-                fontWeight: FontWeight.w800,
-                letterSpacing: -0.2,
+
+            // Camera punch-hole notch / Dynamic Island
+            Align(
+              alignment: Alignment.topCenter,
+              child: Container(
+                key: Key(isLandscape ? 'hero_landscape_camera' : 'hero_portrait_notch'),
+                margin: const EdgeInsets.only(top: 6),
+                width: isLandscape ? 8 : (width * 0.22).clamp(20.0, 36.0),
+                height: isLandscape ? 8 : 7,
+                decoration: BoxDecoration(
+                  color: Colors.black,
+                  shape: isLandscape ? BoxShape.circle : BoxShape.rectangle,
+                  borderRadius: isLandscape ? null : BorderRadius.circular(4),
+                ),
+              ),
+            ),
+
+            // Clock & Date (9:41, Tue, Oct 20)
+            Positioned(
+              top: (height * 0.14).clamp(24.0, 36.0),
+              left: 4,
+              right: 4,
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Text(
+                    '9:41',
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontSize: (width * 0.27).clamp(20.0, 28.0),
+                      fontWeight: FontWeight.w800,
+                      letterSpacing: -0.5,
+                      height: 1.0,
+                    ),
+                  ),
+                  const SizedBox(height: 3),
+                  Text(
+                    'Tue, Oct 20',
+                    style: TextStyle(
+                      color: Colors.white.withAlpha(200),
+                      fontSize: (width * 0.10).clamp(9.0, 11.0),
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+
+            // Bottom "Lock" Pill
+            Positioned(
+              bottom: 8,
+              left: 6,
+              right: 6,
+              child: Center(
+                child: Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 3.5),
+                  decoration: BoxDecoration(
+                    color: Colors.black.withAlpha(160),
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                  child: const Text(
+                    'Lock',
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontSize: 10.5,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ),
               ),
             ),
           ],
@@ -718,346 +578,587 @@ class _SlideshowTabState extends State<SlideshowTab> with SingleTickerProviderSt
     );
   }
 
-  Widget _buildWallpaperConfigurationCard(
+  Widget _buildHomeMockup(
+    double width,
+    double height,
+    double cornerRadius,
+    bool isLandscape,
+    WallpaperItem? currentItem,
+    SlideshowConfig config,
+  ) {
+    return Container(
+      key: const Key('hero_home_mockup'),
+      width: width,
+      height: height,
+      decoration: BoxDecoration(
+        color: const Color(0xFF161820),
+        borderRadius: BorderRadius.circular(cornerRadius),
+        border: Border.all(color: const Color(0xFF262A38), width: 2.2),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withAlpha(140),
+            blurRadius: 18,
+            offset: const Offset(0, 8),
+          ),
+        ],
+      ),
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(cornerRadius - 2.2),
+        child: Stack(
+          fit: StackFit.expand,
+          children: [
+            // Active Wallpaper Image or Gradient
+            _buildMockupWallpaper(currentItem, config),
+
+            // Subtle dark overlay gradient for readability
+            Container(
+              decoration: BoxDecoration(
+                gradient: LinearGradient(
+                  begin: Alignment.topCenter,
+                  end: Alignment.bottomCenter,
+                  colors: [
+                    Colors.black.withAlpha(60),
+                    Colors.transparent,
+                    Colors.black.withAlpha(100),
+                  ],
+                  stops: const [0.0, 0.4, 1.0],
+                ),
+              ),
+            ),
+
+            // Camera punch-hole notch / Dynamic Island
+            Align(
+              alignment: Alignment.topCenter,
+              child: Container(
+                margin: const EdgeInsets.only(top: 6),
+                width: isLandscape ? 8 : (width * 0.22).clamp(20.0, 36.0),
+                height: isLandscape ? 8 : 7,
+                decoration: BoxDecoration(
+                  color: Colors.black,
+                  shape: isLandscape ? BoxShape.circle : BoxShape.rectangle,
+                  borderRadius: isLandscape ? null : BorderRadius.circular(4),
+                ),
+              ),
+            ),
+
+            // App Icons Grid (2 rows x 4 columns)
+            Positioned(
+              top: (height * 0.15).clamp(26.0, 40.0),
+              left: 4,
+              right: 4,
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: List.generate(4, (i) => Container(
+                      width: (width * 0.125).clamp(9.0, 13.0),
+                      height: (width * 0.125).clamp(9.0, 13.0),
+                      margin: const EdgeInsets.all(2.2),
+                      decoration: BoxDecoration(
+                        color: Colors.white.withAlpha(85),
+                        borderRadius: BorderRadius.circular(3.5),
+                      ),
+                    )),
+                  ),
+                  const SizedBox(height: 2),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: List.generate(4, (i) => Container(
+                      width: (width * 0.125).clamp(9.0, 13.0),
+                      height: (width * 0.125).clamp(9.0, 13.0),
+                      margin: const EdgeInsets.all(2.2),
+                      decoration: BoxDecoration(
+                        color: Colors.white.withAlpha(85),
+                        borderRadius: BorderRadius.circular(3.5),
+                      ),
+                    )),
+                  ),
+                ],
+              ),
+            ),
+
+            // Bottom "Home" Pill
+            Positioned(
+              bottom: 8,
+              left: 6,
+              right: 6,
+              child: Center(
+                child: Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 3.5),
+                  decoration: BoxDecoration(
+                    color: Colors.black.withAlpha(160),
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                  child: const Text(
+                    'Home',
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontSize: 10.5,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildMockupWallpaper(WallpaperItem? currentItem, SlideshowConfig config) {
+    return AnimatedSwitcher(
+      duration: const Duration(milliseconds: 350),
+      layoutBuilder: (currentChild, previousChildren) {
+        return Stack(
+          fit: StackFit.expand,
+          children: <Widget>[
+            ...previousChildren,
+            ?currentChild,
+          ],
+        );
+      },
+      transitionBuilder: (child, animation) {
+        return FadeTransition(
+          opacity: animation,
+          child: ScaleTransition(
+            scale: Tween<double>(begin: 0.98, end: 1.0).animate(
+              CurvedAnimation(
+                parent: animation,
+                curve: Curves.easeOutCubic,
+              ),
+            ),
+            child: child,
+          ),
+        );
+      },
+      child: currentItem != null && File(currentItem.path).existsSync()
+          ? Image.file(
+              key: ValueKey<String>('${currentItem.id}_${config.scaleType}'),
+              File(currentItem.path),
+              fit: _getBoxFit(config.scaleType),
+              width: double.infinity,
+              height: double.infinity,
+            )
+          : Container(
+              key: const ValueKey('default_wallpaper_gradient'),
+              decoration: const BoxDecoration(
+                gradient: LinearGradient(
+                  begin: Alignment.topCenter,
+                  end: Alignment.bottomCenter,
+                  colors: [
+                    Color(0xFF1D4ED8),
+                    Color(0xFF0F172A),
+                  ],
+                ),
+              ),
+            ),
+    );
+  }
+
+  Widget _buildCircularShuffleButton() {
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        PressableScale(
+          onTap: _handleShuffle,
+          child: Container(
+            width: 62,
+            height: 62,
+            decoration: BoxDecoration(
+              color: const Color(0xFFFF3B30),
+              shape: BoxShape.circle,
+              boxShadow: [
+                BoxShadow(
+                  color: const Color(0xFFFF3B30).withAlpha(100),
+                  blurRadius: 16,
+                  offset: const Offset(0, 4),
+                ),
+              ],
+            ),
+            child: Center(
+              child: RotationTransition(
+                turns: _rotationController,
+                child: const Icon(
+                  Icons.shuffle_rounded,
+                  color: Colors.white,
+                  size: 28,
+                ),
+              ),
+            ),
+          ),
+        ),
+        const SizedBox(height: 8),
+        const Text(
+          'Shuffle',
+          style: TextStyle(
+            color: Colors.white,
+            fontSize: 13,
+            fontWeight: FontWeight.bold,
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildSourceSelectorCard(WallpaperController controller) {
+    return PressableScale(
+      onTap: _showSourceSelectorSheet,
+      child: Container(
+        constraints: const BoxConstraints(minHeight: 52),
+        padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 14),
+        decoration: BoxDecoration(
+          color: const Color(0xFF141620),
+          borderRadius: BorderRadius.circular(16),
+          border: Border.all(color: const Color(0xFF242838)),
+        ),
+        child: Row(
+          children: [
+            Expanded(
+              child: RichText(
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                text: TextSpan(
+                  children: [
+                    const TextSpan(
+                      text: 'Source  ',
+                      style: TextStyle(
+                        color: Colors.white70,
+                        fontSize: 15,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                    TextSpan(
+                      text: controller.activeAlbum != null ? controller.activeAlbum!.name : 'All Wallpapers',
+                      style: const TextStyle(
+                        color: Colors.white,
+                        fontSize: 15,
+                        fontWeight: FontWeight.w800,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+            const SizedBox(width: 8),
+            const Icon(
+              Icons.keyboard_arrow_down_rounded,
+              color: Colors.white70,
+              size: 22,
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  String _formatShortInterval(int minutes) {
+    if (minutes <= 0) return 'Off';
+    if (minutes == 1) return '1m';
+    if (minutes < 60) return '${minutes}m';
+    if (minutes % 60 == 0) return '${minutes ~/ 60}h';
+    return '${minutes}m';
+  }
+
+  Widget _buildConfigurationCard(
     BuildContext context,
     WallpaperController controller,
     SlideshowConfig config,
   ) {
+    final isCustomInterval = ![0, 1, 5, 15, 60].contains(config.intervalMinutes);
     return Container(
+      key: const Key('wallpaper_config_card'),
       decoration: BoxDecoration(
-        color: const Color(0xFF161822),
+        color: const Color(0xFF141620),
         borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: const Color(0xFF242836)),
+        border: Border.all(color: const Color(0xFF242838)),
       ),
       padding: const EdgeInsets.all(16),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // Card Header with Status and Running Switch
+          // 1. APPLY TO
+          const Text(
+            'APPLY TO',
+            style: TextStyle(
+              color: Colors.white54,
+              fontSize: 11.5,
+              fontWeight: FontWeight.w700,
+              letterSpacing: 0.5,
+            ),
+          ),
+          const SizedBox(height: 10),
+          Container(
+            height: 48,
+            padding: const EdgeInsets.all(4),
+            decoration: BoxDecoration(
+              color: const Color(0xFF0E1017),
+              borderRadius: BorderRadius.circular(14),
+            ),
+            child: Row(
+              children: [
+                _buildSegmentOption(
+                  key: const Key('segment_apply_both'),
+                  label: 'Both',
+                  isSelected: config.targetScreen == 'both',
+                  onTap: () => controller.updateTargetScreen('both'),
+                ),
+                _buildSegmentOption(
+                  key: const Key('segment_apply_home'),
+                  label: 'Home',
+                  isSelected: config.targetScreen == 'home',
+                  onTap: () => controller.updateTargetScreen('home'),
+                ),
+                _buildSegmentOption(
+                  key: const Key('segment_apply_lock'),
+                  label: 'Lock',
+                  isSelected: config.targetScreen == 'lock',
+                  onTap: () => controller.updateTargetScreen('lock'),
+                ),
+              ],
+            ),
+          ),
+
+          const SizedBox(height: 18),
+
+          // 2. FIT
+          const Text(
+            'FIT',
+            style: TextStyle(
+              color: Colors.white54,
+              fontSize: 11.5,
+              fontWeight: FontWeight.w700,
+              letterSpacing: 0.5,
+            ),
+          ),
+          const SizedBox(height: 10),
+          Container(
+            height: 48,
+            padding: const EdgeInsets.all(4),
+            decoration: BoxDecoration(
+              color: const Color(0xFF0E1017),
+              borderRadius: BorderRadius.circular(14),
+            ),
+            child: Row(
+              children: [
+                _buildSegmentOption(
+                  key: const Key('segment_fit_full'),
+                  label: 'Full',
+                  isSelected: config.scaleType == 'full',
+                  onTap: () => controller.updateScaleType('full'),
+                ),
+                _buildSegmentOption(
+                  key: const Key('segment_fit_crop'),
+                  label: 'Crop',
+                  isSelected: config.scaleType == 'crop',
+                  onTap: () => controller.updateScaleType('crop'),
+                ),
+                _buildSegmentOption(
+                  key: const Key('segment_fit_fit'),
+                  label: 'Fit',
+                  isSelected: config.scaleType == 'fit',
+                  onTap: () => controller.updateScaleType('fit'),
+                ),
+              ],
+            ),
+          ),
+
+          const SizedBox(height: 18),
+
+          // 3. AUTO-SHUFFLE EVERY
           Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    const Text(
-                      'Wallpaper Configuration',
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                      style: TextStyle(
-                        color: Colors.white,
-                        fontSize: 15,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                    const SizedBox(height: 2),
-                    Row(
-                      children: [
-                        Container(
-                          width: 6,
-                          height: 6,
-                          decoration: BoxDecoration(
-                            shape: BoxShape.circle,
-                            color: config.isSlideshowEnabled
-                                ? const Color(0xFF34C759)
-                                : Colors.white38,
-                          ),
-                        ),
-                        const SizedBox(width: 5),
-                        Text(
-                          config.isSlideshowEnabled ? 'Running' : 'Inactive',
-                          style: TextStyle(
-                            color: config.isSlideshowEnabled
-                                ? const Color(0xFF34C759)
-                                : Colors.white38,
-                            fontSize: 11,
-                            fontWeight: FontWeight.w600,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ],
+              const Flexible(
+                child: Text(
+                  'AUTO-SHUFFLE EVERY',
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: TextStyle(
+                    color: Colors.white54,
+                    fontSize: 11.5,
+                    fontWeight: FontWeight.w700,
+                    letterSpacing: 0.5,
+                  ),
                 ),
               ),
-              Switch.adaptive(
-                key: const Key('switch_slideshow_running'),
-                value: config.isSlideshowEnabled,
-                activeThumbColor: const Color(0xFFFF3B30),
-                activeTrackColor: const Color(0xFFFF3B30).withAlpha(100),
-                onChanged: (val) async {
-                  await controller.toggleSlideshowEnabled(val);
-                },
+              const SizedBox(width: 8),
+              GestureDetector(
+                onTap: () => _showIntervalPicker(context),
+                child: isCustomInterval
+                    ? Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                        decoration: BoxDecoration(
+                          color: const Color(0xFFFF3B30).withAlpha(25),
+                          borderRadius: BorderRadius.circular(6),
+                          border: Border.all(color: const Color(0xFFFF3B30).withAlpha(90)),
+                        ),
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            const Icon(Icons.check_circle_rounded, color: Color(0xFFFF3B30), size: 12),
+                            const SizedBox(width: 4),
+                            Text(
+                              'More options (${_formatShortInterval(config.intervalMinutes)})',
+                              style: const TextStyle(
+                                color: Color(0xFFFF3B30),
+                                fontSize: 11.5,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                          ],
+                        ),
+                      )
+                    : const Text(
+                        'More options',
+                        style: TextStyle(
+                          color: Color(0xFFFF3B30),
+                          fontSize: 11.5,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
               ),
             ],
           ),
-          if (!config.isSlideshowEnabled) ...[
-            const SizedBox(height: 10),
+          const SizedBox(height: 10),
+          Container(
+            height: 48,
+            padding: const EdgeInsets.all(4),
+            decoration: BoxDecoration(
+              color: const Color(0xFF0E1017),
+              borderRadius: BorderRadius.circular(14),
+            ),
+            child: Row(
+              children: [
+                _buildSegmentOption(
+                  key: const Key('segment_interval_off'),
+                  label: 'Off',
+                  isSelected: config.intervalMinutes == 0,
+                  onTap: () => controller.updateInterval(0),
+                ),
+                _buildSegmentOption(
+                  key: const Key('segment_interval_1m'),
+                  label: '1m',
+                  isSelected: config.intervalMinutes == 1,
+                  onTap: () => controller.updateInterval(1),
+                ),
+                _buildSegmentOption(
+                  key: const Key('segment_interval_5m'),
+                  label: '5m',
+                  isSelected: config.intervalMinutes == 5,
+                  onTap: () => controller.updateInterval(5),
+                ),
+                _buildSegmentOption(
+                  key: const Key('segment_interval_15m'),
+                  label: '15m',
+                  isSelected: config.intervalMinutes == 15,
+                  onTap: () => controller.updateInterval(15),
+                ),
+                _buildSegmentOption(
+                  key: const Key('segment_interval_1h'),
+                  label: '1h',
+                  isSelected: config.intervalMinutes == 60,
+                  onTap: () => controller.updateInterval(60),
+                ),
+                if (isCustomInterval)
+                  _buildSegmentOption(
+                    key: const Key('segment_interval_custom'),
+                    label: _formatShortInterval(config.intervalMinutes),
+                    isSelected: true,
+                    onTap: () => _showIntervalPicker(context),
+                  ),
+              ],
+            ),
+          ),
+          if (isCustomInterval) ...[
+            const SizedBox(height: 8),
             Container(
-              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 7),
+              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
               decoration: BoxDecoration(
-                color: const Color(0xFF1B1D26),
-                borderRadius: BorderRadius.circular(10),
-                border: Border.all(color: const Color(0xFF282C3C)),
+                color: const Color(0xFFFF3B30).withAlpha(20),
+                borderRadius: BorderRadius.circular(8),
+                border: Border.all(color: const Color(0xFFFF3B30).withAlpha(60)),
               ),
-              child: const Row(
+              child: Row(
                 children: [
-                  Icon(Icons.info_outline_rounded, size: 14, color: Colors.white38),
-                  SizedBox(width: 8),
+                  const Icon(Icons.check_circle_rounded, color: Color(0xFFFF3B30), size: 14),
+                  const SizedBox(width: 6),
                   Expanded(
                     child: Text(
-                      'Shuffle is inactive. Turn switch on to apply changes to wallpaper.',
-                      style: TextStyle(color: Colors.white54, fontSize: 11, height: 1.2),
+                      'Custom interval active: ${config.intervalLabel}',
+                      style: const TextStyle(
+                        color: Colors.white,
+                        fontSize: 12,
+                        fontWeight: FontWeight.w600,
+                      ),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  ),
+                  GestureDetector(
+                    onTap: () => _showIntervalPicker(context),
+                    child: const Text(
+                      'Change',
+                      style: TextStyle(
+                        color: Color(0xFFFF3B30),
+                        fontSize: 11.5,
+                        fontWeight: FontWeight.bold,
+                      ),
                     ),
                   ),
                 ],
               ),
             ),
           ],
-          const SizedBox(height: 14),
-
-          // Target Screen Selector
-          const Text(
-            'Target Screen',
-            style: TextStyle(
-              color: Colors.white70,
-              fontSize: 13,
-              fontWeight: FontWeight.w600,
-            ),
-          ),
-          const SizedBox(height: 8),
-          Row(
-            children: [
-              _buildPillOption(
-                label: 'Both',
-                icon: Icons.smartphone_rounded,
-                isSelected: config.targetScreen == 'both',
-                onTap: () => controller.updateTargetScreen('both'),
-              ),
-              const SizedBox(width: 8),
-              _buildPillOption(
-                label: 'Home',
-                icon: Icons.home_rounded,
-                isSelected: config.targetScreen == 'home',
-                onTap: () => controller.updateTargetScreen('home'),
-              ),
-              const SizedBox(width: 8),
-              _buildPillOption(
-                label: 'Lock',
-                icon: Icons.lock_outline_rounded,
-                isSelected: config.targetScreen == 'lock',
-                onTap: () => controller.updateTargetScreen('lock'),
-              ),
-            ],
-          ),
-
-          const Padding(
-            padding: EdgeInsets.symmetric(vertical: 14),
-            child: Divider(color: Color(0xFF222634), height: 1),
-          ),
-
-          // Scale Mode Selector
-          const Text(
-            'Scale Mode',
-            style: TextStyle(
-              color: Colors.white70,
-              fontSize: 13,
-              fontWeight: FontWeight.w600,
-            ),
-          ),
-          const SizedBox(height: 8),
-          Row(
-            children: [
-              _buildPillOption(
-                label: 'Full Image',
-                icon: Icons.aspect_ratio_rounded,
-                isSelected: config.scaleType == 'full',
-                onTap: () => controller.updateScaleType('full'),
-              ),
-              const SizedBox(width: 8),
-              _buildPillOption(
-                label: 'Center Crop',
-                icon: Icons.crop_rounded,
-                isSelected: config.scaleType == 'crop',
-                onTap: () => controller.updateScaleType('crop'),
-              ),
-              const SizedBox(width: 8),
-              _buildPillOption(
-                label: 'Fit',
-                icon: Icons.fit_screen_rounded,
-                isSelected: config.scaleType == 'fit',
-                onTap: () => controller.updateScaleType('fit'),
-              ),
-            ],
-          ),
-
-          const Padding(
-            padding: EdgeInsets.symmetric(vertical: 14),
-            child: Divider(color: Color(0xFF222634), height: 1),
-          ),
-
-          // Auto Shuffle Interval
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              const Flexible(
-                child: Text(
-                  'Auto-Shuffle Timer',
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                  style: TextStyle(
-                    color: Colors.white70,
-                    fontSize: 13,
-                    fontWeight: FontWeight.w600,
-                  ),
-                ),
-              ),
-              const SizedBox(width: 8),
-              PressableScale(
-                onTap: () => _showIntervalPicker(context),
-                child: const Text(
-                  'More options',
-                  style: TextStyle(
-                    color: Color(0xFFFF3B30),
-                    fontSize: 12.5,
-                    fontWeight: FontWeight.w600,
-                  ),
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 10),
-
-          // Quick Interval Chips Row
-          SingleChildScrollView(
-            scrollDirection: Axis.horizontal,
-            child: Row(
-              children: [
-                _buildQuickIntervalChip('Off', 0, config.intervalMinutes),
-                const SizedBox(width: 8),
-                _buildQuickIntervalChip('1m', 1, config.intervalMinutes),
-                const SizedBox(width: 8),
-                _buildQuickIntervalChip('3m', 3, config.intervalMinutes),
-                const SizedBox(width: 8),
-                _buildQuickIntervalChip('5m', 5, config.intervalMinutes),
-                const SizedBox(width: 8),
-                _buildQuickIntervalChip('10m', 10, config.intervalMinutes),
-                const SizedBox(width: 8),
-                _buildQuickIntervalChip('15m', 15, config.intervalMinutes),
-                const SizedBox(width: 8),
-                _buildQuickIntervalChip('30m', 30, config.intervalMinutes),
-                const SizedBox(width: 8),
-                _buildQuickIntervalChip('45m', 45, config.intervalMinutes),
-                const SizedBox(width: 8),
-                _buildQuickIntervalChip('1h', 60, config.intervalMinutes),
-                const SizedBox(width: 8),
-                _buildQuickIntervalChip('Daily', 1440, config.intervalMinutes),
-              ],
-            ),
-          ),
         ],
       ),
     );
   }
 
-  Widget _buildQuickAddRow(BuildContext context) {
-    return Row(
-      children: [
-        Expanded(
-          child: PressableScale(
-            onTap: () => _pickImages(context),
-            child: Container(
-              padding: const EdgeInsets.symmetric(vertical: 14, horizontal: 8),
-              decoration: BoxDecoration(
-                color: const Color(0xFF161822),
-                borderRadius: BorderRadius.circular(16),
-                border: Border.all(color: const Color(0xFF262A38)),
-              ),
-              child: const Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Icon(Icons.add_photo_alternate_rounded, color: Color(0xFFFF3B30), size: 20),
-                  SizedBox(width: 8),
-                  Flexible(
-                    child: Text(
-                      'Add Photos',
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                      style: TextStyle(
-                        color: Colors.white,
-                        fontSize: 14,
-                        fontWeight: FontWeight.w700,
-                      ),
-                    ),
-                  ),
-                ],
-              ),
+  Widget _buildSegmentOption({
+    Key? key,
+    required String label,
+    required bool isSelected,
+    required VoidCallback onTap,
+  }) {
+    return Expanded(
+      child: PressableScale(
+        key: key,
+        onTap: onTap,
+        child: Container(
+          height: double.infinity,
+          decoration: BoxDecoration(
+            color: isSelected ? const Color(0xFFFF3B30) : Colors.transparent,
+            borderRadius: BorderRadius.circular(10),
+          ),
+          alignment: Alignment.center,
+          child: Text(
+            label,
+            style: TextStyle(
+              color: isSelected ? Colors.white : Colors.white70,
+              fontSize: 13.5,
+              fontWeight: isSelected ? FontWeight.w800 : FontWeight.w600,
             ),
           ),
         ),
-        const SizedBox(width: 12),
-        Expanded(
-          child: PressableScale(
-            onTap: () => _pickFolder(context),
-            child: Container(
-              padding: const EdgeInsets.symmetric(vertical: 14, horizontal: 8),
-              decoration: BoxDecoration(
-                color: const Color(0xFF161822),
-                borderRadius: BorderRadius.circular(16),
-                border: Border.all(color: const Color(0xFF262A38)),
-              ),
-              child: const Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Icon(Icons.folder_open_rounded, color: Colors.white70, size: 20),
-                  SizedBox(width: 8),
-                  Flexible(
-                    child: Text(
-                      'Add Folder',
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                      style: TextStyle(
-                        color: Colors.white,
-                        fontSize: 14,
-                        fontWeight: FontWeight.w700,
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ),
-        ),
-      ],
+      ),
     );
   }
 
-  Widget _buildRotationQueueHeader(List<WallpaperItem> items) {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-      children: [
-        const Flexible(
-          child: Text(
-            'Rotation Queue',
-            maxLines: 1,
-            overflow: TextOverflow.ellipsis,
-            style: TextStyle(
-              color: Colors.white,
-              fontSize: 15,
-              fontWeight: FontWeight.bold,
-            ),
-          ),
+  Widget _buildRotationQueueHeader() {
+    return const Align(
+      alignment: Alignment.centerLeft,
+      child: Text(
+        'Rotation Queue',
+        maxLines: 1,
+        overflow: TextOverflow.ellipsis,
+        style: TextStyle(
+          color: Colors.white,
+          fontSize: 15,
+          fontWeight: FontWeight.bold,
         ),
-        const SizedBox(width: 8),
-        Text(
-          '${items.length} in rotation',
-          style: const TextStyle(
-            color: Color(0xFF34C759),
-            fontSize: 13,
-            fontWeight: FontWeight.w600,
-          ),
-        ),
-      ],
+      ),
     );
   }
 
@@ -1207,207 +1308,46 @@ class _SlideshowTabState extends State<SlideshowTab> with SingleTickerProviderSt
           child: Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Flexible(
-                child: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Container(
-                      padding: const EdgeInsets.all(8),
-                      decoration: BoxDecoration(
-                        color: const Color(0xFFFF3B30).withAlpha(30),
-                        borderRadius: BorderRadius.circular(12),
-                        border: Border.all(color: const Color(0xFFFF3B30).withAlpha(70)),
-                      ),
-                      child: const Icon(Icons.wallpaper_rounded, color: Color(0xFFFF3B30), size: 22),
-                    ),
-                    const SizedBox(width: 10),
-                    const Flexible(
-                      child: Column(
-                        mainAxisSize: MainAxisSize.min,
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            'Wall Tap',
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
-                            style: TextStyle(
-                              color: Colors.white,
-                              fontSize: 20,
-                              fontWeight: FontWeight.w800,
-                              letterSpacing: -0.5,
-                            ),
-                          ),
-                          Text(
-                            'Studio',
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
-                            style: TextStyle(
-                              color: Colors.white54,
-                              fontSize: 11,
-                              fontWeight: FontWeight.w500,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ],
+              const Expanded(
+                child: Text(
+                  'Wall Tap',
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontSize: 24,
+                    fontWeight: FontWeight.w800,
+                    letterSpacing: -0.5,
+                  ),
                 ),
               ),
-
+              const SizedBox(width: 8),
               Row(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  // Random / Sequential Mode Toggle Pill
-                  PressableScale(
-                    onTap: () => controller.toggleRandom(!config.isRandom),
-                    child: Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-                      decoration: BoxDecoration(
-                        color: const Color(0xFF1B1D26),
-                        borderRadius: BorderRadius.circular(20),
-                        border: Border.all(color: const Color(0xFF2C3040)),
-                      ),
-                      child: Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          Icon(
-                            config.isRandom ? Icons.shuffle : Icons.repeat,
-                            color: config.isRandom ? const Color(0xFFFF3B30) : Colors.white70,
-                            size: 16,
-                          ),
-                          const SizedBox(width: 6),
-                          Text(
-                            config.isRandom ? 'Random' : 'Order',
-                            style: TextStyle(
-                              color: config.isRandom ? const Color(0xFFFF3B30) : Colors.white70,
-                              fontSize: 13,
-                              fontWeight: FontWeight.w600,
-                            ),
-                          ),
-                        ],
-                      ),
+                  Text(
+                    config.isSlideshowEnabled ? 'Shuffle on' : 'Shuffle off',
+                    style: const TextStyle(
+                      color: Colors.white70,
+                      fontSize: 13.5,
+                      fontWeight: FontWeight.w600,
                     ),
                   ),
                   const SizedBox(width: 8),
-                  // Button Help
-                  Tooltip(
-                    message: 'Widget Guide & Help',
-                    child: PressableScale(
-                      onTap: () => WidgetGuideDialog.show(context),
-                      child: Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
-                        decoration: BoxDecoration(
-                          color: const Color(0xFF1B1D26),
-                          borderRadius: BorderRadius.circular(20),
-                          border: Border.all(color: const Color(0xFF2C3040)),
-                        ),
-                        child: const Row(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            Icon(
-                              Icons.help_outline_rounded,
-                              color: Colors.white70,
-                              size: 16,
-                            ),
-                            SizedBox(width: 4),
-                            Text(
-                              'Help',
-                              style: TextStyle(
-                                color: Colors.white70,
-                                fontSize: 13,
-                                fontWeight: FontWeight.w600,
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ),
+                  Switch.adaptive(
+                    key: const Key('switch_slideshow_running'),
+                    value: config.isSlideshowEnabled,
+                    activeThumbColor: Colors.white,
+                    activeTrackColor: const Color(0xFFFF3B30),
+                    inactiveThumbColor: Colors.white,
+                    inactiveTrackColor: const Color(0xFF2C3040),
+                    onChanged: (val) async {
+                      await controller.toggleSlideshowEnabled(val);
+                    },
                   ),
                 ],
               ),
             ],
-          ),
-        ),
-      ),
-    );
-  }
-
-  Widget _buildPillOption({
-    required String label,
-    required IconData icon,
-    required bool isSelected,
-    required VoidCallback onTap,
-  }) {
-    return Expanded(
-      child: PressableScale(
-        onTap: onTap,
-        child: AnimatedContainer(
-          duration: const Duration(milliseconds: 180),
-          padding: const EdgeInsets.symmetric(vertical: 10),
-          decoration: BoxDecoration(
-            color: isSelected ? const Color(0xFFFF3B30) : const Color(0xFF1B1E29),
-            borderRadius: BorderRadius.circular(12),
-            border: Border.all(
-              color: isSelected ? const Color(0xFFFF3B30) : const Color(0xFF282C3C),
-            ),
-          ),
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Icon(
-                icon,
-                color: isSelected ? Colors.white : Colors.white60,
-                size: 15,
-              ),
-              const SizedBox(width: 6),
-              Flexible(
-                child: Text(
-                  label,
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                  style: TextStyle(
-                    color: isSelected ? Colors.white : Colors.white70,
-                    fontSize: 12,
-                    fontWeight: isSelected ? FontWeight.w800 : FontWeight.w600,
-                  ),
-                ),
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-
-  Widget _buildQuickIntervalChip(String label, int minutes, int currentMinutes) {
-    final isSelected = currentMinutes == minutes;
-    return PressableScale(
-      onTap: () => widget.controller.updateInterval(minutes),
-      child: AnimatedContainer(
-        duration: const Duration(milliseconds: 200),
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 9),
-        decoration: BoxDecoration(
-          color: isSelected ? const Color(0xFFFF3B30) : const Color(0xFF1B1E29),
-          borderRadius: BorderRadius.circular(14),
-          border: Border.all(
-            color: isSelected ? const Color(0xFFFF3B30) : const Color(0xFF282C3C),
-          ),
-          boxShadow: isSelected
-              ? [
-                  BoxShadow(
-                    color: const Color(0xFFFF3B30).withAlpha(80),
-                    blurRadius: 10,
-                    offset: const Offset(0, 2),
-                  ),
-                ]
-              : null,
-        ),
-        child: Text(
-          label,
-          style: TextStyle(
-            color: isSelected ? Colors.white : Colors.white70,
-            fontSize: 13,
-            fontWeight: isSelected ? FontWeight.w800 : FontWeight.w600,
           ),
         ),
       ),

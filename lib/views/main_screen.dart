@@ -67,49 +67,55 @@ class _MainScreenState extends State<MainScreen> with WidgetsBindingObserver {
           child: Container(
             constraints: const BoxConstraints(maxWidth: 540),
             padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
-            child: ClipRRect(
-              borderRadius: BorderRadius.circular(32),
-              child: BackdropFilter(
-                filter: ImageFilter.blur(sigmaX: 16, sigmaY: 16),
-                child: Container(
-                  height: 64,
-                  decoration: BoxDecoration(
-                    color: const Color(0xCC161824),
-                    borderRadius: BorderRadius.circular(32),
-                    border: Border.all(color: const Color(0xFF2B3042), width: 1.2),
-                    boxShadow: [
-                      BoxShadow(
-                        color: Colors.black.withAlpha(140),
-                        blurRadius: 20,
-                        offset: const Offset(0, 8),
-                      ),
-                    ],
+            child: Container(
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(32),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withAlpha(140),
+                    blurRadius: 24,
+                    spreadRadius: 1,
+                    offset: const Offset(0, 8),
                   ),
-                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 6),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceAround,
-                    children: [
-                      _buildNavItem(
-                        index: 0,
-                        label: 'Studio',
-                        icon: Icons.shuffle_rounded,
-                      ),
-                      _buildNavItem(
-                        index: 1,
-                        label: 'Gallery',
-                        icon: Icons.photo_library_rounded,
-                      ),
-                      _buildNavItem(
-                        index: 2,
-                        label: 'Widgets',
-                        icon: Icons.widgets_rounded,
-                      ),
-                      _buildNavItem(
-                        index: 3,
-                        label: 'Settings',
-                        icon: Icons.tune_rounded,
-                      ),
-                    ],
+                ],
+              ),
+              child: ClipRRect(
+                borderRadius: BorderRadius.circular(32),
+                child: BackdropFilter(
+                  filter: ImageFilter.blur(sigmaX: 20, sigmaY: 20),
+                  child: Container(
+                    height: 64,
+                    decoration: BoxDecoration(
+                      color: const Color(0xB8161824),
+                      borderRadius: BorderRadius.circular(32),
+                      border: Border.all(color: const Color(0xFF2B3042), width: 1.2),
+                    ),
+                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 6),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceAround,
+                      children: [
+                        _buildNavItem(
+                          index: 0,
+                          label: 'Studio',
+                          icon: Icons.shuffle_rounded,
+                        ),
+                        _buildNavItem(
+                          index: 1,
+                          label: 'Library',
+                          icon: Icons.photo_library_rounded,
+                        ),
+                        _buildNavItem(
+                          index: 2,
+                          label: 'Widgets',
+                          icon: Icons.widgets_rounded,
+                        ),
+                        _buildNavItem(
+                          index: 3,
+                          label: 'Settings',
+                          icon: Icons.tune_rounded,
+                        ),
+                      ],
+                    ),
                   ),
                 ),
               ),
@@ -142,26 +148,28 @@ class _MainScreenState extends State<MainScreen> with WidgetsBindingObserver {
         child: AnimatedContainer(
           duration: const Duration(milliseconds: 240),
           curve: Curves.easeOutCubic,
+          constraints: const BoxConstraints(minHeight: 44),
           decoration: BoxDecoration(
             color: isSelected ? const Color(0xFFFF3B30) : Colors.transparent,
             borderRadius: BorderRadius.circular(24),
             boxShadow: isSelected
                 ? [
                     BoxShadow(
-                      color: const Color(0xFFFF3B30).withAlpha(100),
-                      blurRadius: 12,
+                      color: Colors.black.withAlpha(90),
+                      blurRadius: 6,
                       offset: const Offset(0, 2),
                     ),
                   ]
                 : null,
           ),
           padding: const EdgeInsets.symmetric(vertical: 8),
+          alignment: Alignment.center,
           child: Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
               Icon(
                 icon,
-                color: isSelected ? Colors.white : Colors.white54,
+                color: isSelected ? Colors.white : Colors.white60,
                 size: 20,
               ),
               if (isSelected) ...[

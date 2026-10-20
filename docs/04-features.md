@@ -149,20 +149,12 @@ Tapping any wallpaper card in the Gallery or Album view opens `WallpaperPreviewD
 
 ## 5. Settings & Reliability Tab
 
-The **Settings** tab provides diagnostic controls and options to ensure background wallpaper rotations are never killed by Android power managers.
+The **Settings** tab provides diagnostic controls and options to ensure background wallpaper rotations are never killed by Android power managers, alongside application attribution.
 
 ### 5.1 Background Execution & Alarms
 - **Battery Optimization Whitelist**:
   - Displays green "Unrestricted" badge if Wall Tap is whitelisted from OEM battery restrictions.
   - If restricted, displays an amber warning card with a one-tap button to request exemption (`Settings.ACTION_REQUEST_IGNORE_BATTERY_OPTIMIZATIONS`).
-- **Persistent Notification**:
-  - Toggle switch to display a low-priority ongoing notification (`NotificationHelper`).
-  - Keeps background service priorities high, preventing rotation delays on aggressive task-killer devices (Xiaomi, Huawei, Samsung).
 
-### 5.2 Device & Display Info
-- Queries native display metrics via `getDisplayDimensions`.
-- Displays screen physical width, height, and computed aspect ratio (e.g., `1080 x 2400 (20:9)`).
-
-### 5.3 Storage & Maintenance
-- Displays total wallpaper count and disk space consumed in MB.
-- **Clear Cache**: Clears temporary image picker files and SAF import caches.
+### 5.2 About Wall Tap
+- Displays application version, developer attribution, and architectural summary.

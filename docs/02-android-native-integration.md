@@ -10,7 +10,7 @@ The Android native implementation is organized into dedicated helper objects, br
 
 | Component | Type | Responsibility |
 | :--- | :--- | :--- |
-| `MainActivity.kt` | `FlutterActivity` | Host activity, engine caching, `MethodChannel` dispatch, SAF folder picker result handling, and notification permission callbacks. |
+| `MainActivity.kt` | `FlutterActivity` | Host activity, engine caching, `MethodChannel` dispatch, and SAF folder picker result handling. |
 | `WallpaperHelper.kt` | Singleton Object | Display dimension detection, sampled bitmap decoding, aspect ratio scaling (`crop`/`fit`/`full`), and `WallpaperManager` invocation. |
 | `WidgetProvider.kt` | `AppWidgetProvider` | Main Wall Tap Shuffle widget provider (`walltap_widget.xml`) managing next wallpaper preview and quick action buttons. |
 | `AlbumWidgetProvider.kt` | `AppWidgetProvider` | Album Display widget provider (`album_widget.xml`) with dynamic controls overlay for manual photo flipping and settings. |
@@ -20,7 +20,6 @@ The Android native implementation is organized into dedicated helper objects, br
 | `AlarmReceiver.kt` | `BroadcastReceiver` | Receives global rotation alarm ticks, advances wallpaper, and schedules the next tick. |
 | `AlbumWidgetReceiver.kt` | `BroadcastReceiver` | Receives individual album widget alarm ticks and advances the widget image. |
 | `BootReceiver.kt` | `BroadcastReceiver` | Restores alarms and widget schedules after device restarts (`BOOT_COMPLETED`). |
-| `NotificationHelper.kt` | Singleton Object | Creates notification channels and manages the persistent foreground status notification. |
 
 ---
 
@@ -189,4 +188,3 @@ Wall Tap declares the following permissions in `AndroidManifest.xml`:
 | `RECEIVE_BOOT_COMPLETED` | Allows `BootReceiver` to restore wallpaper and widget alarms after device reboot. |
 | `REQUEST_IGNORE_BATTERY_OPTIMIZATIONS`| Allows prompting user to disable battery restrictions for uninterrupted rotation. |
 | `SCHEDULE_EXACT_ALARM` | Permits setting exact wake-up alarms on Android 12+ (API 31+). |
-| `POST_NOTIFICATIONS` | Runtime permission for persistent background status notification on Android 13+. |

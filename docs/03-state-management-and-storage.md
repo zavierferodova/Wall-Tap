@@ -98,7 +98,6 @@ Native Android (`Context.getSharedPreferences("FlutterSharedPreferences", MODE_P
 | `flutter.walltap_interval_minutes` | `_keyIntervalMinutes` | Long / Int | Dart & Kotlin | Interval in minutes between rotations (0 = manual). |
 | `flutter.walltap_albums` | `_keyAlbums` | String (JSON) | Dart & Kotlin | Serialized list of `Album` objects. Read by native `AlbumWidgetProvider` and `AlbumWidgetConfigureActivity`. |
 | `flutter.walltap_active_album_id` | `_keyActiveAlbumId` | String | Dart | ID of album currently powering the Studio rotation (or null for all). |
-| `flutter.walltap_show_persistent_notification` | `_keyShowPersistentNotification` | Boolean | Dart & Kotlin | Tracks whether persistent background notification is active. |
 | `flutter.walltap_current_wallpaper_id` | `_keyCurrentWallpaperId` | String | Dart | ID of currently active device wallpaper (used for rendering `CURRENT` badge). |
 | `flutter.album_widget_${id}_album_id` | N/A | String | Dart & Kotlin | Target album ID for home screen widget instance `${id}`. |
 | `flutter.album_widget_${id}_album_name` | N/A | String | Dart & Kotlin | Display name of album for home screen widget `${id}`. |

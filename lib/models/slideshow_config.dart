@@ -10,7 +10,6 @@ class SlideshowConfig {
   final bool isRandom;
   final bool isSlideshowEnabled;
   final int intervalMinutes; // 0 = manual / widget tap only
-  final bool showPersistentNotification;
 
   const SlideshowConfig({
     this.targetScreen = 'both',
@@ -22,7 +21,6 @@ class SlideshowConfig {
     this.isRandom = false,
     this.isSlideshowEnabled = false,
     this.intervalMinutes = 0,
-    this.showPersistentNotification = false,
   });
 
   String get targetScreenLabel {
@@ -70,7 +68,6 @@ class SlideshowConfig {
     bool? isRandom,
     bool? isSlideshowEnabled,
     int? intervalMinutes,
-    bool? showPersistentNotification,
   }) {
     return SlideshowConfig(
       targetScreen: targetScreen ?? this.targetScreen,
@@ -82,7 +79,6 @@ class SlideshowConfig {
       isRandom: isRandom ?? this.isRandom,
       isSlideshowEnabled: isSlideshowEnabled ?? this.isSlideshowEnabled,
       intervalMinutes: intervalMinutes ?? this.intervalMinutes,
-      showPersistentNotification: showPersistentNotification ?? this.showPersistentNotification,
     );
   }
 
@@ -97,7 +93,6 @@ class SlideshowConfig {
       'isRandom': isRandom,
       'isSlideshowEnabled': isSlideshowEnabled,
       'intervalMinutes': intervalMinutes,
-      'showPersistentNotification': showPersistentNotification,
     };
   }
 
@@ -112,7 +107,6 @@ class SlideshowConfig {
       isRandom: map['isRandom'] as bool? ?? false,
       isSlideshowEnabled: map['isSlideshowEnabled'] as bool? ?? false,
       intervalMinutes: (map['intervalMinutes'] as num?)?.toInt() ?? 0,
-      showPersistentNotification: map['showPersistentNotification'] as bool? ?? false,
     );
   }
 

@@ -112,7 +112,7 @@ void main() {
     );
 
     expect(find.text('Album Widgets'), findsOneWidget);
-    expect(find.text('Desktop Photo Frames'), findsOneWidget);
+    expect(find.text('Home Screen Photo Frames'), findsOneWidget);
     expect(find.text('How to Add an Album Widget'), findsOneWidget);
     expect(find.text('Check Placed Widgets'), findsOneWidget);
 
@@ -155,21 +155,32 @@ void main() {
       ),
     );
 
-    // Verify placed widget is rendered
+    // Verify placed widget is rendered on image grid with title on bottom
     expect(find.text('Widget #42'), findsOneWidget);
     expect(find.text('All Photos'), findsOneWidget);
-    expect(find.text('Shuffle Now'), findsOneWidget);
     expect(find.text('Sync All'), findsOneWidget);
+    // Control panel is not on the grid
+    expect(find.text('Shuffle Now'), findsNothing);
 
-    // Tap "Shuffle Now"
+    // Tap placed widget card to open bottom sheet configuration
+    await tester.tap(find.text('Widget #42'));
+    await tester.pumpAndSettle();
+
+    expect(find.text('Shuffle Now'), findsOneWidget);
+
+    // Tap "Shuffle Now" in bottom sheet
     await tester.tap(find.text('Shuffle Now'));
     await tester.pumpAndSettle();
     expect(fakeWallpaperService.shuffledWidgetId, 42);
 
-    // Tap "Ordered" to toggle order mode
+    // Tap "Ordered" in bottom sheet to toggle order mode
     await tester.tap(find.text('Ordered'));
     await tester.pumpAndSettle();
     expect(controller.albumWidgets.first.isRandom, false);
+
+    // Close bottom sheet
+    Navigator.of(tester.element(find.text('Shuffle Now'))).pop();
+    await tester.pumpAndSettle();
 
     // Tap "Sync All"
     await tester.tap(find.text('Sync All'));
@@ -199,15 +210,15 @@ void main() {
     // RefreshIndicator is present
     expect(find.byType(RefreshIndicator), findsOneWidget);
 
-    // Refresh icon button in AppBar is removed
-    final appBarFinder = find.byType(SliverAppBar);
+    // Refresh icon button in header is removed
+    final headerFinder = find.byKey(const Key('widgets_header'));
     expect(
-      find.descendant(of: appBarFinder, matching: find.byIcon(Icons.refresh_rounded)),
+      find.descendant(of: headerFinder, matching: find.byIcon(Icons.refresh_rounded)),
       findsNothing,
     );
 
     // Simulate pull-down-to-refresh gesture
-    await tester.fling(find.byType(CustomScrollView), const Offset(0, 300), 1000);
+    await tester.fling(find.byType(SingleChildScrollView), const Offset(0, 300), 1000);
     await tester.pumpAndSettle();
 
     // Verify still stable
@@ -249,6 +260,10 @@ void main() {
         ),
       ),
     );
+    await tester.pumpAndSettle();
+
+    // Tap placed widget card to open configuration bottom sheet
+    await tester.tap(find.text('Widget #99'));
     await tester.pumpAndSettle();
 
     // Tap on the interval selector button (currently displaying '15 minutes')

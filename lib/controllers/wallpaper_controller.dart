@@ -132,9 +132,6 @@ class WallpaperController extends ChangeNotifier {
           _currentWallpaperId = activeItems.first.id;
         }
       }
-      if (_config.showPersistentNotification) {
-        await _wallpaperService.setPersistentNotification(true);
-      }
       _isBatteryOptimizationIgnored = await _wallpaperService.isBatteryOptimizationIgnored();
       if (_config.isSlideshowEnabled && _config.intervalMinutes > 0) {
         await _wallpaperService.updateSchedule(_config.intervalMinutes);
@@ -536,14 +533,6 @@ class WallpaperController extends ChangeNotifier {
       await _wallpaperService.updateSchedule(0);
     }
     notifyListeners();
-  }
-
-  Future<bool> togglePersistentNotification(bool show) async {
-    _config = _config.copyWith(showPersistentNotification: show);
-    await _storageService.saveConfig(_config);
-    final success = await _wallpaperService.setPersistentNotification(show);
-    notifyListeners();
-    return success;
   }
 
   Future<void> checkBatteryOptimizationStatus() async {

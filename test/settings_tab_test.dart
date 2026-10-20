@@ -52,21 +52,20 @@ class FakeStorageService extends StorageService {
 }
 
 class FakeWallpaperService extends WallpaperService {
-  bool? lastPersistentNotificationSet;
   bool batteryOptimizationIgnored = true;
+  bool requestIgnoreCalled = false;
 
   @override
-  Future<bool> setPersistentNotification(bool show) async {
-    lastPersistentNotificationSet = show;
+  Future<bool> isBatteryOptimizationIgnored() async => batteryOptimizationIgnored;
+  @override
+  Future<bool> requestIgnoreBatteryOptimizations() async {
+    requestIgnoreCalled = true;
     return true;
   }
-
   @override
   Future<bool> updateWidget() async => true;
   @override
   Future<bool> updateSchedule(int intervalMinutes) async => true;
-  @override
-  Future<bool> isBatteryOptimizationIgnored() async => batteryOptimizationIgnored;
   @override
   Future<List<AlbumWidgetConfig>> getAlbumWidgets() async => [];
 }
@@ -85,7 +84,7 @@ void main() {
     );
   });
 
-  testWidgets('SettingsTab renders persistent notification toggle when hidden', (tester) async {
+  testWidgets('SettingsTab renders Battery Optimization card without persistent notification toggle', (tester) async {
     await controller.initialize();
 
     await tester.pumpWidget(
@@ -95,18 +94,14 @@ void main() {
     );
     await tester.pumpAndSettle();
 
-    expect(find.text('Active Status Notification'), findsOneWidget);
-    expect(find.byIcon(Icons.notifications_off_rounded), findsOneWidget);
-    expect(find.textContaining('persistent, unremovable notification'), findsOneWidget);
-
-    final switchFinder = find.byKey(const Key('switch_persistent_notification'));
-    expect(switchFinder, findsOneWidget);
-
-    final switchWidget = tester.widget<Switch>(switchFinder);
-    expect(switchWidget.value, false);
+    expect(find.text('Settings & System'), findsOneWidget);
+    expect(find.text('Battery Optimization'), findsOneWidget);
+    expect(find.text('Active Status Notification'), findsNothing);
+    expect(find.byKey(const Key('switch_persistent_notification')), findsNothing);
   });
 
-  testWidgets('Toggling notification switch activates notification and updates UI', (tester) async {
+  testWidgets('SettingsTab displays battery optimization button when not ignored and triggers request', (tester) async {
+    fakeWallpaperService.batteryOptimizationIgnored = false;
     await controller.initialize();
 
     await tester.pumpWidget(
@@ -116,25 +111,25 @@ void main() {
     );
     await tester.pumpAndSettle();
 
-    final switchFinder = find.byKey(const Key('switch_persistent_notification'));
-    await tester.tap(switchFinder);
+    expect(find.text('Allow Unrestricted Background Execution'), findsOneWidget);
+    await tester.tap(find.text('Allow Unrestricted Background Execution'));
     await tester.pumpAndSettle();
 
-    expect(controller.config.showPersistentNotification, true);
-    expect(fakeWallpaperService.lastPersistentNotificationSet, true);
-    expect(find.byIcon(Icons.notifications_active_rounded), findsOneWidget);
-
-    // Toggle back off
-    await tester.tap(switchFinder);
-    await tester.pumpAndSettle();
-
-    expect(controller.config.showPersistentNotification, false);
-    expect(fakeWallpaperService.lastPersistentNotificationSet, false);
-    expect(find.byIcon(Icons.notifications_off_rounded), findsOneWidget);
+    expect(fakeWallpaperService.requestIgnoreCalled, true);
   });
 
-  testWidgets('SettingsTab renders initial active state if configured', (tester) async {
-    fakeStorage.storedConfig = const SlideshowConfig(showPersistentNotification: true);
+  testWidgets('SettingsTab does not render storage and playlist clear section', (tester) async {
+    fakeStorage.storedItems = [
+      WallpaperItem(
+        id: '1',
+        path: '/test/1.jpg',
+        fileName: '1.jpg',
+        width: 1080,
+        height: 1920,
+        fileSize: 1024 * 500,
+        dateAdded: DateTime.now(),
+      ),
+    ];
     await controller.initialize();
 
     await tester.pumpWidget(
@@ -144,11 +139,9 @@ void main() {
     );
     await tester.pumpAndSettle();
 
-    expect(find.byIcon(Icons.notifications_active_rounded), findsOneWidget);
-
-    final switchFinder = find.byKey(const Key('switch_persistent_notification'));
-    final switchWidget = tester.widget<Switch>(switchFinder);
-    expect(switchWidget.value, true);
+    expect(find.text('Storage & Playlist Data'), findsNothing);
+    expect(find.text('Playlist Storage'), findsNothing);
+    expect(find.text('Clear All Wallpapers'), findsNothing);
   });
 
   testWidgets('SettingsTab does not overflow on narrow screens', (tester) async {
@@ -167,7 +160,8 @@ void main() {
     );
     await tester.pumpAndSettle();
 
-    expect(find.text('Active Status Notification'), findsOneWidget);
+    expect(find.text('Battery Optimization'), findsOneWidget);
+    expect(find.text('Active Status Notification'), findsNothing);
     expect(tester.takeException(), isNull);
   });
 
@@ -183,9 +177,10 @@ void main() {
 
     expect(find.text('About Wall Tap'), findsOneWidget);
     expect(find.text('Zavier Ferodova Al Fitroh'), findsOneWidget);
-    expect(find.text('Zavier Developer'), findsOneWidget);
+    expect(find.text('Zavier Developer'), findsNothing);
+    expect(find.textContaining('This app created by'), findsNothing);
     expect(
-      find.textContaining('This app created by Zavier Ferodova Al Fitroh as Zavier Developer'),
+      find.text('Designed for automatic wallpaper scheduling, album rotation, and home screen widgets.'),
       findsOneWidget,
     );
   });

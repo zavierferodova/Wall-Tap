@@ -6,6 +6,8 @@
     android:targetCellHeight="2"
     android:updatePeriodMillis="0"
     android:initialLayout="@layout/album_widget"
+    android:previewLayout="@layout/album_widget_preview"
+    android:previewImage="@drawable/album_widget_preview_img"
     android:configure="com.zavierdev.walltap.AlbumWidgetConfigureActivity"
     android:resizeMode="horizontal|vertical"
     android:widgetCategory="home_screen">

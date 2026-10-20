@@ -39,7 +39,7 @@ class WallTapApp extends StatelessWidget {
         scaffoldBackgroundColor: const Color(0xFF0D0E12),
         colorScheme: const ColorScheme.dark(
           primary: Color(0xFFFF3B30),
-          secondary: Color(0xFFFF5E3A),
+          secondary: Color(0xFFFF3B30),
           surface: Color(0xFF16181F),
           surfaceContainerHighest: Color(0xFF1F222B),
           onSurface: Color(0xFFF0F1F5),

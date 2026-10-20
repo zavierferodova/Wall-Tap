@@ -77,7 +77,7 @@ class FakeWallpaperService extends WallpaperService {
 }
 
 void main() {
-  testWidgets('SlideshowTab renders Wallpaper Configuration with Target Screen and Scale Mode', (tester) async {
+  testWidgets('SlideshowTab renders Configuration with Target Screen and Scale Mode', (tester) async {
     final fakeStorage = FakeStorageService();
     final fakeWallpaperService = FakeWallpaperService();
     final controller = WallpaperController(
@@ -102,34 +102,34 @@ void main() {
       ),
     );
 
-    // Verify Wallpaper Configuration header is rendered on homepage
-    expect(find.text('Wallpaper Configuration'), findsOneWidget);
-    expect(find.text('Target Screen'), findsOneWidget);
-    expect(find.text('Scale Mode'), findsOneWidget);
-    expect(find.text('Auto-Shuffle Timer'), findsOneWidget);
+    // Verify Configuration headers are rendered on homepage
+    expect(find.text('APPLY TO'), findsOneWidget);
+    expect(find.text('FIT'), findsOneWidget);
+    expect(find.text('AUTO-SHUFFLE EVERY'), findsOneWidget);
 
-    // Verify Target Screen options
-    expect(find.text('Both'), findsOneWidget);
-    expect(find.text('Home'), findsOneWidget);
-    expect(find.text('Lock'), findsOneWidget);
+    // Verify Target Screen options inside configuration card
+    final configCard = find.byKey(const Key('wallpaper_config_card'));
+    expect(find.descendant(of: configCard, matching: find.text('Both')), findsOneWidget);
+    expect(find.descendant(of: configCard, matching: find.text('Home')), findsOneWidget);
+    expect(find.descendant(of: configCard, matching: find.text('Lock')), findsOneWidget);
 
     // Verify Scale Mode options
-    expect(find.text('Full Image'), findsOneWidget);
-    expect(find.text('Center Crop'), findsOneWidget);
-    expect(find.text('Fit'), findsOneWidget);
+    expect(find.descendant(of: configCard, matching: find.text('Full')), findsOneWidget);
+    expect(find.descendant(of: configCard, matching: find.text('Crop')), findsOneWidget);
+    expect(find.descendant(of: configCard, matching: find.text('Fit')), findsOneWidget);
 
     // Tap 'Lock' to switch target screen
-    await tester.tap(find.text('Lock'));
+    await tester.tap(find.byKey(const Key('segment_apply_lock')));
     await tester.pumpAndSettle();
     expect(controller.config.targetScreen, 'lock');
 
     // Tap 'Fit' to switch scale mode
-    await tester.tap(find.text('Fit'));
+    await tester.tap(find.byKey(const Key('segment_fit_fit')));
     await tester.pumpAndSettle();
     expect(controller.config.scaleType, 'fit');
   });
 
-  testWidgets('SlideshowTab renders Help button and opens WidgetGuideDialog on tap', (tester) async {
+  testWidgets('SlideshowTab does not render Help button and dialog', (tester) async {
     final fakeStorage = FakeStorageService();
     final fakeWallpaperService = FakeWallpaperService();
     final controller = WallpaperController(
@@ -154,31 +154,9 @@ void main() {
       ),
     );
 
-    // Verify Help button is rendered
-    expect(find.text('Help'), findsOneWidget);
-    expect(find.byIcon(Icons.help_outline_rounded), findsOneWidget);
-
-    // Tap Help button
-    await tester.tap(find.text('Help'));
-    await tester.pumpAndSettle();
-
-    // Verify Dialog content is shown
-    expect(find.text('Home Screen Widget'), findsOneWidget);
-    expect(find.text('Preview upcoming wallpaper & control shuffle from home screen'), findsOneWidget);
-    expect(find.text('Long-press any empty space on your Android home screen'), findsOneWidget);
-    expect(find.text('Select "Widgets" and find "Wall Tap"'), findsOneWidget);
-    expect(find.text('Drag it onto your home screen to preview and rotate wallpapers'), findsOneWidget);
-    expect(find.text('Up Next'), findsOneWidget);
-    expect(find.text('Next'), findsOneWidget);
-    expect(find.text('Settings'), findsOneWidget);
-    expect(find.text('Got It'), findsOneWidget);
-
-    // Tap 'Got It' to dismiss
-    await tester.tap(find.text('Got It'));
-    await tester.pumpAndSettle();
-
-    // Verify dialog dismissed
-    expect(find.text('Got It'), findsNothing);
+    // Verify Help button is not rendered
+    expect(find.text('Help'), findsNothing);
+    expect(find.byIcon(Icons.help_outline_rounded), findsNothing);
   });
 
   testWidgets('Tapping Target Screen or Scale Mode immediately applies to current wallpaper on device', (tester) async {
@@ -219,7 +197,7 @@ void main() {
     );
 
     // Tap 'Home' to switch target screen while inactive (does NOT apply wallpaper)
-    await tester.tap(find.text('Home'));
+    await tester.tap(find.byKey(const Key('segment_apply_home')));
     await tester.pumpAndSettle();
     expect(controller.config.targetScreen, 'home');
     expect(fakeWallpaperService.lastWallpaperSet, isNull);
@@ -232,7 +210,7 @@ void main() {
     expect(fakeWallpaperService.lastTargetScreen, 'home');
 
     // Tap 'Fit' to switch scale mode while running (immediately applies)
-    await tester.tap(find.text('Fit'));
+    await tester.tap(find.byKey(const Key('segment_fit_fit')));
     await tester.pumpAndSettle();
     expect(controller.config.scaleType, 'fit');
     expect(fakeWallpaperService.lastScaleType, 'fit');
@@ -248,7 +226,7 @@ void main() {
 
     await controller.initialize();
 
-    tester.view.physicalSize = const Size(1080, 800);
+    tester.view.physicalSize = const Size(600, 600);
     tester.view.devicePixelRatio = 1.0;
     addTearDown(() {
       tester.view.resetPhysicalSize();
@@ -279,8 +257,8 @@ void main() {
     final scrolledNavbarPos = tester.getTopLeft(find.text('Wall Tap'));
     expect(scrolledNavbarPos.dy, equals(initialNavbarPos.dy));
     expect(find.text('Wall Tap'), findsOneWidget);
-    expect(find.text('Studio'), findsOneWidget);
-    expect(find.text('Help'), findsOneWidget);
+    expect(find.text('Studio'), findsNothing);
+    expect(find.text('Help'), findsNothing);
 
     // Verify border line now shows up
     final navbarAfter = tester.widget<AnimatedContainer>(find.byKey(const Key('sticky_navbar')));
@@ -297,7 +275,7 @@ void main() {
     expect(borderTop?.bottom.color, equals(Colors.transparent));
   });
 
-  testWidgets('SlideshowTab allows selecting 3m, 5m, 10m, and 45m auto-shuffle intervals', (tester) async {
+  testWidgets('SlideshowTab allows selecting 1m, 5m, 15m, 1h, and modal intervals', (tester) async {
     final fakeStorage = FakeStorageService();
     final fakeWallpaperService = FakeWallpaperService();
     final controller = WallpaperController(
@@ -323,33 +301,32 @@ void main() {
     );
     await tester.pumpAndSettle();
 
-    // Verify chips 3m, 5m, 10m, 45m exist
-    expect(find.text('3m'), findsOneWidget);
+    // Verify segment options exist
+    expect(find.text('Off'), findsOneWidget);
+    expect(find.text('1m'), findsOneWidget);
     expect(find.text('5m'), findsOneWidget);
-    expect(find.text('10m'), findsOneWidget);
-    expect(find.text('45m'), findsOneWidget);
+    expect(find.text('15m'), findsOneWidget);
+    expect(find.text('1h'), findsOneWidget);
 
-    // Tap 3m chip
-    await tester.tap(find.text('3m'));
+    // Tap 1m
+    await tester.tap(find.text('1m'));
     await tester.pumpAndSettle();
-    expect(controller.config.intervalMinutes, 3);
+    expect(controller.config.intervalMinutes, 1);
 
-    // Tap 5m chip
+    // Tap 5m
     await tester.tap(find.text('5m'));
     await tester.pumpAndSettle();
     expect(controller.config.intervalMinutes, 5);
 
-    // Tap 10m chip
-    await tester.tap(find.text('10m'));
+    // Tap 15m
+    await tester.tap(find.text('15m'));
     await tester.pumpAndSettle();
-    expect(controller.config.intervalMinutes, 10);
+    expect(controller.config.intervalMinutes, 15);
 
-    // Tap 45m chip after scrolling it into view
-    await tester.ensureVisible(find.text('45m'));
+    // Tap 1h
+    await tester.tap(find.text('1h'));
     await tester.pumpAndSettle();
-    await tester.tap(find.text('45m'));
-    await tester.pumpAndSettle();
-    expect(controller.config.intervalMinutes, 45);
+    expect(controller.config.intervalMinutes, 60);
 
     // Open More options modal
     await tester.tap(find.text('More options'));
@@ -364,6 +341,69 @@ void main() {
     await tester.tap(find.text('Every 3 minutes'));
     await tester.pumpAndSettle();
     expect(controller.config.intervalMinutes, 3);
+
+    // Verify indicator is displayed when custom option is selected
+    expect(find.byKey(const Key('segment_interval_custom')), findsOneWidget);
+    expect(find.text('3m'), findsOneWidget);
+    expect(find.textContaining('Custom interval active: 3 minutes'), findsOneWidget);
+    expect(find.textContaining('More options (3m)'), findsOneWidget);
+
+    // Tapping standard preset removes custom indicator
+    await tester.tap(find.text('5m'));
+    await tester.pumpAndSettle();
+    expect(controller.config.intervalMinutes, 5);
+    expect(find.byKey(const Key('segment_interval_custom')), findsNothing);
+    expect(find.text('More options'), findsOneWidget);
+  });
+
+  testWidgets('SlideshowTab displays Rotation Queue when active wallpapers exist', (tester) async {
+    final fakeStorage = FakeStorageService();
+    final fakeWallpaperService = FakeWallpaperService();
+    final item1 = WallpaperItem(
+      id: 'item1',
+      path: '/test/item1.jpg',
+      fileName: 'item1.jpg',
+      width: 1080,
+      height: 1920,
+      fileSize: 1024,
+      dateAdded: DateTime.now(),
+    );
+    final item2 = WallpaperItem(
+      id: 'item2',
+      path: '/test/item2.jpg',
+      fileName: 'item2.jpg',
+      width: 1080,
+      height: 1920,
+      fileSize: 1024,
+      dateAdded: DateTime.now(),
+    );
+    fakeStorage.storedItems = [item1, item2];
+
+    final controller = WallpaperController(
+      storageService: fakeStorage,
+      wallpaperService: fakeWallpaperService,
+    );
+    await controller.initialize();
+
+    tester.view.physicalSize = const Size(1080, 2400);
+    tester.view.devicePixelRatio = 1.0;
+    addTearDown(() {
+      tester.view.resetPhysicalSize();
+      tester.view.resetDevicePixelRatio();
+    });
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: SlideshowTab(controller: controller),
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    expect(find.text('Rotation Queue'), findsOneWidget);
+    expect(find.textContaining('in rotation'), findsNothing);
+    expect(find.text('LIVE'), findsOneWidget);
   });
 }
 

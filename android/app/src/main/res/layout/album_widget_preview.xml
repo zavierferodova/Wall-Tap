@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/album_widget_root"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@drawable/widget_bg"
+    android:clipToOutline="true">
+
+    <!-- Album photo displayed on widget -->
+    <ImageView
+        android:id="@+id/widget_album_image"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:src="@drawable/sample_wallpaper_album"
+        android:scaleType="centerCrop"
+        android:contentDescription="Album Photo" />
+
+</RelativeLayout>
+

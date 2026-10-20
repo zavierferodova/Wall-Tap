@@ -106,7 +106,7 @@ The main navigation is a floating glass pill suspended above the bottom screen e
   1. **Studio** (`Icons.shuffle_rounded`): Quick wallpaper shuffle, auto-interval setup, active collection monitor.
   2. **Gallery** (`Icons.photo_library_rounded`): All wallpapers grid, custom albums, multi-select actions.
   3. **Widgets** (`Icons.widgets_rounded`): Home screen widget manager and preview builder.
-  4. **Settings** (`Icons.tune_rounded`): Persistent notification switch, background execution, battery optimization, and storage maintenance.
+  4. **Settings** (`Icons.tune_rounded`): Background execution, battery optimization, and app information.
 - **Interactive State**: The selected tab animates smoothly into an expanded red pill (`#FFFF3B30`, `BorderRadius.circular(24)`) with drop shadow glow, revealing the tab label alongside the icon.
 
 ### 5.2 Wallpaper Cards (Gallery & Albums)
@@ -177,14 +177,11 @@ All interactive buttons, cards, and icon taps are wrapped with `PressableScale`:
 - **Select / Deselect Item**: `HapticFeedback.selectionClick()`
 - **Primary CTA (Set Wallpaper / Shuffle)**: `HapticFeedback.mediumImpact()`
 
-### 6.3 Feedback & Notifications
+### 6.3 Feedback & Toast Messaging
 - **Floating SnackBars**:
   - Elevated floating behavior (`SnackBarBehavior.floating`) with `BorderRadius.circular(12)`.
   - Icon on leading edge (`Icons.check_circle` or `Icons.error_outline`).
   - Color-coded: Success `#34C759`, Warning `#FF9F0A`, Error `#FF3B30`.
-- **Persistent Android Notification**:
-  - Clean system indicator with compact Wall Tap brand icon and status text.
-  - Toggleable from the Settings screen for user control.
 
 ---
 

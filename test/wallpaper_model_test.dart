@@ -86,7 +86,6 @@ void main() {
         isRandom: true,
         isSlideshowEnabled: false,
         intervalMinutes: 60,
-        showPersistentNotification: true,
       );
 
       final jsonStr = config.toJson();
@@ -100,20 +99,17 @@ void main() {
       expect(restored.isRandom, true);
       expect(restored.isSlideshowEnabled, false);
       expect(restored.intervalMinutes, 60);
-      expect(restored.showPersistentNotification, true);
     });
 
-    test('copyWith handles clearDefaultHome, clearDefaultLock, and showPersistentNotification', () {
+    test('copyWith handles clearDefaultHome and clearDefaultLock', () {
       const config = SlideshowConfig(
         defaultHomePath: '/home.jpg',
         defaultLockPath: '/lock.jpg',
-        showPersistentNotification: false,
       );
 
-      final updated = config.copyWith(clearDefaultHome: true, showPersistentNotification: true);
+      final updated = config.copyWith(clearDefaultHome: true);
       expect(updated.defaultHomePath, isNull);
       expect(updated.defaultLockPath, '/lock.jpg');
-      expect(updated.showPersistentNotification, true);
     });
   });
 }

@@ -159,15 +159,4 @@ class WallpaperService {
       return false;
     }
   }
-
-  Future<bool> setPersistentNotification(bool show) async {
-    try {
-      final method = show ? 'showPersistentNotification' : 'hidePersistentNotification';
-      final result = await _channel.invokeMethod<bool>(method);
-      return result ?? false;
-    } catch (e) {
-      debugPrint('Error setting persistent notification: $e');
-      return false;
-    }
-  }
 }
